@@ -26,7 +26,7 @@ type AdEvent struct {
 	UserId               int64  `json:"userId" db:"user_id"`                              // Id пользователя.
 	Type                 string `json:"type" db:"type"`                                   // Тип события. (sale, buy ...)
 	Partner              string `json:"partner" db:"partner"`                             // Ссылка партнера. (Продавец / Покупатель)
-	Chanel               string `json:"chanel" db:"chanel"`                               // Ссылка на канал. (Продавец / Покупатель)
+	Channel              string `json:"channel" db:"channel"`                             // Ссылка на канал. (Продавец / Покупатель)
 	Price                int64  `json:"price" db:"price"`                                 // Цена.
 	DatePosting          string `json:"datePosting" db:"date_posting"`                    // Дата постинга.
 	DateDelete           string `json:"dateDelete" db:"date_delete"`                      // Дата удаления поста.
@@ -59,7 +59,7 @@ func (ae *AdEvent) AllData() bool {
 		return false
 	}
 
-	if ae.Chanel == "" {
+	if ae.Channel == "" {
 		return false
 	}
 
