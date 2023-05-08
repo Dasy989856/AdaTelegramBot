@@ -10,13 +10,13 @@ import (
 // Обработчик CallbackQuery.
 func (b *BotTelegram) handlerCallbackQuery(update *tgbotapi.Update) error {
 	cbqSteps := strings.Split(update.CallbackQuery.Data, ".")
-	if len(cbqSteps) < 2 {
+	if len(cbqSteps) <= 0 {
 		return fmt.Errorf("error len cbqSlice")
 	}
 
 	switch cbqSteps[0] {
 	case "ad_event":
-		if err := handlerAdEvent(b, update.CallbackQuery, cbqSteps); err != nil {
+		if err := cbqHandlerAdEvent(b, update.CallbackQuery, cbqSteps); err != nil {
 			return err
 		}
 	}

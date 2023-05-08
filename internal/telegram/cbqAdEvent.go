@@ -10,7 +10,53 @@ import (
 )
 
 // Обработчик CallbackQuery ad_event.
-func handlerAdEvent(b *BotTelegram, cbq *tgbotapi.CallbackQuery, cbqSteps []string) error {
+func cbqHandlerAdEvent(b *BotTelegram, cbq *tgbotapi.CallbackQuery, cbqSteps []string) error {
+	// Вывод меню.
+	if len(cbqSteps) == 1 {
+		if err := cbqAdEventMenu(b, cbq); err != nil {
+			return err
+		}
+		return nil
+	}
+
+	// Обработчик типов ad_event.
+	if len(cbqSteps) >= 2 {
+		if err := cbqHandlerAdEventType(b, cbq, cbqSteps); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// Главное меню CallbackQuery ad_event.
+func cbqAdEventMenu(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
+	userId := cbq.Message.Chat.ID
+	messageID := cbq.Message.MessageID
+
+	textMsg := "Выберите тип события:"
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Продажа рекламы.", "ad_event.sale"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Покупка рекламы.", "ad_event.buy"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Взаимный пиар.", "ad_event.mutual"),
+		),
+	)
+
+	_, err := b.bot.Send(tgbotapi.NewEditMessageTextAndMarkup(userId, messageID, textMsg, keyboard))
+	if err != nil {
+		return fmt.Errorf("error edit msg in cbqAdEventMenu: %w", err)
+	}
+
+	return nil
+}
+
+// Обработчик CallbackQuery ad_event.type.
+func cbqHandlerAdEventType(b *BotTelegram, cbq *tgbotapi.CallbackQuery, cbqSteps []string) error {
 	userId := cbq.Message.Chat.ID
 	messageID := cbq.Message.MessageID
 	adEventType := strings.ToLower(cbqSteps[1])
@@ -18,7 +64,7 @@ func handlerAdEvent(b *BotTelegram, cbq *tgbotapi.CallbackQuery, cbqSteps []stri
 	// Создание кэша ad события.
 	adEvent := models.AdEvent{
 		UserId:    userId,
-		CreatedAt: time.Now().Format("2006-01-02 15:04:05.999"),
+		CreatedAt: time.Now().Format("02.01.2006 15:04:05.999"),
 		Ready:     true,
 		Type:      adEventType,
 	}
@@ -29,11 +75,11 @@ func handlerAdEvent(b *BotTelegram, cbq *tgbotapi.CallbackQuery, cbqSteps []stri
 	var botMsg string
 	switch adEventType {
 	case "sale":
-		botMsg = "Отлично! Теперь отправь мне ссылку на покупателя. Пример: @AdaTelegramBot или https://t.me/AdaTelegramBot"
+		botMsg = "Отлично! Теперь отправьтете мне ссылку на покупателя. Пример: @AdaTelegramBot или https://t.me/AdaTelegramBot"
 	case "buy":
-		botMsg = "Отлично! Теперь отправь мне ссылку на продавца. Пример: @AdaTelegramBot или https://t.me/AdaTelegramBot"
-	case "barter":
-		botMsg = "Отлично! Теперь отправь мне ссылку на партнера по бартеру. Пример: @AdaTelegramBot или https://t.me/AdaTelegramBot"
+		botMsg = "Отлично! Теперь отправьтете мне ссылку на продавца. Пример: @AdaTelegramBot или https://t.me/AdaTelegramBot"
+	case "mutual":
+		botMsg = "Отлично! Теперь отправьтете мне ссылку на партнера по взаимному пиару. Пример: @AdaTelegramBot или https://t.me/AdaTelegramBot"
 	default:
 		delete(b.cashAdEvents, userId)
 		sendRestart(b, userId)

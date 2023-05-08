@@ -24,7 +24,7 @@ func NewBotTelegram(db models.TelegramBotDB) (*BotTelegram, error) {
 	if err != nil {
 		return nil, err
 	}
-	bot.Debug = true
+	bot.Debug = false
 
 	return &BotTelegram{bot: bot, db: db, cashAdEvents: make(map[int64]*models.AdEvent)}, nil
 }
@@ -112,11 +112,20 @@ func parseDate(timeString string) (*time.Time, error) {
 	return &t1, nil
 }
 
+// Очистка сообщения. Пока что не работает.
+func (b *BotTelegram) cleareMessage(userId int64, messageId int) error {
+	deleteMsg := tgbotapi.NewDeleteMessage(userId, messageId)
+	if _, err := b.bot.Send(deleteMsg); err != nil {
+		return fmt.Errorf("error cleare msgId%d: %w", messageId, err)
+	}
+	return nil
+}
+
 // TODO Очистка чата. Пока что не работает.
-// func (b *BotTelegram) cleareAllChat(chatID int64) error {
-// 	deleteMsg := tgbotapi.NewDeleteMessage(chatID, 0)
-// 	if _, err := b.bot.Send(deleteMsg); err != nil {
-// 		return fmt.Errorf("error cleare all chat: %w", err)
-// 	}
-// 	return nil
-// }
+func (b *BotTelegram) cleareAllChat(userId int64) error {
+	deleteMsg := tgbotapi.NewDeleteMessage(userId, -1)
+	if _, err := b.bot.Send(deleteMsg); err != nil {
+		return fmt.Errorf("error cleare all chat: %w", err)
+	}
+	return nil
+}
