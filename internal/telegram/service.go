@@ -9,22 +9,14 @@ import (
 	"github.com/spf13/viper"
 )
 
-/*
-		Полезные команды которые понадобятся.
-Пример 1 (Добавление ссылок под строкой ввода сообщения):
-	// numericKeyboard := tgbotapi.NewReplyKeyboard(
-	// 	tgbotapi.NewKeyboardButtonRow(
-	// 		tgbotapi.NewKeyboardButton("Добавить продажу рекламы."),
-	// 		tgbotapi.NewKeyboardButton("Добавить покупку рекламы."),
-	// 	))
-	// newMsg.ReplyMarkup = numericKeyboard
-*/
-
+// Структура телеграмм бота.
 type BotTelegram struct {
 	bot *tgbotapi.BotAPI
 	db  models.TelegramBotDB
+	cashAdEvents map[int64]models.AdEvent // Хэш-таблица ad событий.
 }
 
+// Создание телеграмм бота.
 func NewBotTelegram(db models.TelegramBotDB) (*BotTelegram, error) {
 	token := viper.GetString("token.telegram")
 	bot, err := tgbotapi.NewBotAPI(token)
@@ -33,9 +25,10 @@ func NewBotTelegram(db models.TelegramBotDB) (*BotTelegram, error) {
 	}
 	bot.Debug = true
 
-	return &BotTelegram{bot: bot, db: db}, nil
+	return &BotTelegram{bot: bot, db: db, cashAdEvents: make(map[int64]models.AdEvent)}, nil
 }
 
+// Запуск апдейтера.
 func (b *BotTelegram) StartBotUpdater() error {
 	log.Printf("Authorized on account %s", b.bot.Self.UserName)
 	updates := b.InitUpdatesChanel()
@@ -54,7 +47,7 @@ func (b *BotTelegram) InitUpdatesChanel() tgbotapi.UpdatesChannel {
 // Обработчики сообщений.
 func (b *BotTelegram) handlerUpdates(updates tgbotapi.UpdatesChannel) error {
 	for update := range updates {
-		// Команды.
+		// Обработка команд.
 		if update.Message != nil && update.Message.IsCommand() {
 			if err := b.handlerCommand(update.Message); err != nil {
 				return err
@@ -62,7 +55,7 @@ func (b *BotTelegram) handlerUpdates(updates tgbotapi.UpdatesChannel) error {
 			continue
 		}
 
-		// Сообщения.
+		// Обработка сообщений.
 		if update.Message != nil {
 			if err := b.handlerMessage(update.Message); err != nil {
 				return err
@@ -70,7 +63,7 @@ func (b *BotTelegram) handlerUpdates(updates tgbotapi.UpdatesChannel) error {
 			continue
 		}
 
-		// CallbackQuery.
+		// Обработка CallbackQuery.
 		if update.CallbackQuery != nil {
 			if err := b.handlerCallbackQuery(&update); err != nil {
 				return err
@@ -79,10 +72,10 @@ func (b *BotTelegram) handlerUpdates(updates tgbotapi.UpdatesChannel) error {
 		}
 	}
 
-	return fmt.Errorf("handlerUpdates closed")
+	return fmt.Errorf("updates chanel closed")
 }
 
-// Очистка чата.
+// TODO Очистка чата. Пока что не работает.
 func (b *BotTelegram) cleareAllChat(chatID int64) error {
 	deleteMsg := tgbotapi.NewDeleteMessage(chatID, 0)
 	if _, err := b.bot.Send(deleteMsg); err != nil {

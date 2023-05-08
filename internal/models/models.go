@@ -18,16 +18,56 @@ type User struct {
 	Password  string `json:"password" db:"password"`
 }
 
-// Событие.
-type Event struct {
+// Ad событие.
+type AdEvent struct {
 	Id                   int64  `json:"id" db:"id"`
-	UserId               int64  `json:"userId" db:"user_id"`
-	Type                 string `json:"type" db:"name"`                                   // Тип события. (sale, buy)
 	CreatedAt            string `json:"createdAt" db:"created_at"`                        // Дата создания события.
-	PostingDate          string `json:"postingDate" db:"posting_date"`                    // Дата постинга.
-	PartnerURL           string `json:"partnerName" db:"partner_url"`                     // Имя партнера. (Продавец / Покупатель)
-	Price                int    `json:"price" db:"price"`                                 // Цена.
-	ArrivalOfSubscribers int    `json:"arrivalOfSubscribers" db:"arrival_of_subscribers"` // Приход подписчиков.
+	Ready                bool   `json:"ready" db:"ready"`                                 // Состояние события (Временно не используется)
+	UserId               int64  `json:"userId" db:"user_id"`                              // Id пользователя.
+	Type                 string `json:"type" db:"type"`                                   // Тип события. (sale, buy ...)
+	Partner              string `json:"partner" db:"partner"`                             // Ссылка партнера. (Продавец / Покупатель)
+	Chanel               string `json:"chanel" db:"chanel"`                               // Ссылка на канал. (Продавец / Покупатель)
+	Price                int64  `json:"price" db:"price"`                                 // Цена.
+	DatePosting          string `json:"datePosting" db:"date_posting"`                    // Дата постинга.
+	DateDelete           string `json:"dateDelete" db:"date_delete"`                      // Дата удаления поста.
+	ArrivalOfSubscribers int64  `json:"arrivalOfSubscribers" db:"arrival_of_subscribers"` // Приход подписчиков.
+}
+
+// Если ad событе полностью заполенно - возвращается true. Иначе false.
+func (ae *AdEvent) AllData() bool {
+	if ae.UserId == 0 {
+		return false
+	}
+
+	if ae.Type == "" {
+		return false
+	}
+
+	if ae.CreatedAt == "" {
+		return false
+	}
+
+	if ae.DatePosting == "" {
+		return false
+	}
+
+	if ae.DateDelete == "" {
+		return false
+	}
+
+	if ae.Partner == "" {
+		return false
+	}
+
+	if ae.Chanel == "" {
+		return false
+	}
+
+	if ae.Type != "barter" && ae.Price == 0 {
+		return false
+	}
+
+	return true
 }
 
 // БД для телеграмм бота.
@@ -36,14 +76,16 @@ type TelegramBotDB interface {
 	GetUserData(userId int64) (user *User, err error)
 	// Создание пользователя.
 	DefaultUserCreation(chatId int64, userUrl, firstName string) error
-	// Добавление события.
-	AdEventCreation(event *Event) (int64, error)
+	// Создание дефолтного ad события.
+	AdEventCreation(event *AdEvent) (int64, error)
 	// Удаление события.
 	AdEventDelete(eventId int64) error
 	// Установка шага пользователя.
 	SetStepUser(userId int64, step string) error
 	// Получение текущего шага пользователя.
 	GetStepUser(userId int64) (step string, err error)
+	// Подучение id незавершенного ad события.
+	GetUnfinishedAdEventId(userId int64) (eventId int64, err error)
 	// Закрытие БД.
 	Close() error
 }

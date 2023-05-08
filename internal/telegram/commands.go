@@ -38,14 +38,9 @@ func (b *BotTelegram) cmdStart(msg *tgbotapi.Message) error {
 
 // Отправка стартового меню.
 func (b *BotTelegram) sendMenuMsg(chatID int64) error {
-	// if err := b.cleareAllChat(chatID); err != nil {
-	// 	return err
-	// }
-
-	menuMsg := tgbotapi.NewMessage(chatID, "😎 Возможности бота ADS от Ammka:")
+	menuMsg := tgbotapi.NewMessage(chatID, "😎 Вот что я умею:")
 	// Создание объекта InlineKeyboardMarkup
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
-		// Создание первой строки кнопок
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Добавить продажу рекламы.", "ad_event.sale"),
 		),
@@ -58,7 +53,7 @@ func (b *BotTelegram) sendMenuMsg(chatID int64) error {
 	)
 	menuMsg.ReplyMarkup = keyboard
 	if _, err := b.bot.Send(menuMsg); err != nil {
-		return fmt.Errorf("error send requestNameMsg message: %w", err)
+		return fmt.Errorf("error send menuMsg: %w", err)
 	}
 
 	if err := b.db.SetStepUser(chatID, "start"); err != nil {

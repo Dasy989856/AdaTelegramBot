@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	usersTable  = "users"
-	eventsTable = "ad_events"
+	usersTable      = "users"
+	adEventsTable = "ad_events"
 )
 
 type Config struct {
@@ -116,46 +116,6 @@ func (t *TelegramBotDB) DefaultUserCreation(chatId int64, userUrl, firstName str
 	return nil
 }
 
-// Создание ad события.
-func (t *TelegramBotDB) AdEventCreation(event *models.Event) (eventId int64, err error) {
-	tx := t.db.MustBegin()
-	defer func() {
-		if err != nil {
-			tx.Rollback()
-		} else {
-			tx.Commit()
-		}
-	}()
-
-	sql := fmt.Sprintf(`INSERT INTO public.%s (user_id, type, created_at, posting_date, partner_url,
-		price, arrival_of_subscribers) values ($1, $2, $3, $4, $5, $6, $7) RETURNING id;`, eventsTable)
-	if err := tx.QueryRow(sql, event.UserId, event.Type, event.CreatedAt, event.PostingDate, event.PartnerURL,
-		event.Price, event.ArrivalOfSubscribers).Scan(&eventId); err != nil {
-		return 0, fmt.Errorf("error creation event: %w", err)
-	}
-
-	return eventId, nil
-}
-
-// Удаление ad события.
-func (t *TelegramBotDB) AdEventDelete(eventId int64) (err error) {
-	tx := t.db.MustBegin()
-	defer func() {
-		if err != nil {
-			tx.Rollback()
-		} else {
-			tx.Commit()
-		}
-	}()
-
-	sql := fmt.Sprintf(`DELETE FROM public.%s WHERE id=$1;`, eventsTable)
-	if _, err := tx.Exec(sql, eventId); err != nil {
-		return fmt.Errorf("error delete event: %w", err)
-	}
-
-	return nil
-}
-
 // Установка шага пользователя.
 func (p *TelegramBotDB) SetStepUser(userId int64, step string) (err error) {
 	tx := p.db.MustBegin()
@@ -186,7 +146,7 @@ func (p *TelegramBotDB) GetStepUser(userId int64) (step string, err error) {
 		}
 	}()
 
-	sql := fmt.Sprintf(`SELECT step FROM public.%s WHERE user_id=$1;`, usersTable)
+	sql := fmt.Sprintf(`SELECT step FROM public.%s WHERE id=$1;`, usersTable)
 	if err := tx.QueryRow(sql, userId).Scan(&step); err != nil {
 		return "", err
 	}
