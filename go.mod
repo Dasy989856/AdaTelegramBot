@@ -1,11 +1,11 @@
-module abs-by-ammka-bot
+module AdaTelegramBot
 
 go 1.19
 
 require (
 	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
 	github.com/jmoiron/sqlx v1.3.5
-	github.com/lib/pq v1.10.8
+	github.com/lib/pq v1.10.9
 	github.com/spf13/viper v1.15.0
 )
 

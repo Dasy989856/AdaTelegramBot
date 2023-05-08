@@ -1,7 +1,7 @@
 package telegram
 
 import (
-	"abs-by-ammka-bot/internal/models"
+	"AdaTelegramBot/internal/models"
 	"fmt"
 	"log"
 

@@ -1,8 +1,8 @@
 package main
 
 import (
-	"abs-by-ammka-bot/internal/postgresql"
-	"abs-by-ammka-bot/internal/telegram"
+	"AdaTelegramBot/internal/postgresql"
+	"AdaTelegramBot/internal/telegram"
 	"log"
 
 	"github.com/spf13/viper"

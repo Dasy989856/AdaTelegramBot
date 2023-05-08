@@ -1,7 +1,7 @@
 package postgresql
 
 import (
-	"abs-by-ammka-bot/internal/models"
+	"AdaTelegramBot/internal/models"
 	"database/sql"
 	"fmt"
 
