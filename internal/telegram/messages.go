@@ -50,8 +50,8 @@ func (b *BotTelegram) handlerMessage(msg *tgbotapi.Message) error {
 // step: ad_event.partner
 func adEventPartner(b *BotTelegram, msg *tgbotapi.Message) error {
 	// Example: https://t.me/nikname ; @nikname
-	regxType1 := regexp.MustCompile(`https:\/\/t\.me\/[A-Za-z0-9]+`)
-	regxType2 := regexp.MustCompile(`@[A-Za-z0-9]+`)
+	regxType1 := regexp.MustCompile(`^https:\/\/t\.me\/[a-zA-Z0-9]+$`)
+	regxType2 := regexp.MustCompile(`^@[a-zA-Z0-9]+$`)
 	userId := msg.Chat.ID
 
 	if !regxType1.MatchString(msg.Text) && !regxType2.MatchString(msg.Text) {
@@ -100,8 +100,8 @@ func adEventPartner(b *BotTelegram, msg *tgbotapi.Message) error {
 // step: ad_event.chanel
 func adEventChanel(b *BotTelegram, msg *tgbotapi.Message) error {
 	// Example: https://t.me/nikname ; @nikname
-	regxType1 := regexp.MustCompile(`https:\/\/t\.me\/[A-Za-z0-9]+`)
-	regxType2 := regexp.MustCompile(`@[A-Za-z0-9]+`)
+	regxType1 := regexp.MustCompile(`^https:\/\/t\.me\/[a-zA-Z0-9]+$`)
+	regxType2 := regexp.MustCompile(`^@[a-zA-Z0-9]+$`)
 	userId := msg.Chat.ID
 
 	if !regxType1.MatchString(msg.Text) && !regxType2.MatchString(msg.Text) {
@@ -124,7 +124,12 @@ func adEventChanel(b *BotTelegram, msg *tgbotapi.Message) error {
 	}
 
 	adEvent.Channel = msg.Text
-	b.db.SetStepUser(msg.Chat.ID, "ad_event.price")
+
+	if adEvent.Type == "barter" {
+		b.db.SetStepUser(msg.Chat.ID, "ad_event.date_posting")
+	} else {
+		b.db.SetStepUser(msg.Chat.ID, "ad_event.price")
+	}
 
 	botMsg := tgbotapi.NewMessage(msg.Chat.ID, "Отлично! Теперь отправь мне стоимость.")
 	if _, err := b.bot.Send(botMsg); err != nil {
@@ -227,12 +232,12 @@ func adEventDateDelete(b *BotTelegram, msg *tgbotapi.Message) error {
 	if err != nil {
 		return fmt.Errorf("error parse durationDatePosting: %w", err)
 	}
-	
+
 	durationDateDelete, err := parseDate(adEvent.DateDelete)
 	if err != nil {
 		return fmt.Errorf("error parse durationDateDelete: %w", err)
 	}
-	
+
 	if durationDateDelete.Sub(*durationDatePosting) <= 0 {
 		botMsg := tgbotapi.NewMessage(msg.Chat.ID, "Вы ввели дату удаления поста меньше даты размещения поста, попробуйте снова.")
 		if _, err := b.bot.Send(botMsg); err != nil {

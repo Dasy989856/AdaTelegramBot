@@ -39,16 +39,18 @@ func (b *BotTelegram) cmdStart(msg *tgbotapi.Message) error {
 // Отправка стартового меню.
 func (b *BotTelegram) sendMenuMsg(chatID int64) error {
 	menuMsg := tgbotapi.NewMessage(chatID, "😎 Вот что я умею:")
-	// Создание объекта InlineKeyboardMarkup
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Добавить продажу рекламы.", "ad_event.sale"),
+			tgbotapi.NewInlineKeyboardButtonData("Продажа рекламы.", "ad_event.sale"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Добавить покупку рекламы.", "ad_event.buy"),
+			tgbotapi.NewInlineKeyboardButtonData("Покупка рекламы.", "ad_event.buy"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Посмотреть краткую статистику.", "statistic.brief"),
+			tgbotapi.NewInlineKeyboardButtonData("Добавить бартер.", "ad_event.barter"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Статистика.", "statistic"),
 		),
 	)
 	menuMsg.ReplyMarkup = keyboard
