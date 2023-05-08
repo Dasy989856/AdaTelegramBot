@@ -8,6 +8,9 @@ import (
 
 // Обработчик команд.
 func (b *BotTelegram) handlerCommand(msg *tgbotapi.Message) error {
+	fmt.Println("MSG ID: ", msg.MessageID)
+	userId := msg.Chat.ID
+
 	switch msg.Command() {
 	case "start":
 		if err := b.cmdStart(msg); err != nil {
@@ -15,8 +18,7 @@ func (b *BotTelegram) handlerCommand(msg *tgbotapi.Message) error {
 		}
 		return nil
 	default:
-		errMsg := tgbotapi.NewMessage(msg.Chat.ID, `Неизвестная команда 🥲`)
-		if _, err := b.bot.Send(errMsg); err != nil {
+		if err := b.sendMessage(userId, `Неизвестная команда 🥲`); err != nil {
 			return err
 		}
 		return nil
@@ -26,6 +28,10 @@ func (b *BotTelegram) handlerCommand(msg *tgbotapi.Message) error {
 // Команда /start
 func (b *BotTelegram) cmdStart(msg *tgbotapi.Message) error {
 	if err := b.db.DefaultUserCreation(msg.Chat.ID, msg.Chat.UserName, msg.Chat.FirstName); err != nil {
+		return err
+	}
+
+	if err := b.cleareAllChat(msg.Chat.ID); err != nil {
 		return err
 	}
 

@@ -80,12 +80,20 @@ type TelegramBotDB interface {
 	AdEventCreation(event *AdEvent) (int64, error)
 	// Удаление события.
 	AdEventDelete(eventId int64) error
+	// Обновление информации о приходе подписчиков.
+	UpdateSubscribesInAdEvent(eventId, subscribers int64) error
 	// Установка шага пользователя.
 	SetStepUser(userId int64, step string) error
 	// Получение текущего шага пользователя.
 	GetStepUser(userId int64) (step string, err error)
 	// Подучение id незавершенного ad события.
 	GetUnfinishedAdEventId(userId int64) (eventId int64, err error)
+	// Добавление messageId пользователя.
+	AddUserMessageId(userId int64, messageId int) error
+	// Удаление messageId пользователя.
+	DeleteUserMessageId(messageId int) error
+	// Возвращает список messageIds пользователя.
+	GetUserMessageIds(userId int64) ([]int, error)
 	// Закрытие БД.
 	Close() error
 }

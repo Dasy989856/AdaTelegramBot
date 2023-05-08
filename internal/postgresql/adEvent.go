@@ -39,7 +39,7 @@ UPDATE public.ad_events
 	SET arrival_of_subscribers=123
 	WHERE id=1;
 */
-func (t *TelegramBotDB) UpdateSubscribeInAdEvent(eventId, subscribers int64) (err error) {
+func (t *TelegramBotDB) UpdateSubscribesInAdEvent(eventId, subscribers int64) (err error) {
 	tx := t.db.MustBegin()
 	defer func() {
 		if err != nil {
