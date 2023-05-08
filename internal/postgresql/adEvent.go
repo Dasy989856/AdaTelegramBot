@@ -21,9 +21,9 @@ func (t *TelegramBotDB) AdEventCreation(event *models.AdEvent) (eventId int64, e
 		} else {
 			tx.Commit()
 		}
-	}()
+	}() 
 
-	sql := fmt.Sprintf(`INSERT INTO public.%s (ready, user_id, "type", partner, chanel, price, date_posting, date_delete)
+	sql := fmt.Sprintf(`INSERT INTO public.%s (ready, user_id, "type", partner, channel, price, date_posting, date_delete)
 	values (true, $1, $2, $3, $4, $5, $6, $7) RETURNING id;`, adEventsTable)
 	if err := tx.QueryRow(sql, event.UserId, event.Type, event.Partner, event.Channel, event.Price, event.DatePosting, event.DateDelete).Scan(&eventId); err != nil {
 		return 0, fmt.Errorf("error creation event: %w", err)

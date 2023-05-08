@@ -12,6 +12,7 @@ import (
 // Обработчик CallbackQuery ad_event.
 func handlerAdEvent(b *BotTelegram, cbq *tgbotapi.CallbackQuery, cbqSteps []string) error {
 	userId := cbq.Message.Chat.ID
+	messageID := cbq.Message.MessageID
 	adEventType := strings.ToLower(cbqSteps[1])
 
 	// Создание кэша ad события.
@@ -23,67 +24,25 @@ func handlerAdEvent(b *BotTelegram, cbq *tgbotapi.CallbackQuery, cbqSteps []stri
 	}
 	b.cashAdEvents[userId] = &adEvent
 
+	b.db.SetStepUser(userId, "ad_event.partner")
+
+	var botMsg string
 	switch adEventType {
 	case "sale":
-		if err := adEventSale(b, cbq); err != nil {
-			return err
-		}
+		botMsg = "Отлично! Теперь отправь мне ссылку на покупателя. Пример: @buyer"
 	case "buy":
-		if err := adEventBuy(b, cbq); err != nil {
-			return err
-		}
+		botMsg = "Отлично! Теперь отправь мне ссылку на продавца. Пример: @saler"
 	case "barter":
-		if err := adEventBarter(b, cbq); err != nil {
-			return err
-		}
+		botMsg = "Отлично! Теперь отправь мне ссылку на партнера по бартеру. Пример: @barter"
 	default:
 		delete(b.cashAdEvents, userId)
-		return fmt.Errorf("unknow cbq[1] step. cbq: %v", cbqSteps)
+		sendRestart(b, userId)
+		return fmt.Errorf("unknow type adEvent. cbq: %v", cbqSteps)
 	}
 
-	return nil
-}
-
-func adEventSale(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
-	chatID := cbq.Message.Chat.ID
-	messageID := cbq.Message.MessageID
-
-	b.db.SetStepUser(chatID, "ad_event.partner")
-
-	botMsg := "Отлично! Теперь отправь мне ссылку на покупателя."
-	_, err := b.bot.Send(tgbotapi.NewEditMessageText(chatID, messageID, botMsg))
+	_, err := b.bot.Send(tgbotapi.NewEditMessageText(userId, messageID, botMsg))
 	if err != nil {
 		return fmt.Errorf("error send botMsg from adEventSale: %w", err)
-	}
-
-	return nil
-}
-
-func adEventBuy(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
-	chatID := cbq.Message.Chat.ID
-	messageID := cbq.Message.MessageID
-
-	b.db.SetStepUser(chatID, "ad_event.partner")
-
-	readyMsg := "Отлично! Теперь отправь мне ссылку на продавца."
-	_, err := b.bot.Send(tgbotapi.NewEditMessageText(chatID, messageID, readyMsg))
-	if err != nil {
-		return fmt.Errorf("error send readyMsg from addEventSale: %w", err)
-	}
-
-	return nil
-}
-
-func adEventBarter(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
-	chatID := cbq.Message.Chat.ID
-	messageID := cbq.Message.MessageID
-
-	b.db.SetStepUser(chatID, "ad_event.partner")
-
-	readyMsg := "Отлично! Теперь отправь мне ссылку на партнера по бартеру."
-	_, err := b.bot.Send(tgbotapi.NewEditMessageText(chatID, messageID, readyMsg))
-	if err != nil {
-		return fmt.Errorf("error send readyMsg from addEventSale: %w", err)
 	}
 
 	return nil
