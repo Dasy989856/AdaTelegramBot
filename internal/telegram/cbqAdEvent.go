@@ -29,11 +29,11 @@ func handlerAdEvent(b *BotTelegram, cbq *tgbotapi.CallbackQuery, cbqSteps []stri
 	var botMsg string
 	switch adEventType {
 	case "sale":
-		botMsg = "Отлично! Теперь отправь мне ссылку на покупателя. Пример: @buyer"
+		botMsg = "Отлично! Теперь отправь мне ссылку на покупателя. Пример: @AdaTelegramBot или https://t.me/AdaTelegramBot"
 	case "buy":
-		botMsg = "Отлично! Теперь отправь мне ссылку на продавца. Пример: @saler"
+		botMsg = "Отлично! Теперь отправь мне ссылку на продавца. Пример: @AdaTelegramBot или https://t.me/AdaTelegramBot"
 	case "barter":
-		botMsg = "Отлично! Теперь отправь мне ссылку на партнера по бартеру. Пример: @barter"
+		botMsg = "Отлично! Теперь отправь мне ссылку на партнера по бартеру. Пример: @AdaTelegramBot или https://t.me/AdaTelegramBot"
 	default:
 		delete(b.cashAdEvents, userId)
 		sendRestart(b, userId)
