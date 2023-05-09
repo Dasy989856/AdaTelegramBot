@@ -207,6 +207,11 @@ func cbqAdEventCreateEnd(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 		return err
 	}
 
+	botMsg = tgbotapi.NewMessage(userId, "Для возврата в главное меню воспользуйтесь командой /start.")
+	if err := b.sendMessage(userId, botMsg); err != nil {
+		return err
+	}
+
 	return nil
 }
 
