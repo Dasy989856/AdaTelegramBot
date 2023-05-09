@@ -47,8 +47,7 @@ func cbqAdEventMenu(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 		),
 	)
 
-	_, err := b.bot.Send(tgbotapi.NewEditMessageTextAndMarkup(userId, messageID, textMsg, keyboard))
-	if err != nil {
+	if err := b.sendMessage(userId, tgbotapi.NewEditMessageTextAndMarkup(userId, messageID, textMsg, keyboard)); err != nil {
 		return fmt.Errorf("error edit msg in cbqAdEventMenu: %w", err)
 	}
 
@@ -86,8 +85,7 @@ func cbqHandlerAdEventType(b *BotTelegram, cbq *tgbotapi.CallbackQuery, cbqSteps
 		return fmt.Errorf("unknow type adEvent. cbq: %v", cbqSteps)
 	}
 
-	_, err := b.bot.Send(tgbotapi.NewEditMessageText(userId, messageID, botMsg))
-	if err != nil {
+	if err := b.sendMessage(userId, tgbotapi.NewEditMessageText(userId, messageID, botMsg)); err != nil {
 		return fmt.Errorf("error send botMsg from adEventSale: %w", err)
 	}
 

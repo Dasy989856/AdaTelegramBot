@@ -109,7 +109,7 @@ func getAdEventFromCash(b *BotTelegram, userId int64) (*models.AdEvent, error) {
 func sendRestart(b *BotTelegram, userId int64) error {
 	b.db.SetStepUser(userId, "start")
 	botMsg := tgbotapi.NewMessage(userId, "К сожалению что то пошло не так. Выберите действие из меню /start повторно. 🥲")
-	if _, err := b.bot.Send(botMsg); err != nil {
+	if err := b.sendMessage(userId, botMsg); err != nil {
 		return fmt.Errorf("error send message in sendRestartMessage: %w", err)
 	}
 	return nil
@@ -155,9 +155,8 @@ func (b *BotTelegram) cleareAllChat(userId int64) error {
 }
 
 // Отправка сообщения пользователю.
-func (b *BotTelegram) sendMessage(userId int64, text string) error {
-	botMsgConfig := tgbotapi.NewMessage(userId, text)
-	botMsg, err := b.bot.Send(botMsgConfig)
+func (b *BotTelegram) sendMessage(userId int64, c tgbotapi.Chattable) error {
+	botMsg, err := b.bot.Send(c)
 	if err != nil {
 		return err
 	}
@@ -165,6 +164,6 @@ func (b *BotTelegram) sendMessage(userId int64, text string) error {
 	if err := b.db.AddUserMessageId(userId, botMsg.MessageID); err != nil {
 		return err
 	}
-	
 
+	return nil
 }

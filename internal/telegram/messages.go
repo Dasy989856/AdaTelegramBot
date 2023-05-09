@@ -10,7 +10,8 @@ import (
 
 // Обработчик сообщений.
 func (b *BotTelegram) handlerMessage(msg *tgbotapi.Message) error {
-	step, err := b.db.GetStepUser(msg.Chat.ID)
+	userId := msg.Chat.ID
+	step, err := b.db.GetStepUser(userId)
 	if err != nil {
 		return err
 	}
@@ -38,8 +39,8 @@ func (b *BotTelegram) handlerMessage(msg *tgbotapi.Message) error {
 			return err
 		}
 	default:
-		botMsg := tgbotapi.NewMessage(msg.Chat.ID, "Не получается обработать сообщение... 😔")
-		if _, err := b.bot.Send(botMsg); err != nil {
+		botMsg := tgbotapi.NewMessage(userId, "Не получается обработать сообщение... 😔")
+		if err := b.sendMessage(userId, botMsg); err != nil {
 			return err
 		}
 
@@ -57,7 +58,7 @@ func adEventPartner(b *BotTelegram, msg *tgbotapi.Message) error {
 
 	if !regxType1.MatchString(msg.Text) && !regxType2.MatchString(msg.Text) {
 		botMsg := tgbotapi.NewMessage(userId, "Вы ввели некорректную ссылку на пользователя, попробуйте снова. Пример: @AdaTelegramBot или https://t.me/AdaTelegramBot")
-		if _, err := b.bot.Send(botMsg); err != nil {
+		if err := b.sendMessage(userId, botMsg); err != nil {
 			return err
 		}
 		return nil
@@ -80,12 +81,12 @@ func adEventPartner(b *BotTelegram, msg *tgbotapi.Message) error {
 	switch adEvent.Type {
 	case "sale":
 		botMsg := tgbotapi.NewMessage(msg.Chat.ID, "Отлично! Теперь отправьте мне ссылку на рекламируемый канал.")
-		if _, err := b.bot.Send(botMsg); err != nil {
+		if err := b.sendMessage(userId, botMsg); err != nil {
 			return err
 		}
 	case "buy":
 		botMsg := tgbotapi.NewMessage(msg.Chat.ID, "Отлично! Теперь отправьте мне ссылку на канал, в котором выйдет твоя реклама.")
-		if _, err := b.bot.Send(botMsg); err != nil {
+		if err := b.sendMessage(userId, botMsg); err != nil {
 			return err
 		}
 	default:
@@ -107,7 +108,7 @@ func adEventChanel(b *BotTelegram, msg *tgbotapi.Message) error {
 
 	if !regxType1.MatchString(msg.Text) && !regxType2.MatchString(msg.Text) {
 		botMsg := tgbotapi.NewMessage(msg.Chat.ID, "Вы ввели некорректную ссылку на канал, попробуйте снова. Пример: @AdaTelegramBot или https://t.me/AdaTelegramBot")
-		if _, err := b.bot.Send(botMsg); err != nil {
+		if err := b.sendMessage(userId, botMsg); err != nil {
 			return err
 		}
 		return nil
@@ -133,7 +134,7 @@ func adEventChanel(b *BotTelegram, msg *tgbotapi.Message) error {
 	}
 
 	botMsg := tgbotapi.NewMessage(msg.Chat.ID, "Отлично! Теперь отправьте мне стоимость.")
-	if _, err := b.bot.Send(botMsg); err != nil {
+	if err := b.sendMessage(userId, botMsg); err != nil {
 		return err
 	}
 
@@ -147,7 +148,7 @@ func adEventPrice(b *BotTelegram, msg *tgbotapi.Message) error {
 
 	if !regxPrice.MatchString(msg.Text) {
 		botMsg := tgbotapi.NewMessage(msg.Chat.ID, "Вы ввели некорректную стоимость, попробуйте снова. Пример: 1000")
-		if _, err := b.bot.Send(botMsg); err != nil {
+		if err := b.sendMessage(userId, botMsg); err != nil {
 			return err
 		}
 		return nil
@@ -168,7 +169,7 @@ func adEventPrice(b *BotTelegram, msg *tgbotapi.Message) error {
 	b.db.SetStepUser(msg.Chat.ID, "ad_event.date_posting")
 
 	botMsg := tgbotapi.NewMessage(msg.Chat.ID, "Отлично! Теперь отправьте дату размещения рекламы. Формат `2022-08-22 16:30`")
-	if _, err := b.bot.Send(botMsg); err != nil {
+	if err := b.sendMessage(userId, botMsg); err != nil {
 		return err
 	}
 
@@ -183,7 +184,7 @@ func adEventDatePosting(b *BotTelegram, msg *tgbotapi.Message) error {
 
 	if !regxDate.MatchString(msg.Text) {
 		botMsg := tgbotapi.NewMessage(msg.Chat.ID, "Вы ввели некорректную дату, попробуйте снова. Пример: 2022-08-22 16:30")
-		if _, err := b.bot.Send(botMsg); err != nil {
+		if err := b.sendMessage(userId, botMsg); err != nil {
 			return err
 		}
 		return nil
@@ -199,7 +200,7 @@ func adEventDatePosting(b *BotTelegram, msg *tgbotapi.Message) error {
 	b.db.SetStepUser(msg.Chat.ID, "ad_event.date_delete")
 
 	botMsg := tgbotapi.NewMessage(msg.Chat.ID, "Отлично! Теперь отправьте дату удаления рекламы. Формат `2022-08-22 16:30`")
-	if _, err := b.bot.Send(botMsg); err != nil {
+	if err := b.sendMessage(userId, botMsg); err != nil {
 		return err
 	}
 
@@ -214,7 +215,7 @@ func adEventDateDelete(b *BotTelegram, msg *tgbotapi.Message) error {
 
 	if !regxDate.MatchString(msg.Text) {
 		botMsg := tgbotapi.NewMessage(msg.Chat.ID, "Вы ввели некорректную дату, попробуйте снова. Пример: 2022-08-22 16:30")
-		if _, err := b.bot.Send(botMsg); err != nil {
+		if err := b.sendMessage(userId, botMsg); err != nil {
 			return err
 		}
 		return nil
@@ -241,7 +242,7 @@ func adEventDateDelete(b *BotTelegram, msg *tgbotapi.Message) error {
 
 	if durationDateDelete.Sub(*durationDatePosting) <= 0 {
 		botMsg := tgbotapi.NewMessage(msg.Chat.ID, "Вы ввели дату удаления поста меньше даты размещения поста, попробуйте снова.")
-		if _, err := b.bot.Send(botMsg); err != nil {
+		if err := b.sendMessage(userId, botMsg); err != nil {
 			return err
 		}
 		return nil
@@ -261,7 +262,7 @@ func adEventDateDelete(b *BotTelegram, msg *tgbotapi.Message) error {
 
 	botMsgString := fmt.Sprintf("Отлично! Событие добавлено! ID события: %d.", adEventId)
 	botMsg := tgbotapi.NewMessage(msg.Chat.ID, botMsgString)
-	if _, err := b.bot.Send(botMsg); err != nil {
+	if err := b.sendMessage(userId, botMsg); err != nil {
 		return err
 	}
 

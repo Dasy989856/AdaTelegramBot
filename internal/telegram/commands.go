@@ -8,7 +8,6 @@ import (
 
 // Обработчик команд.
 func (b *BotTelegram) handlerCommand(msg *tgbotapi.Message) error {
-	fmt.Println("MSG ID: ", msg.MessageID)
 	userId := msg.Chat.ID
 
 	switch msg.Command() {
@@ -18,8 +17,9 @@ func (b *BotTelegram) handlerCommand(msg *tgbotapi.Message) error {
 		}
 		return nil
 	default:
-		if err := b.sendMessage(userId, `Неизвестная команда 🥲`); err != nil {
-			return err
+		botMsg := tgbotapi.NewMessage(userId, `Неизвестная команда 🥲`)
+		if err := b.sendMessage(userId, botMsg); err != nil {
+			return fmt.Errorf("error send unknow command error: %w", err)
 		}
 		return nil
 	}
@@ -43,8 +43,8 @@ func (b *BotTelegram) cmdStart(msg *tgbotapi.Message) error {
 }
 
 // Отправка стартового меню.
-func (b *BotTelegram) sendMenuMsg(chatID int64) error {
-	menuMsg := tgbotapi.NewMessage(chatID, "Возможности телеграмм бота Ада:")
+func (b *BotTelegram) sendMenuMsg(userId int64) error {
+	menuMsg := tgbotapi.NewMessage(userId, "Возможности телеграмм бота Ада:")
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Управление событиями.", "ad_event"),
@@ -60,11 +60,12 @@ func (b *BotTelegram) sendMenuMsg(chatID int64) error {
 		),
 	)
 	menuMsg.ReplyMarkup = keyboard
-	if _, err := b.bot.Send(menuMsg); err != nil {
-		return fmt.Errorf("error send menuMsg: %w", err)
+
+	if err := b.sendMessage(userId, menuMsg); err != nil {
+		return fmt.Errorf("error send start menu: %w", err)
 	}
 
-	if err := b.db.SetStepUser(chatID, "start"); err != nil {
+	if err := b.db.SetStepUser(userId, "start"); err != nil {
 		return err
 	}
 
