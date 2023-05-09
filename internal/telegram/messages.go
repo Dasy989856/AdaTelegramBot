@@ -19,23 +19,23 @@ func (b *BotTelegram) handlerMessage(msg *tgbotapi.Message) error {
 
 	// Сообщение обрабатываеются отталкиваясь от текущего шага пользователя.
 	switch step {
-	case "ad_event.partner":
+	case "ad_event.create.partner":
 		if err := adEventPartner(b, msg); err != nil {
 			return err
 		}
-	case "ad_event.chanel":
+	case "ad_event.create.chanel":
 		if err := adEventChanel(b, msg); err != nil {
 			return err
 		}
-	case "ad_event.price":
+	case "ad_event.create.price":
 		if err := adEventPrice(b, msg); err != nil {
 			return err
 		}
-	case "ad_event.date_posting":
+	case "ad_event.create.date_posting":
 		if err := adEventDatePosting(b, msg); err != nil {
 			return err
 		}
-	case "ad_event.date_delete":
+	case "ad_event.create.date_delete":
 		if err := adEventDateDelete(b, msg); err != nil {
 			return err
 		}
@@ -50,7 +50,6 @@ func (b *BotTelegram) handlerMessage(msg *tgbotapi.Message) error {
 	return nil
 }
 
-// step: ad_event.partner
 func adEventPartner(b *BotTelegram, msg *tgbotapi.Message) error {
 	// Example: https://t.me/nikname ; @nikname
 	regxType1 := regexp.MustCompile(`^https:\/\/t\.me\/[a-zA-Z0-9_]+$`)
@@ -77,21 +76,26 @@ func adEventPartner(b *BotTelegram, msg *tgbotapi.Message) error {
 	}
 
 	adEvent.Partner = msg.Text
-	b.db.SetStepUser(msg.Chat.ID, "ad_event.chanel")
+	b.db.SetStepUser(msg.Chat.ID, "ad_event.create.chanel")
 
 	switch adEvent.Type {
 	case "sale":
-		botMsg := tgbotapi.NewMessage(msg.Chat.ID, "Отлично! Теперь отправьте мне ссылку на рекламируемый канал.")
+		botMsg := tgbotapi.NewMessage(msg.Chat.ID, "Отлично! Теперь отправьте мне ссылку на рекламируемый Вами канал.")
 		if err := b.sendMessage(userId, botMsg); err != nil {
 			return err
 		}
 	case "buy":
-		botMsg := tgbotapi.NewMessage(msg.Chat.ID, "Отлично! Теперь отправьте мне ссылку на канал, в котором выйдет твоя реклама.")
+		botMsg := tgbotapi.NewMessage(msg.Chat.ID, "Отлично! Теперь отправьте мне ссылку на канал, в котором выйдет Ваша реклама.")
+		if err := b.sendMessage(userId, botMsg); err != nil {
+			return err
+		}
+	case "mutal":
+		botMsg := tgbotapi.NewMessage(msg.Chat.ID, "Отлично! Теперь отправьте мне ссылку на канал, в котором выйдет Ваша реклама.")
 		if err := b.sendMessage(userId, botMsg); err != nil {
 			return err
 		}
 	default:
-		if err := sendRestart(b, userId); err != nil {
+		if err := sendRequestRestartMsg(b, userId); err != nil {
 			return err
 		}
 		return fmt.Errorf("unknow type adEvent")
@@ -100,7 +104,6 @@ func adEventPartner(b *BotTelegram, msg *tgbotapi.Message) error {
 	return nil
 }
 
-// step: ad_event.chanel
 func adEventChanel(b *BotTelegram, msg *tgbotapi.Message) error {
 	userId := msg.Chat.ID
 
@@ -126,9 +129,9 @@ func adEventChanel(b *BotTelegram, msg *tgbotapi.Message) error {
 	adEvent.Channel = msg.Text
 
 	if adEvent.Type == "mutual" {
-		b.db.SetStepUser(msg.Chat.ID, "ad_event.date_posting")
+		b.db.SetStepUser(msg.Chat.ID, "ad_event.create.date_posting")
 	} else {
-		b.db.SetStepUser(msg.Chat.ID, "ad_event.price")
+		b.db.SetStepUser(msg.Chat.ID, "ad_event.create.price")
 	}
 
 	botMsg := tgbotapi.NewMessage(msg.Chat.ID, "Отлично! Теперь отправьте мне стоимость.")
@@ -139,7 +142,6 @@ func adEventChanel(b *BotTelegram, msg *tgbotapi.Message) error {
 	return nil
 }
 
-// step: ad_event.price
 func adEventPrice(b *BotTelegram, msg *tgbotapi.Message) error {
 	userId := msg.Chat.ID
 
@@ -163,7 +165,7 @@ func adEventPrice(b *BotTelegram, msg *tgbotapi.Message) error {
 	}
 
 	adEvent.Price = price
-	b.db.SetStepUser(msg.Chat.ID, "ad_event.date_posting")
+	b.db.SetStepUser(msg.Chat.ID, "ad_event.create.date_posting")
 
 	botMsg := tgbotapi.NewMessage(msg.Chat.ID, "Отлично! Теперь отправьте дату размещения рекламы. Формат `22.08.2022 16:30`")
 	if err := b.sendMessage(userId, botMsg); err != nil {
@@ -173,7 +175,6 @@ func adEventPrice(b *BotTelegram, msg *tgbotapi.Message) error {
 	return nil
 }
 
-// step: ad_event.date_posting
 func adEventDatePosting(b *BotTelegram, msg *tgbotapi.Message) error {
 	userId := msg.Chat.ID
 
@@ -192,7 +193,7 @@ func adEventDatePosting(b *BotTelegram, msg *tgbotapi.Message) error {
 	}
 
 	adEvent.DatePosting = msg.Text
-	b.db.SetStepUser(msg.Chat.ID, "ad_event.date_delete")
+	b.db.SetStepUser(msg.Chat.ID, "ad_event.create.date_delete")
 
 	botMsg := tgbotapi.NewMessage(msg.Chat.ID, "Отлично! Теперь отправьте дату удаления рекламы. Формат `22.08.2022 16:30`")
 	if err := b.sendMessage(userId, botMsg); err != nil {
@@ -202,7 +203,6 @@ func adEventDatePosting(b *BotTelegram, msg *tgbotapi.Message) error {
 	return nil
 }
 
-// step: ad_event.date_delete
 func adEventDateDelete(b *BotTelegram, msg *tgbotapi.Message) error {
 	userId := msg.Chat.ID
 
@@ -241,22 +241,27 @@ func adEventDateDelete(b *BotTelegram, msg *tgbotapi.Message) error {
 		return nil
 	}
 
-	// Сохранение события в бд.
-	if !adEvent.AllData() {
-		return fmt.Errorf("adEvent have not full data")
-	}
-
-	adEventId, err := b.db.AdEventCreation(adEvent)
-	if err != nil {
-		return err
-	}
-
-	b.db.SetStepUser(msg.Chat.ID, "start")
-
-	botMsgString := fmt.Sprintf("Отлично! Событие добавлено! Индификатор события: %d.", adEventId)
-	botMsg := tgbotapi.NewMessage(msg.Chat.ID, botMsgString)
+	botMsg := tgbotapi.NewMessage(msg.Chat.ID, "Дата удаления рекламы добавлена успешно!")
 	if err := b.sendMessage(userId, botMsg); err != nil {
 		return err
+	}
+
+	// Показать событие.
+	{
+		botMsgText := createAdEnentDescription(adEvent)
+		keyboard := tgbotapi.NewInlineKeyboardMarkup(
+			tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData("Да.", "ad_event.create.end"),
+			),
+			tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData("Отменить.", "start"),
+			),
+		)
+		botMsg := tgbotapi.NewMessage(msg.Chat.ID, botMsgText)
+		botMsg.ReplyMarkup = keyboard
+		if err := b.sendMessage(userId, botMsg); err != nil {
+			return err
+		}
 	}
 
 	return nil
