@@ -55,66 +55,66 @@ func (b *BotTelegram) sendStartMenu(userId int64) error {
 		return err
 	}
 
+	text := "Возможности телеграмм бота Ада:"
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Управление событиями.", "ad_event"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Статистика.", "statistic"),
+			tgbotapi.NewInlineKeyboardButtonData("Биржа рекламных интеграций.", "exchange"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Продажа рекламы.", "exchange.sale"),
+			tgbotapi.NewInlineKeyboardButtonData("Статистики.", "statistic"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Покупка рекламы.", "exchange.buy"),
+			tgbotapi.NewInlineKeyboardButtonData("Тех. поддержка.", "help"),
 		),
 	)
 
-	if err := updateStartMenu(b, userId, keyboard); err != nil {
-		return err
+	// Создание/получение startMessage которое не удаляется.
+	startMessageId, err := b.db.GetStartMessageId(userId)
+	if err != nil {
+		if err := updateStartMenu(b, userId, startMessageId, keyboard, text); err != nil {
+			return err
+		}
+		return nil
 	}
 
-	// // Создание/получение startMessage которое не удаляется.
-	// startMessageId, err := b.db.GetStartMessageId(userId)
-	// if err != nil {
-	// 	log.Println(err, userId)
-	// 	if err := updateStartMenu(b, userId, keyboard); err != nil {
-	// 		return err
-	// 	}
-	// 	return nil
-	// }
-
-	// // Изменение startMenu.
-	// if err := editStartMenu(b, userId, startMessageId, keyboard); err != nil {
-	// 	log.Println(err, userId)
-	// 	// Попытка создать новое старт меню.
-	// 	if err := updateStartMenu(b, userId, keyboard); err != nil {
-	// 		return err
-	// 	}
-	// }
+	// Изменение startMenu.
+	if err := editStartMenu(b, userId, startMessageId, keyboard, text); err != nil {
+		// Попытка создать новое старт меню.
+		if err := updateStartMenu(b, userId, startMessageId, keyboard, text); err != nil {
+			return err
+		}
+	}
 
 	return nil
 }
 
 // Обновление startMenu.
-func updateStartMenu(b *BotTelegram, userId int64, keyboard tgbotapi.InlineKeyboardMarkup) error {
-	menuMsg := tgbotapi.NewMessage(userId, "Возможности телеграмм бота Ада:")
+func updateStartMenu(b *BotTelegram, userId int64, startMessageId int, keyboard tgbotapi.InlineKeyboardMarkup, text string) error {
+	menuMsg := tgbotapi.NewMessage(userId, text)
 	menuMsg.ReplyMarkup = keyboard
 
-	startMessage, err := b.bot.Send(menuMsg)
+	// Создание нового startMessage.
+	newStartMessage, err := b.bot.Send(menuMsg)
 	if err != nil {
 		return fmt.Errorf("error send startMenu: %w", err)
 	}
 
-	if err := b.db.UpdateStartMessageId(userId, startMessage.MessageID); err != nil {
+	// Удаление если возможно старого startMessage.
+	b.cleareMessage(userId, startMessageId)
+
+	// Установка нового startMessage.
+	if err := b.db.UpdateStartMessageId(userId, newStartMessage.MessageID); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func editStartMenu(b *BotTelegram, userId int64, startMessageId int, keyboard tgbotapi.InlineKeyboardMarkup) error {
-	menuMsg := tgbotapi.NewEditMessageTextAndMarkup(userId, startMessageId, "Возможности телеграмм бота Ада:", keyboard)
+func editStartMenu(b *BotTelegram, userId int64, startMessageId int, keyboard tgbotapi.InlineKeyboardMarkup, text string) error {
+	menuMsg := tgbotapi.NewEditMessageTextAndMarkup(userId, startMessageId, text, keyboard)
 	if _, err := b.bot.Send(menuMsg); err != nil {
 		return fmt.Errorf("error edit startMenu: %w", err)
 	}
