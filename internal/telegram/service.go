@@ -129,12 +129,21 @@ func (b *BotTelegram) cleareMessage(userId int64, messageId int) error {
 
 // TODO Очистка чата. Пока что не работает.
 func (b *BotTelegram) cleareAllChat(userId int64) error {
+	startMessageId, err := b.db.GetStartMessageId(userId)
+	if err != nil {
+		return err
+	}
+
 	messageIds, err := b.db.GetUserMessageIds(userId)
 	if err != nil {
 		return err
 	}
 
+	// Удаление всех сообщений кроме startMessage.
 	for _, messageId := range messageIds {
+		if startMessageId == messageId {
+			continue
+		}
 		b.cleareMessage(userId, messageId)
 	}
 

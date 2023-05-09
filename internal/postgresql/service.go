@@ -118,8 +118,8 @@ func (t *TelegramBotDB) DefaultUserCreation(chatId int64, userUrl, firstName str
 }
 
 // Установка шага пользователя.
-func (p *TelegramBotDB) SetStepUser(userId int64, step string) (err error) {
-	tx := p.db.MustBegin()
+func (t *TelegramBotDB) SetStepUser(userId int64, step string) (err error) {
+	tx := t.db.MustBegin()
 	defer func() {
 		if err != nil {
 			tx.Rollback()
@@ -137,8 +137,8 @@ func (p *TelegramBotDB) SetStepUser(userId int64, step string) (err error) {
 }
 
 // Поулчение шага пользователя.
-func (p *TelegramBotDB) GetStepUser(userId int64) (step string, err error) {
-	tx := p.db.MustBegin()
+func (t *TelegramBotDB) GetStepUser(userId int64) (step string, err error) {
+	tx := t.db.MustBegin()
 	defer func() {
 		if err != nil {
 			tx.Rollback()
@@ -155,71 +155,3 @@ func (p *TelegramBotDB) GetStepUser(userId int64) (step string, err error) {
 	return step, nil
 }
 
-// Добавляет ID сообщения пользователя.
-func (p *TelegramBotDB) AddUserMessageId(userId int64, messageId int) (err error) {
-	tx := p.db.MustBegin()
-	defer func() {
-		if err != nil {
-			tx.Rollback()
-		} else {
-			tx.Commit()
-		}
-	}()
-
-	sql := fmt.Sprintf(`INSERT INTO public.%s (id, user_id) values ($1, $2) ON CONFLICT DO NOTHING;`, messageIdsTable)
-	if _, err := tx.Exec(sql, messageId, userId); err != nil {
-		return fmt.Errorf("error insert messageId: %w", err)
-	}
-
-	return nil
-}
-
-// Удаление messageId пользователя.
-func (p *TelegramBotDB) DeleteUserMessageId(messageId int) (err error) {
-	tx := p.db.MustBegin()
-	defer func() {
-		if err != nil {
-			tx.Rollback()
-		} else {
-			tx.Commit()
-		}
-	}()
-
-	sql := fmt.Sprintf(`DELETE FROM public.%s WHERE id=$1;`, messageIdsTable)
-	if _, err := tx.Exec(sql, messageId); err != nil {
-		return fmt.Errorf("error delete messageId: %w", err)
-	}
-
-	return nil
-}
-
-
-
-// Возвращает список messageIds пользователя.
-func (p *TelegramBotDB) GetUserMessageIds(userId int64) (messageIds []int, err error) {
-	tx := p.db.MustBegin()
-	defer func() {
-		if err != nil {
-			tx.Rollback()
-		} else {
-			tx.Commit()
-		}
-	}()
-	messageIds = make([]int, 0, 50)
-
-	sql := fmt.Sprintf(`SELECT id FROM public.%s WHERE user_id=$1;`, messageIdsTable)
-	rows, err := tx.Query(sql, userId)
-	if err != nil {
-		return nil, fmt.Errorf("error select messageIds: %w", err)
-	}
-
-	for rows.Next() {
-		var messageId int
-		if err := rows.Scan(&messageId); err != nil {
-			return nil, fmt.Errorf("error scan messageId in GetUserMessageIds: %w", err)
-		}
-		messageIds = append(messageIds, messageId)
-	}
-
-	return messageIds, nil
-}

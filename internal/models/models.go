@@ -106,6 +106,10 @@ type TelegramBotDB interface {
 	DeleteUserMessageId(messageId int) error
 	// Возвращает список messageIds пользователя.
 	GetUserMessageIds(userId int64) ([]int, error)
+	// Возвращает startMessageId. Это сообщение которое не удаляется а меняется на меню команды /start.
+	GetStartMessageId(userId int64) (messageId int, err error)
+	// Обновление startMessageId. Это сообщение которое не удаляется а меняется на меню команды /start.
+	UpdateStartMessageId(userId int64, messageId int) (err error)
 	// Закрытие БД.
 	Close() error
 }

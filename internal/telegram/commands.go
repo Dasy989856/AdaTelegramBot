@@ -27,15 +27,26 @@ func (b *BotTelegram) handlerCommand(msg *tgbotapi.Message) error {
 
 // Команда /start
 func (b *BotTelegram) cmdStart(msg *tgbotapi.Message) error {
+	userId := msg.Chat.ID
+
+	// Регистрация пользователя.
 	if err := b.db.DefaultUserCreation(msg.Chat.ID, msg.Chat.UserName, msg.Chat.FirstName); err != nil {
 		return err
 	}
 
-	if err := b.cleareAllChat(msg.Chat.ID); err != nil {
+	// Создание стартового сообщение которое не удаляется если его нет.
+	startMessageId, err := b.db.GetStartMessageId(userId)
+	if err != nil {
 		return err
 	}
 
-	if err := b.sendMenuMsg(msg.Chat.ID); err != nil {
+	// Отправка меню /start.
+	if err := b.sendStartMenu(userId, startMessageId); err != nil {
+		return err
+	}
+
+	// Очистка чата.
+	if err := b.cleareAllChat(msg.Chat.ID); err != nil {
 		return err
 	}
 
@@ -43,8 +54,12 @@ func (b *BotTelegram) cmdStart(msg *tgbotapi.Message) error {
 }
 
 // Отправка стартового меню.
-func (b *BotTelegram) sendMenuMsg(userId int64) error {
-	menuMsg := tgbotapi.NewMessage(userId, "Возможности телеграмм бота Ада:")
+func (b *BotTelegram) sendStartMenu(userId int64, startMessageId int) error {
+	// Установка шага пользователя.
+	if err := b.db.SetStepUser(userId, "start"); err != nil {
+		return err
+	}
+
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Управление событиями.", "ad_event"),
@@ -59,14 +74,26 @@ func (b *BotTelegram) sendMenuMsg(userId int64) error {
 			tgbotapi.NewInlineKeyboardButtonData("Покупка рекламы.", "exchange.buy"),
 		),
 	)
-	menuMsg.ReplyMarkup = keyboard
 
-	if err := b.sendMessage(userId, menuMsg); err != nil {
-		return fmt.Errorf("error send start menu: %w", err)
-	}
+	// Создание startMessage если его нет.
+	if startMessageId == 0 {
+		menuMsg := tgbotapi.NewMessage(userId, "Возможности телеграмм бота Ада:")
+		menuMsg.ReplyMarkup = keyboard
 
-	if err := b.db.SetStepUser(userId, "start"); err != nil {
-		return err
+		startMessage, err := b.bot.Send(menuMsg)
+		if err != nil {
+			return fmt.Errorf("error send start menu: %w", err)
+		}
+
+		if err := b.db.UpdateStartMessageId(userId, startMessage.MessageID); err != nil {
+			return err
+		}
+	} else {
+		menuMsg := tgbotapi.NewEditMessageTextAndMarkup(userId, startMessageId, "Возможности телеграмм бота Ада:", keyboard)
+
+		if _, err := b.bot.Send(menuMsg); err != nil {
+			return fmt.Errorf("error send start menu: %w", err)
+		}
 	}
 
 	return nil
