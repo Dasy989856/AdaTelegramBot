@@ -63,7 +63,7 @@ func cbqHandlerAdEventType(b *BotTelegram, cbq *tgbotapi.CallbackQuery, cbqSteps
 	// Создание кэша ad события.
 	adEvent := models.AdEvent{
 		UserId:    userId,
-		CreatedAt: time.Now().Format("02.01.2006 15:04:05.999"),
+		CreatedAt: time.Now().Format("2006-01-02 15:04:05.999"),
 		Ready:     true,
 		Type:      adEventType,
 	}

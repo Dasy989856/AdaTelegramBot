@@ -223,12 +223,12 @@ func adEventDateDelete(b *BotTelegram, msg *tgbotapi.Message) error {
 	adEvent.DateDelete = msg.Text
 
 	// Сравнение даты постинга и удаления.
-	durationDatePosting, err := parseDate(adEvent.DatePosting)
+	durationDatePosting, err := models.ParseDateToTime(adEvent.DatePosting)
 	if err != nil {
 		return fmt.Errorf("error parse durationDatePosting: %w", err)
 	}
 
-	durationDateDelete, err := parseDate(adEvent.DateDelete)
+	durationDateDelete, err := models.ParseDateToTime(adEvent.DateDelete)
 	if err != nil {
 		return fmt.Errorf("error parse durationDateDelete: %w", err)
 	}

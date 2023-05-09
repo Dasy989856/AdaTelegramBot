@@ -3,6 +3,7 @@ package models
 import (
 	"fmt"
 	"regexp"
+	"time"
 )
 
 // Ошибки.
@@ -107,4 +108,21 @@ type TelegramBotDB interface {
 	GetUserMessageIds(userId int64) ([]int, error)
 	// Закрытие БД.
 	Close() error
+}
+
+// Парсинг даты в time.Time
+func ParseDateToTime(timeString string) (*time.Time, error) {
+	layout := "02.01.2006 15:04"
+
+	t1, err := time.Parse(layout, timeString)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing date: %w", err)
+	}
+
+	return &t1, nil
+}
+
+// Парсинг time.Time в дату.
+func ParseTimeToDate(time *time.Time) string {
+	return time.Format("02.01.2006 15:04")
 }

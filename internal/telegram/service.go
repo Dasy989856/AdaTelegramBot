@@ -4,7 +4,6 @@ import (
 	"AdaTelegramBot/internal/models"
 	"fmt"
 	"log"
-	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/spf13/viper"
@@ -113,18 +112,6 @@ func sendRestart(b *BotTelegram, userId int64) error {
 		return fmt.Errorf("error send message in sendRestartMessage: %w", err)
 	}
 	return nil
-}
-
-// Парсинг даты.
-func parseDate(timeString string) (*time.Time, error) {
-	layout := "2006-01-02 15:04" // формат даты-времени
-
-	t1, err := time.Parse(layout, timeString)
-	if err != nil {
-		return nil, fmt.Errorf("error parsing date: %w", err)
-	}
-
-	return &t1, nil
 }
 
 // Очистка сообщения. Пока что не работает.

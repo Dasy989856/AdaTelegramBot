@@ -21,11 +21,24 @@ func (t *TelegramBotDB) AdEventCreation(event *models.AdEvent) (eventId int64, e
 		} else {
 			tx.Commit()
 		}
-	}() 
+	}()
+
+	// Изменение формата времени.
+	timeDatePosting, err := models.ParseDateToTime(event.DatePosting)
+	if err != nil {
+		return 0, err
+	}
+	event.DatePosting = timeDatePosting.Format("2006-01-02 15:04:05.999")
+	timeDateDelete, err := models.ParseDateToTime(event.DateDelete)
+	if err != nil {
+		return 0, err
+	}
+	event.DateDelete = timeDateDelete.Format("2006-01-02 15:04:05.999")
 
 	sql := fmt.Sprintf(`INSERT INTO public.%s (ready, user_id, "type", partner, channel, price, date_posting, date_delete)
 	values (true, $1, $2, $3, $4, $5, $6, $7) RETURNING id;`, adEventsTable)
-	if err := tx.QueryRow(sql, event.UserId, event.Type, event.Partner, event.Channel, event.Price, event.DatePosting, event.DateDelete).Scan(&eventId); err != nil {
+	if err := tx.QueryRow(sql, event.UserId, event.Type, event.Partner, event.Channel, event.Price,
+		event.DatePosting, event.DateDelete).Scan(&eventId); err != nil {
 		return 0, fmt.Errorf("error creation event: %w", err)
 	}
 
