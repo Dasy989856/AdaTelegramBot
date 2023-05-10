@@ -23,6 +23,8 @@ var (
 
 // Типы событий.
 var (
+	TypeSale   = "sale"
+	TypeBuy    = "buy"
 	TypeMutual = "mutual"
 )
 

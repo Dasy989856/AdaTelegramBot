@@ -178,7 +178,7 @@ func editMessage(b *BotTelegram, userId int64, startmessageId int, keyboard tgbo
 // Создание текст-описания ad события.
 func createAdEventDescription(a *models.AdEvent) (descriptionAdEvent string) {
 	switch a.Type {
-	case "sale":
+	case models.TypeSale:
 		descriptionAdEvent = fmt.Sprintf(`
 		Ваше событие:
 		- Покупатель: %s,
