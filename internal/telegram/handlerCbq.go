@@ -8,21 +8,44 @@ import (
 )
 
 // Обработчик CallbackQuery.
-func (b *BotTelegram) handlerCbq(update *tgbotapi.Update) error {
-	fmt.Println(update.CallbackQuery.Message.Text)
-	fmt.Println(update.CallbackQuery.Data)
-	cbqSteps := strings.Split(update.CallbackQuery.Data, ".")
-	if len(cbqSteps) <= 0 {
-		return fmt.Errorf("error len cbqSteps")
+func (b *BotTelegram) handlerCbq(cbq *tgbotapi.CallbackQuery) error {
+	fmt.Println(cbq.Message.Text)
+	fmt.Println(cbq.Data)
+
+	// Определение типа cbq.
+	cbqPart := strings.Split(cbq.Data, ":")
+	if len(cbqPart) < 1 || len(cbqPart) > 2 {
+		return fmt.Errorf("error len cbqPart in static, cbqData: %s", cbq.Data)
+	}
+
+	// Статический cbq.
+	if len(cbqPart) == 1 {
+		if err := handlerCbqStatic(b, cbq); err != nil {
+			return err
+		}
+	}
+
+	// Динамический cbq.
+	// if len(cbqPart) == 2 {
+	//  TODO
+	// }
+
+	return nil
+}
+
+func handlerCbqStatic(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
+	cbqSteps := strings.Split(cbq.Data, ".")
+	if len(cbqSteps) < 1 {
+		return fmt.Errorf("error len cbqSteps in static, cbqData: %s", cbq.Data)
 	}
 
 	switch cbqSteps[0] {
 	case "start":
-		if err := b.cmdStart(update.CallbackQuery.Message); err != nil {
+		if err := b.cmdStart(cbq.Message); err != nil {
 			return err
 		}
 	case "ad_event":
-		if err := cbqHandlerAdEvent(b, update.CallbackQuery); err != nil {
+		if err := cbqHandlerAdEvent(b, cbq); err != nil {
 			return err
 		}
 	}

@@ -40,7 +40,6 @@ func cbqHandlerAdEvent(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 			return err
 		}
 	}
-
 	return nil
 }
 
@@ -87,7 +86,7 @@ func cbqAdEventCreateSale(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	b.db.SetStepUser(userId, "ad_event.create.partner")
 
 	botMsg := `
-	Отправьте мне ссылку на покупателя.
+	Теперь требуется отправить мне ссылку на покупателя.
 	Пример: @AdaTelegramBot или https://t.me/AdaTelegramBot`
 
 	if err := b.sendMessage(userId, tgbotapi.NewEditMessageText(userId, messageID, botMsg)); err != nil {
@@ -113,7 +112,7 @@ func cbqAdEventCreateBuy(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	b.db.SetStepUser(userId, "ad_event.create.partner")
 
 	botMsg := `
-	Отправьте мне ссылку на продавца.
+	Теперь требуется отправить мне ссылку на продавца.
 	Пример: @AdaTelegramBot или https://t.me/AdaTelegramBot`
 
 	if err := b.sendMessage(userId, tgbotapi.NewEditMessageText(userId, messageID, botMsg)); err != nil {
@@ -139,7 +138,7 @@ func cbqAdEventCreateMutual(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	b.db.SetStepUser(userId, "ad_event.create.partner")
 
 	botMsg := `
-	Отправьте мне ссылку на продавца.
+	Теперь требуется отправить мне ссылку на продавца.
 	Пример: @AdaTelegramBot или https://t.me/AdaTelegramBot`
 
 	if err := b.sendMessage(userId, tgbotapi.NewEditMessageText(userId, messageID, botMsg)); err != nil {
@@ -165,7 +164,7 @@ func cbqAdEventCreateCustom(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 
 	b.db.SetStepUser(userId, "ad_event.create.partner")
 
-	botMsg := "Отлично! Теперь отправьте мне ссылку на продавца. Пример: @AdaTelegramBot или https://t.me/AdaTelegramBot"
+	botMsg := "Теперь требуется отправить мне ссылку на продавца. Пример: @AdaTelegramBot или https://t.me/AdaTelegramBot"
 
 	if err := b.sendMessage(userId, tgbotapi.NewEditMessageText(userId, messageID, botMsg)); err != nil {
 		return fmt.Errorf("error edit msg in cbqAdEventCreateCustom: %w", err)
@@ -173,7 +172,6 @@ func cbqAdEventCreateCustom(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 
 	return nil
 }
-
 
 func cbqAdEventCreateEnd(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	userId := cbq.Message.Chat.ID
@@ -215,39 +213,18 @@ func cbqAdEventCreateEnd(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	return nil
 }
 
-// Создание описания ad события.
-func createAdEnentDescription(a *models.AdEvent) (descriptionAdEvent string) {
-	switch a.Type {
-	case "sale":
-		descriptionAdEvent = fmt.Sprintf(`
-		Ваше событие:
-		- Покупатель: %s,
-		- Канал покупателя: %s,
-		- Цена продажи: %d, 
-		- Дата постинга рекламы: %s,
-		- Дата удаления рекламы: %s
-		
-		Сохранить событие?`, a.Partner, a.Channel, a.Price, a.DatePosting, a.DateDelete)
-	case "buy":
-		descriptionAdEvent = fmt.Sprintf(`
-		Ваше событие:
-		- Продавец: %s,
-		- Канал продавца: %s,
-		- Цена продажи: %d, 
-		- Дата постинга рекламы: %s,
-		- Дата удаления рекламы: %s
+// TODO
+func cbqAdEventDelete(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
+	userId := cbq.Message.Chat.ID
+	messageID := cbq.Message.MessageID
 
-		Сохранить событие?`, a.Partner, a.Channel, a.Price, a.DatePosting, a.DateDelete)
-	case "mutal":
-		descriptionAdEvent = fmt.Sprintf(`
-		Ваше событие:
-		- Партнер по ВП: %s,
-		- Канал партнера по ВП: %s,
-		- Дата постинга рекламы: %s,
-		- Дата удаления рекламы: %s
+	// Проверка доступа пользователя к событию.
+	// b.db.CheckUserAccessToAdEvent(userId)
+	// Удаление события
 
-		Сохранить событие?`, a.Partner, a.Channel, a.DatePosting, a.DateDelete)
+	if err := b.sendMessage(userId, tgbotapi.NewEditMessageText(userId, messageID, "Событие успешно удалено!")); err != nil {
+		return fmt.Errorf("error edit msg in cbqAdEventDelete: %w", err)
 	}
 
-	return descriptionAdEvent
+	return nil
 }

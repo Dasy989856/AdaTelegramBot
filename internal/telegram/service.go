@@ -80,7 +80,7 @@ func (b *BotTelegram) handlerUpdates(updates tgbotapi.UpdatesChannel) error {
 				return err
 			}
 
-			if err := b.handlerCbq(&update); err != nil {
+			if err := b.handlerCbq(update.CallbackQuery); err != nil {
 				log.Println(err)
 			}
 			continue
@@ -162,4 +162,41 @@ func (b *BotTelegram) sendMessage(userId int64, c tgbotapi.Chattable) error {
 	}
 
 	return nil
+}
+
+// Создание текст-описания ad события.
+func createAdEventDescription(a *models.AdEvent) (descriptionAdEvent string) {
+	switch a.Type {
+	case "sale":
+		descriptionAdEvent = fmt.Sprintf(`
+		Ваше событие:
+		- Покупатель: %s,
+		- Канал покупателя: %s,
+		- Цена продажи: %d, 
+		- Дата постинга рекламы: %s,
+		- Дата удаления рекламы: %s
+		
+		`, a.Partner, a.Channel, a.Price, a.DatePosting, a.DateDelete)
+	case "buy":
+		descriptionAdEvent = fmt.Sprintf(`
+		Ваше событие:
+		- Продавец: %s,
+		- Канал продавца: %s,
+		- Цена продажи: %d, 
+		- Дата постинга рекламы: %s,
+		- Дата удаления рекламы: %s
+		
+		`, a.Partner, a.Channel, a.Price, a.DatePosting, a.DateDelete)
+	case "mutal":
+		descriptionAdEvent = fmt.Sprintf(`
+		Ваше событие:
+		- Партнер по ВП: %s,
+		- Канал партнера по ВП: %s,
+		- Дата постинга рекламы: %s,
+		- Дата удаления рекламы: %s
+		
+		`, a.Partner, a.Channel, a.DatePosting, a.DateDelete)
+	}
+
+	return descriptionAdEvent
 }

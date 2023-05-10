@@ -5,14 +5,43 @@ import (
 	"fmt"
 )
 
-// Создание дефолтного ad события.
-// Exemple:
-/*
-INSERT INTO public.ad_events
-(ready, user_id, "type", partner, chanel, price, date_posting, date_delete)
-VALUES(true, 1, 'buy', 'https://t.me/nikname', 'https://t.me/chanelname', 1000, '2023-05-08 17:22:19', '2023-05-08 18:22:19')
-RETURNING id;
-*/
+// Получение ad события.
+func (t *TelegramBotDB) GetAdEvent(eventId int64) (adEvent *models.AdEvent, err error) {
+	tx := t.db.MustBegin()
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		} else {
+			tx.Commit()
+		}
+	}()
+
+	var aE models.AdEvent
+	sql := fmt.Sprintf(`SELECT (id, created_at, user_id, "type", partner, channel, price, date_posting, date_delete, arrival_of_subscribers)
+	FROM public.%s WHERE id=$1`, adEventsTable)
+	if err := tx.QueryRow(sql, eventId).Scan(&aE); err != nil {
+		return nil, fmt.Errorf("error creation event: %w", err)
+	}
+	
+	fmt.Println(aE)
+
+		// Изменение формата времени.
+	// timeDatePosting, err := models.ParseDateToTime(event.DatePosting)
+	// if err != nil {
+	// 	return 0, err
+	// }
+	// event.DatePosting = timeDatePosting.Format("2006-01-02 15:04:05.999")
+
+	// timeDateDelete, err := models.ParseDateToTime(event.DateDelete)
+	// if err != nil {
+	// 	return 0, err
+	// }
+	// event.DateDelete = timeDateDelete.Format("2006-01-02 15:04:05.999")
+
+	return &aE, nil
+}
+
+// Создание ad события.
 func (t *TelegramBotDB) AdEventCreation(event *models.AdEvent) (eventId int64, err error) {
 	tx := t.db.MustBegin()
 	defer func() {
@@ -46,12 +75,6 @@ func (t *TelegramBotDB) AdEventCreation(event *models.AdEvent) (eventId int64, e
 }
 
 // Добавление информации о приходе подписчиков.
-// Exemple:
-/*
-UPDATE public.ad_events
-	SET arrival_of_subscribers=123
-	WHERE id=1;
-*/
 func (t *TelegramBotDB) UpdateSubscribesInAdEvent(eventId, subscribers int64) (err error) {
 	tx := t.db.MustBegin()
 	defer func() {

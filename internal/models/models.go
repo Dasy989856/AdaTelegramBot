@@ -17,6 +17,8 @@ var (
 	RegxUrlType2 = regexp.MustCompile(`^@[a-zA-Z0-9_]+$`)
 	// Example: "1000"
 	RegxPrice = regexp.MustCompile(`[0-9]+`)
+	// Example: "1"
+	RegxID = regexp.MustCompile(`[0-9]+`)
 )
 
 // Пользователь при регистрации.
@@ -84,14 +86,26 @@ func (ae *AdEvent) AllData() bool {
 
 // БД для телеграмм бота.
 type TelegramBotDB interface {
+	// Закрытие БД.
+	Close() error
+	
+	// User
+
 	// Получение данных пользователя.
 	GetUserData(userId int64) (user *User, err error)
 	// Создание пользователя.
 	DefaultUserCreation(chatId int64, userUrl, firstName string) error
-	// Создание дефолтного ad события.
+
+	// AdEvent
+
+	// Получение ad события.
+	GetAdEvent(eventId int64) (*AdEvent, error)
+	// Создание ad события.
 	AdEventCreation(event *AdEvent) (int64, error)
-	// Удаление события.
+	// Удаление ad события.
 	AdEventDelete(eventId int64) error
+	// Проверка доступа пользователя к ad событию.
+	// CheckUserAccessToAdEvent(userId, eventId int64) (bool, error)
 	// Обновление информации о приходе подписчиков.
 	UpdateSubscribesInAdEvent(eventId, subscribers int64) error
 	// Установка шага пользователя.
@@ -100,6 +114,9 @@ type TelegramBotDB interface {
 	GetStepUser(userId int64) (step string, err error)
 	// Подучение id незавершенного ad события.
 	GetUnfinishedAdEventId(userId int64) (eventId int64, err error)
+
+	// Messages
+
 	// Добавление messageId пользователя.
 	AddUserMessageId(userId int64, messageId int) error
 	// Удаление messageId пользователя.
@@ -110,8 +127,6 @@ type TelegramBotDB interface {
 	GetStartMessageId(userId int64) (messageId int, err error)
 	// Обновление startMessageId. Это сообщение которое не удаляется а меняется на меню команды /start.
 	UpdateStartMessageId(userId int64, messageId int) (err error)
-	// Закрытие БД.
-	Close() error
 }
 
 // Парсинг даты в time.Time
