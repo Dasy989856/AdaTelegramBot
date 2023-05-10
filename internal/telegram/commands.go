@@ -55,7 +55,21 @@ func (b *BotTelegram) sendStartMenu(userId int64) error {
 		return err
 	}
 
-	keyboard, text := menuStart()
+	text := "Возможности телеграмм бота Ада:"
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Управление событиями.", "ad_event"),
+		),
+		// tgbotapi.NewInlineKeyboardRow(
+		// 	tgbotapi.NewInlineKeyboardButtonData("Биржа рекламных интеграций.", "exchange"),
+		// ),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Статистика.", "statistics"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Тех. поддержка.", "help"),
+		),
+	)
 
 	// Создание/получение startMessage которое не удаляется.
 	startMessageId, err := b.db.GetStartMessageId(userId)

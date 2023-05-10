@@ -39,6 +39,14 @@ func cbqHandlerAdEvent(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 		if err := cbqAdEventCreateEnd(b, cbq); err != nil {
 			return err
 		}
+	case "ad_event.view":
+		if err := cbqAdEventView(b, cbq); err != nil {
+			return err
+		}
+	case "ad_event.view.all":
+		if err := cbqAdEventViewAll(b, cbq); err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -48,7 +56,18 @@ func cbqAdEvent(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	userId := cbq.Message.Chat.ID
 	messageID := cbq.Message.MessageID
 
-	keyboard, text := menuAdEvent()
+	text := "Управление событиями:"
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Создать событие.", "ad_event.create"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Просмотреть события.", "ad_event.view"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Назад.", "start"),
+		),
+	)
 
 	if err := b.sendMessage(userId, tgbotapi.NewEditMessageTextAndMarkup(userId, messageID, text, keyboard)); err != nil {
 		return fmt.Errorf("error edit msg in cbqAdEventMenu: %w", err)
@@ -61,7 +80,24 @@ func cbqAdEventCreate(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	userId := cbq.Message.Chat.ID
 	messageID := cbq.Message.MessageID
 
-	keyboard, text := menuAdEventCreate()
+	text := "Выберите тип события:"
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Продажа рекламы.", "ad_event.create.sale"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Покупка рекламы.", "ad_event.create.buy"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Взаимный пиар.", "ad_event.create.mutual"),
+		),
+		// tgbotapi.NewInlineKeyboardRow(
+		// 	tgbotapi.NewInlineKeyboardButtonData("Кастомное.", "ad_event.create.castom"),
+		// ),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Назад.", "ad_event"),
+		),
+	)
 
 	if err := b.sendMessage(userId, tgbotapi.NewEditMessageTextAndMarkup(userId, messageID, text, keyboard)); err != nil {
 		return fmt.Errorf("error edit msg in cbqAdEventCreate: %w", err)
@@ -224,6 +260,73 @@ func cbqAdEventDelete(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 
 	if err := b.sendMessage(userId, tgbotapi.NewEditMessageText(userId, messageID, "Событие успешно удалено!")); err != nil {
 		return fmt.Errorf("error edit msg in cbqAdEventDelete: %w", err)
+	}
+
+	return nil
+}
+
+func cbqAdEventView(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
+	userId := cbq.Message.Chat.ID
+	messageID := cbq.Message.MessageID
+
+	text := "Выберите тип событий:"
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Все.", "ad_event.view.all"),
+		),
+		// tgbotapi.NewInlineKeyboardRow(
+		// 	tgbotapi.NewInlineKeyboardButtonData("Проданная реклама.", "ad_event.view.sale"),
+		// ),
+		// tgbotapi.NewInlineKeyboardRow(
+		// 	tgbotapi.NewInlineKeyboardButtonData("Купленная реклама.", "ad_event.view.buy"),
+		// ),
+		// tgbotapi.NewInlineKeyboardRow(
+		// 	tgbotapi.NewInlineKeyboardButtonData("Взаимный пиар.", "ad_event.view.mutual"),
+		// ),
+		// tgbotapi.NewInlineKeyboardRow(
+		// 	tgbotapi.NewInlineKeyboardButtonData("Кастомное.", "ad_event.create.castom"),
+		// ),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Назад.", "ad_event"),
+		),
+	)
+
+	if err := b.sendMessage(userId, tgbotapi.NewEditMessageTextAndMarkup(userId, messageID, text, keyboard)); err != nil {
+		return fmt.Errorf("error edit msg in cbqAdEventView: %w", err)
+	}
+
+	return nil
+}
+
+
+func cbqAdEventViewAll(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
+	userId := cbq.Message.Chat.ID
+	messageID := cbq.Message.MessageID
+
+	text := "Выберите фильтр для всех событий:"
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Сегодня.", "ad_event.view.all.today"),
+		),
+		// tgbotapi.NewInlineKeyboardRow(
+		// 	tgbotapi.NewInlineKeyboardButtonData("Текущая неделя.", "ad_event.view.all.this_week"),
+		// ),
+		// tgbotapi.NewInlineKeyboardRow(
+		// 	tgbotapi.NewInlineKeyboardButtonData("Следующая неделя.", "ad_event.view.all.next_week"),
+		// ),
+		// tgbotapi.NewInlineKeyboardRow(
+		// 	tgbotapi.NewInlineKeyboardButtonData("Прошлая неделя.", "ad_event.view.all.last_week"),
+		// ),
+		// tgbotapi.NewInlineKeyboardRow(
+		// 	tgbotapi.NewInlineKeyboardButtonData("Кастомное.", "ad_event.create.castom"),
+		// ),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Назад.", "ad_event.view"),
+		),
+	)
+
+	if err := b.sendMessage(userId, tgbotapi.NewEditMessageTextAndMarkup(userId, messageID, text, keyboard)); err != nil {
+		return fmt.Errorf("error edit msg in cbqAdEventView: %w", err)
 	}
 
 	return nil
