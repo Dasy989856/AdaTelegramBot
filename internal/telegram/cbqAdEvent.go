@@ -97,7 +97,7 @@ func cbqAdEventCreateBuy(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 		UserId:    userId,
 		CreatedAt: time.Now().Format("2006-01-02 15:04:05.999"),
 		Ready:     true,
-		Type:      "buy",
+		Type:      models.TypeBuy,
 	}
 	b.cashAdEvents[userId] = &adEvent
 

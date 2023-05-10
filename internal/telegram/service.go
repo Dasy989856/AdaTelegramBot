@@ -188,7 +188,7 @@ func createAdEventDescription(a *models.AdEvent) (descriptionAdEvent string) {
 		- Дата удаления рекламы: %s
 		
 		`, a.Partner, a.Channel, a.Price, a.DatePosting, a.DateDelete)
-	case "buy":
+	case models.TypeBuy:
 		descriptionAdEvent = fmt.Sprintf(`
 		Ваше событие:
 		- Продавец: %s,

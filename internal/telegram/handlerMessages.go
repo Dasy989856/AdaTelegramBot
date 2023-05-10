@@ -91,7 +91,7 @@ func adEventPartner(b *BotTelegram, msg *tgbotapi.Message) error {
 		if err := b.sendMessage(userId, botMsg); err != nil {
 			return err
 		}
-	case "buy":
+	case models.TypeBuy:
 		botMsg := tgbotapi.NewMessage(msg.Chat.ID, "Теперь требуется отправить мне ссылку на канал, в котором выйдет Ваша реклама.")
 		if err := b.sendMessage(userId, botMsg); err != nil {
 			return err
@@ -153,7 +153,7 @@ func adEventChanel(b *BotTelegram, msg *tgbotapi.Message) error {
 		if err := b.sendMessage(userId, botMsg); err != nil {
 			return err
 		}
-	case "buy":
+	case models.TypeBuy:
 		botMsg := tgbotapi.NewMessage(msg.Chat.ID, "Теперь требуется отправить стоимость рекламного поста.")
 		if err := b.sendMessage(userId, botMsg); err != nil {
 			return err
@@ -212,7 +212,7 @@ func adEventPrice(b *BotTelegram, msg *tgbotapi.Message) error {
 		if err := b.sendMessage(userId, botMsg); err != nil {
 			return err
 		}
-	case "buy":
+	case models.TypeBuy:
 		botMsg := tgbotapi.NewMessage(msg.Chat.ID, `Теперь требуется отправить дату и время размещения рекламного поста.
 		Пример: 22.08.2022 16:30`)
 		if err := b.sendMessage(userId, botMsg); err != nil {
@@ -267,7 +267,7 @@ func adEventDatePosting(b *BotTelegram, msg *tgbotapi.Message) error {
 		if err := b.sendMessage(userId, botMsg); err != nil {
 			return err
 		}
-	case "buy":
+	case models.TypeBuy:
 		botMsg := tgbotapi.NewMessage(msg.Chat.ID, `Теперь требуется отправить дату и время удаления рекламного поста.
 		Формат 22.08.2022 16:30`)
 		if err := b.sendMessage(userId, botMsg); err != nil {
@@ -339,7 +339,7 @@ func adEventDateDelete(b *BotTelegram, msg *tgbotapi.Message) error {
 		if err := b.sendMessage(userId, botMsg); err != nil {
 			return err
 		}
-	case "buy":
+	case models.TypeBuy:
 		botMsg := tgbotapi.NewMessage(msg.Chat.ID, `Дата и время удаления рекламного поста добавлены успешно!`)
 		if err := b.sendMessage(userId, botMsg); err != nil {
 			return err
