@@ -21,6 +21,11 @@ var (
 	RegxID = regexp.MustCompile(`[0-9]+`)
 )
 
+// Типы событий.
+var (
+	TypeMutual = "mutual"
+)
+
 // Пользователь при регистрации.
 type User struct {
 	Id        int64  `json:"id"`                        // Chat_ID
@@ -88,7 +93,7 @@ func (ae *AdEvent) AllData() bool {
 type TelegramBotDB interface {
 	// Закрытие БД.
 	Close() error
-	
+
 	// User
 
 	// Получение данных пользователя.
@@ -100,6 +105,8 @@ type TelegramBotDB interface {
 
 	// Получение ad события.
 	GetAdEvent(eventId int64) (*AdEvent, error)
+	// Получение списка ad событий.
+	GetRangeAdEvent(eventId int64, typeAdEvent string) (*AdEvent, error)
 	// Создание ad события.
 	AdEventCreation(event *AdEvent) (int64, error)
 	// Удаление ad события.
@@ -118,19 +125,19 @@ type TelegramBotDB interface {
 	// Messages
 
 	// Добавление messageId пользователя.
-	AddUserMessageId(userId int64, messageId int) error
+	AddUsermessageId(userId int64, messageId int) error
 	// Удаление messageId пользователя.
-	DeleteUserMessageId(messageId int) error
+	DeleteUsermessageId(messageId int) error
 	// Возвращает список messageIds пользователя.
-	GetUserMessageIds(userId int64) ([]int, error)
-	// Возвращает startMessageId. Это сообщение которое не удаляется а меняется на меню команды /start.
-	GetStartMessageId(userId int64) (messageId int, err error)
-	// Обновление startMessageId. Это сообщение которое не удаляется а меняется на меню команды /start.
-	UpdateStartMessageId(userId int64, messageId int) (err error)
-	// Возвращает adMessageId. Это сообщение которое не удаляется, купленная в боте реклама.
-	GetAdMessageId(userId int64) (messageId int, err error)
-	// Обновление AdMessageId. Это сообщение которое не удаляется, купленная в боте реклама.
-	UpdateAdMessageId(userId int64, messageId int) (err error)
+	GetUsermessageIds(userId int64) ([]int, error)
+	// Возвращает startmessageId. Это сообщение которое не удаляется а меняется на меню команды /start.
+	GetStartmessageId(userId int64) (messageId int, err error)
+	// Обновление startmessageId. Это сообщение которое не удаляется а меняется на меню команды /start.
+	UpdateStartmessageId(userId int64, messageId int) (err error)
+	// Возвращает admessageId. Это сообщение которое не удаляется, купленная в боте реклама.
+	GetAdmessageId(userId int64) (messageId int, err error)
+	// Обновление AdmessageId. Это сообщение которое не удаляется, купленная в боте реклама.
+	UpdateAdmessageId(userId int64, messageId int) (err error)
 }
 
 // Парсинг даты в time.Time

@@ -5,7 +5,7 @@ import (
 )
 
 // Добавляет ID сообщения пользователя.
-func (t *TelegramBotDB) AddUserMessageId(userId int64, messageId int) (err error) {
+func (t *TelegramBotDB) AddUsermessageId(userId int64, messageId int) (err error) {
 	tx := t.db.MustBegin()
 	defer func() {
 		if err != nil {
@@ -24,7 +24,7 @@ func (t *TelegramBotDB) AddUserMessageId(userId int64, messageId int) (err error
 }
 
 // Удаление messageId пользователя.
-func (t *TelegramBotDB) DeleteUserMessageId(messageId int) (err error) {
+func (t *TelegramBotDB) DeleteUsermessageId(messageId int) (err error) {
 	tx := t.db.MustBegin()
 	defer func() {
 		if err != nil {
@@ -43,7 +43,7 @@ func (t *TelegramBotDB) DeleteUserMessageId(messageId int) (err error) {
 }
 
 // Возвращает список messageIds пользователя.
-func (t *TelegramBotDB) GetUserMessageIds(userId int64) (messageIds []int, err error) {
+func (t *TelegramBotDB) GetUsermessageIds(userId int64) (messageIds []int, err error) {
 	tx := t.db.MustBegin()
 	defer func() {
 		if err != nil {
@@ -63,7 +63,7 @@ func (t *TelegramBotDB) GetUserMessageIds(userId int64) (messageIds []int, err e
 	for rows.Next() {
 		var messageId int
 		if err := rows.Scan(&messageId); err != nil {
-			return nil, fmt.Errorf("error scan messageId in GetUserMessageIds: %w", err)
+			return nil, fmt.Errorf("error scan messageId in GetUsermessageIds: %w", err)
 		}
 		messageIds = append(messageIds, messageId)
 	}
@@ -71,8 +71,8 @@ func (t *TelegramBotDB) GetUserMessageIds(userId int64) (messageIds []int, err e
 	return messageIds, nil
 }
 
-// Возвращает startMessageId. Это сообщение которое не удаляется а меняется на меню команды /start.
-func (t *TelegramBotDB) GetStartMessageId(userId int64) (messageId int, err error) {
+// Возвращает startmessageId. Это сообщение которое не удаляется а меняется на меню команды /start.
+func (t *TelegramBotDB) GetStartmessageId(userId int64) (messageId int, err error) {
 	tx := t.db.MustBegin()
 	defer func() {
 		if err != nil {
@@ -82,21 +82,21 @@ func (t *TelegramBotDB) GetStartMessageId(userId int64) (messageId int, err erro
 		}
 	}()
 
-	// Получение startMessageId пользователя.
+	// Получение startmessageId пользователя.
 	sql := fmt.Sprintf(`SELECT start_message_id FROM public.%s WHERE id=$1;`, usersTable)
 	if err := tx.QueryRow(sql, userId).Scan(&messageId); err != nil {
-		return 0, fmt.Errorf("error select startMessageId: %w", err)
+		return 0, fmt.Errorf("error select startmessageId: %w", err)
 	}
 
 	if messageId == 0 {
-		return 0, fmt.Errorf("startMessageId quil 0")
+		return 0, fmt.Errorf("startmessageId quil 0")
 	}
 
 	return messageId, nil
 }
 
-// Обновление startMessageId. Это сообщение которое не удаляется а меняется на меню команды /start.
-func (t *TelegramBotDB) UpdateStartMessageId(userId int64, messageId int) (err error) {
+// Обновление startmessageId. Это сообщение которое не удаляется а меняется на меню команды /start.
+func (t *TelegramBotDB) UpdateStartmessageId(userId int64, messageId int) (err error) {
 	tx := t.db.MustBegin()
 	defer func() {
 		if err != nil {
@@ -108,14 +108,14 @@ func (t *TelegramBotDB) UpdateStartMessageId(userId int64, messageId int) (err e
 
 	sql := fmt.Sprintf(`UPDATE public.%s SET start_message_id=$1 WHERE id=$2;`, usersTable)
 	if _, err := tx.Exec(sql, messageId, userId); err != nil {
-		return fmt.Errorf("error update startMessageId: %w", err)
+		return fmt.Errorf("error update startmessageId: %w", err)
 	}
 
 	return nil
 }
 
-// Возвращает adMessageId. Это сообщение которое не удаляется, купленная в боте реклама.
-func (t *TelegramBotDB) GetAdMessageId(userId int64) (messageId int, err error) {
+// Возвращает admessageId. Это сообщение которое не удаляется, купленная в боте реклама.
+func (t *TelegramBotDB) GetAdmessageId(userId int64) (messageId int, err error) {
 	tx := t.db.MustBegin()
 	defer func() {
 		if err != nil {
@@ -125,21 +125,21 @@ func (t *TelegramBotDB) GetAdMessageId(userId int64) (messageId int, err error) 
 		}
 	}()
 
-	// Получение adMessageId пользователя.
+	// Получение admessageId пользователя.
 	sql := fmt.Sprintf(`SELECT ad_message_id FROM public.%s WHERE id=$1;`, usersTable)
 	if err := tx.QueryRow(sql, userId).Scan(&messageId); err != nil {
-		return 0, fmt.Errorf("error select GetAdMessageId: %w", err)
+		return 0, fmt.Errorf("error select GetAdmessageId: %w", err)
 	}
 
 	if messageId == 0 {
-		return 0, fmt.Errorf("adMessageId quil 0")
+		return 0, fmt.Errorf("admessageId quil 0")
 	}
 
 	return messageId, nil
 }
 
-// Обновление adMessageId. Это сообщение которое не удаляется, купленная в боте реклама.
-func (t *TelegramBotDB) UpdateAdMessageId(userId int64, messageId int) (err error) {
+// Обновление admessageId. Это сообщение которое не удаляется, купленная в боте реклама.
+func (t *TelegramBotDB) UpdateAdmessageId(userId int64, messageId int) (err error) {
 	tx := t.db.MustBegin()
 	defer func() {
 		if err != nil {
@@ -151,7 +151,7 @@ func (t *TelegramBotDB) UpdateAdMessageId(userId int64, messageId int) (err erro
 
 	sql := fmt.Sprintf(`UPDATE public.%s SET ad_message_id=$1 WHERE id=$2;`, usersTable)
 	if _, err := tx.Exec(sql, messageId, userId); err != nil {
-		return fmt.Errorf("error update adMessageId: %w", err)
+		return fmt.Errorf("error update admessageId: %w", err)
 	}
 
 	return nil

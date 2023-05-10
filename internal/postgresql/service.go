@@ -154,4 +154,3 @@ func (t *TelegramBotDB) GetStepUser(userId int64) (step string, err error) {
 
 	return step, nil
 }
-

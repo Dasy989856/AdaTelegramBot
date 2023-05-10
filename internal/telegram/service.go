@@ -41,7 +41,7 @@ func (b *BotTelegram) handlerUpdates(updates tgbotapi.UpdatesChannel) error {
 	for update := range updates {
 		// Обработка команд.
 		if update.Message != nil && update.Message.IsCommand() {
-			if err := b.db.AddUserMessageId(update.Message.Chat.ID,
+			if err := b.db.AddUsermessageId(update.Message.Chat.ID,
 				update.Message.MessageID); err != nil {
 				return err
 			}
@@ -54,7 +54,7 @@ func (b *BotTelegram) handlerUpdates(updates tgbotapi.UpdatesChannel) error {
 
 		// Обработка сообщений.
 		if update.Message != nil {
-			if err := b.db.AddUserMessageId(update.Message.Chat.ID,
+			if err := b.db.AddUsermessageId(update.Message.Chat.ID,
 				update.Message.MessageID); err != nil {
 				return err
 			}
@@ -67,7 +67,7 @@ func (b *BotTelegram) handlerUpdates(updates tgbotapi.UpdatesChannel) error {
 
 		// Обработка CallbackQuery.
 		if update.CallbackQuery != nil {
-			if err := b.db.AddUserMessageId(update.CallbackQuery.Message.Chat.ID,
+			if err := b.db.AddUsermessageId(update.CallbackQuery.Message.Chat.ID,
 				update.CallbackQuery.Message.MessageID); err != nil {
 				return err
 			}
@@ -118,7 +118,7 @@ func sendRequestRestartMsg(b *BotTelegram, userId int64) error {
 
 // Очистка сообщения.
 func (b *BotTelegram) cleareMessage(userId int64, messageId int) error {
-	if err := b.db.DeleteUserMessageId(messageId); err != nil {
+	if err := b.db.DeleteUsermessageId(messageId); err != nil {
 		return err
 	}
 
@@ -131,19 +131,19 @@ func (b *BotTelegram) cleareMessage(userId int64, messageId int) error {
 
 // Очистка чата.
 func (b *BotTelegram) cleareAllChat(userId int64) error {
-	startMessageId, err := b.db.GetStartMessageId(userId)
+	startmessageId, err := b.db.GetStartmessageId(userId)
 	if err != nil {
 		return err
 	}
 
-	messageIds, err := b.db.GetUserMessageIds(userId)
+	messageIds, err := b.db.GetUsermessageIds(userId)
 	if err != nil {
 		return err
 	}
 
 	// Удаление всех сообщений кроме startMessage.
 	for _, messageId := range messageIds {
-		if startMessageId == messageId {
+		if startmessageId == messageId {
 			continue
 		}
 		b.cleareMessage(userId, messageId)
@@ -159,7 +159,7 @@ func (b *BotTelegram) sendMessage(userId int64, c tgbotapi.Chattable) error {
 		return err
 	}
 
-	if err := b.db.AddUserMessageId(userId, botMsg.MessageID); err != nil {
+	if err := b.db.AddUsermessageId(userId, botMsg.MessageID); err != nil {
 		return err
 	}
 
@@ -167,8 +167,8 @@ func (b *BotTelegram) sendMessage(userId int64, c tgbotapi.Chattable) error {
 }
 
 // Изменение сообщения.
-func editMessage(b *BotTelegram, userId int64, startMessageId int, keyboard tgbotapi.InlineKeyboardMarkup, text string) error {
-	menuMsg := tgbotapi.NewEditMessageTextAndMarkup(userId, startMessageId, text, keyboard)
+func editMessage(b *BotTelegram, userId int64, startmessageId int, keyboard tgbotapi.InlineKeyboardMarkup, text string) error {
+	menuMsg := tgbotapi.NewEditMessageTextAndMarkup(userId, startmessageId, text, keyboard)
 	if _, err := b.bot.Send(menuMsg); err != nil {
 		return fmt.Errorf("error edit startMenu: %w", err)
 	}
@@ -223,4 +223,3 @@ func cbqGetData(cbq *tgbotapi.CallbackQuery) (data string, ok bool) {
 	}
 	return "", false
 }
-
