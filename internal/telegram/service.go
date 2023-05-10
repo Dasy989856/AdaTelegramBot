@@ -4,6 +4,7 @@ import (
 	"AdaTelegramBot/internal/models"
 	"fmt"
 	"log"
+	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/spf13/viper"
@@ -28,16 +29,7 @@ func NewBotTelegram(db models.TelegramBotDB) (*BotTelegram, error) {
 	return &BotTelegram{bot: bot, db: db, cashAdEvents: make(map[int64]*models.AdEvent)}, nil
 }
 
-// Запуск апдейтера.
-func (b *BotTelegram) StartBotUpdater() error {
-	log.Printf("Authorized on account %s", b.bot.Self.UserName)
-	updates := b.InitUpdatesChanel()
-	if err := b.handlerUpdates(updates); err != nil {
-		return err
-	}
-	return nil
-}
-
+// Инициализация канала событий.
 func (b *BotTelegram) InitUpdatesChanel() tgbotapi.UpdatesChannel {
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 30
@@ -90,6 +82,16 @@ func (b *BotTelegram) handlerUpdates(updates tgbotapi.UpdatesChannel) error {
 	return fmt.Errorf("updates chanel closed")
 }
 
+// Запуск апдейтера.
+func (b *BotTelegram) StartBotUpdater() error {
+	log.Printf("Authorized on account %s", b.bot.Self.UserName)
+	updates := b.InitUpdatesChanel()
+	if err := b.handlerUpdates(updates); err != nil {
+		return err
+	}
+	return nil
+}
+
 // Получение хэша ad события.
 func getAdEventFromCash(b *BotTelegram, userId int64) (*models.AdEvent, error) {
 	adEvent, ok := b.cashAdEvents[userId]
@@ -114,7 +116,7 @@ func sendRequestRestartMsg(b *BotTelegram, userId int64) error {
 	return nil
 }
 
-// Очистка сообщения. Пока что не работает.
+// Очистка сообщения.
 func (b *BotTelegram) cleareMessage(userId int64, messageId int) error {
 	if err := b.db.DeleteUserMessageId(messageId); err != nil {
 		return err
@@ -127,7 +129,7 @@ func (b *BotTelegram) cleareMessage(userId int64, messageId int) error {
 	return nil
 }
 
-// TODO Очистка чата. Пока что не работает.
+// Очистка чата.
 func (b *BotTelegram) cleareAllChat(userId int64) error {
 	startMessageId, err := b.db.GetStartMessageId(userId)
 	if err != nil {
@@ -161,6 +163,15 @@ func (b *BotTelegram) sendMessage(userId int64, c tgbotapi.Chattable) error {
 		return err
 	}
 
+	return nil
+}
+
+// Изменение сообщения.
+func editMessage(b *BotTelegram, userId int64, startMessageId int, keyboard tgbotapi.InlineKeyboardMarkup, text string) error {
+	menuMsg := tgbotapi.NewEditMessageTextAndMarkup(userId, startMessageId, text, keyboard)
+	if _, err := b.bot.Send(menuMsg); err != nil {
+		return fmt.Errorf("error edit startMenu: %w", err)
+	}
 	return nil
 }
 
@@ -200,3 +211,16 @@ func createAdEventDescription(a *models.AdEvent) (descriptionAdEvent string) {
 
 	return descriptionAdEvent
 }
+
+// TODO not used functions vvv
+
+// Проверка cbq на динамические данные. Возвращает данные и идификатор успешности.
+func cbqGetData(cbq *tgbotapi.CallbackQuery) (data string, ok bool) {
+	cbqPart := strings.Split(cbq.Data, ":")
+	//Dinamic type
+	if len(cbqPart) == 2 {
+		return cbqPart[1], true
+	}
+	return "", false
+}
+
