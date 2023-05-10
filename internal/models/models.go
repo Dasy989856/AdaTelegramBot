@@ -107,8 +107,8 @@ type TelegramBotDB interface {
 
 	// Получение ad события.
 	GetAdEvent(eventId int64) (*AdEvent, error)
-	// Получение списка ad событий.
-	GetRangeAdEvent(eventId int64, typeAdEvent string) (*AdEvent, error)
+	// Получение списка все ad событий запрашиваемого типа.
+	GetUserListAdEvent(userId int64, typeAdEvent string) ([]AdEvent, error)
 	// Создание ad события.
 	AdEventCreation(event *AdEvent) (int64, error)
 	// Удаление ad события.

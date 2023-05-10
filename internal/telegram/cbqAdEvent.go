@@ -215,7 +215,7 @@ func cbqAdEventView(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 
 func cbqAdEventViewAll(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	userId := cbq.Message.Chat.ID
-	messageId := cbq.Message.messageId
+	messageId := cbq.Message.MessageID
 
 	text := "Выберите фильтр для всех событий:"
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
@@ -250,36 +250,35 @@ func cbqAdEventViewAllToday(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	userId := cbq.Message.Chat.ID
 	messageId := cbq.Message.MessageID
 
-	// Получение списка событий.
-
-	text := "Выбранные события:"
-	var keyboard tgbotapi.InlineKeyboardMarkup
-
-	// Получение списка элементов из базы данных или API
-	elements := getElements()
+	// Получение списка событий из БД
+	var adEvents []models.AdEvent
 
 	// Создание списка кнопок
-	var keyboard [][]tgbotapi.InlineKeyboardButton
-	for _, element := range elements {
-		button := tgbotapi.NewInlineKeyboardButtonData(element.Name, element.ID)
-		keyboard = append(keyboard, []tgbotapi.InlineKeyboardButton{button})
+	text := "🗓 Список выбранных событий: "
+	lenRow := 3
+
+	var buttonRow []tgbotapi.InlineKeyboardButton
+	var buttorRows [][]tgbotapi.InlineKeyboardButton
+	for i, adEvent := range adEvents {
+		buttonId := fmt.Sprintf("%d", i+1)
+		buttonData := fmt.Sprintf("%d", adEvent.Id)
+		button := tgbotapi.NewInlineKeyboardButtonData(buttonId, buttonData)
+		buttonRow = append(buttonRow, button)
+
+		if lenRow-len(buttonRow) == 0 {
+			buttorRows = append(buttorRows, buttonRow)
+		}
+
+		text = text + fmt.Sprintf("\n %s) ", buttonId)
+		text = text + createAdEventDescription(&adEvent)
 	}
 
-	// Создание клавиатуры
-	replyMarkup := tgbotapi.NewInlineKeyboardMarkup(keyboard)
+	// Создание клавиатуры.
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(buttorRows...)
 
-	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Please choose:")
-	msg.ReplyMarkup = replyMarkup
-	bot.Send(msg)
-}
+	if err := editMessageReplyMarkup(b, userId, messageId, keyboard, text); err != nil {
+		return fmt.Errorf("error edit msg in cbqAdEventViewAllToday: %w", err)
+	}
 
-func button(update tgbotapi.Update, bot *tgbotapi.BotAPI) {
-	query := update.CallbackQuery
-	data := query.Data
-
-	// Обработка нажатия на кнопку
-	element := getElementByID(data)
-	text := fmt.Sprintf("Вы выбрали элемент %s", element.Name)
-	msg := tgbotapi.NewMessage(query.Message.Chat.ID, text)
-	bot.Send(msg)
+	return nil
 }

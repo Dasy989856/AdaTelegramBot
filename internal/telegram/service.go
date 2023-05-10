@@ -166,11 +166,20 @@ func (b *BotTelegram) sendMessage(userId int64, c tgbotapi.Chattable) error {
 	return nil
 }
 
+// Изменение сообщения c ReplyMarkup.
+func editMessageReplyMarkup(b *BotTelegram, userId int64, messageId int, keyboard tgbotapi.InlineKeyboardMarkup, text string) error {
+	botMsg := tgbotapi.NewEditMessageTextAndMarkup(userId, messageId, text, keyboard)
+	if _, err := b.bot.Send(botMsg); err != nil {
+		return fmt.Errorf("error editMessageReplyMarkup: %w", err)
+	}
+	return nil
+}
+
 // Изменение сообщения.
-func editMessage(b *BotTelegram, userId int64, startmessageId int, keyboard tgbotapi.InlineKeyboardMarkup, text string) error {
-	menuMsg := tgbotapi.NewEditMessageTextAndMarkup(userId, startmessageId, text, keyboard)
-	if _, err := b.bot.Send(menuMsg); err != nil {
-		return fmt.Errorf("error edit startMenu: %w", err)
+func editMessage(b *BotTelegram, userId int64, messageId int, text string) error {
+	botMsg := tgbotapi.NewEditMessageText(userId, messageId, text)
+	if _, err := b.bot.Send(botMsg); err != nil {
+		return fmt.Errorf("error editMessage: %w", err)
 	}
 	return nil
 }

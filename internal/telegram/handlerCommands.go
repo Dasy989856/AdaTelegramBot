@@ -87,7 +87,7 @@ func (b *BotTelegram) sendStartMessage(userId int64) error {
 	}
 
 	// Изменение startMenu.
-	if err := editMessage(b, userId, startmessageId, keyboard, text); err != nil {
+	if err := editMessageReplyMarkup(b, userId, startmessageId, keyboard, text); err != nil {
 		// Попытка создать новое старт меню.
 		if err := updateStartMessage(b, userId, startmessageId, keyboard, text); err != nil {
 			return err
@@ -138,7 +138,7 @@ func (b *BotTelegram) sendAdMessage(userId int64) error {
 	}
 
 	// Изменение adMessage.
-	if err := editMessage(b, userId, admessageId, keyboard, text); err != nil {
+	if err := editMessageReplyMarkup(b, userId, admessageId, keyboard, text); err != nil {
 		// Попытка создать новое старт меню.
 		if err := updateAdMessage(b, userId, admessageId, keyboard, text); err != nil {
 			return err

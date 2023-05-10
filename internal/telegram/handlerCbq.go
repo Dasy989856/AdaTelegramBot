@@ -76,6 +76,10 @@ func handlerCbqAdEvent(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 		if err := cbqAdEventViewAllToday(b, cbq); err != nil {
 			return err
 		}
+		// case "ad_event.edit.":
+		// 	if err := cbqAdEventEdit(b, cbq); err != nil {
+		// 		return err
+		// 	}
 	}
 	return nil
 }
