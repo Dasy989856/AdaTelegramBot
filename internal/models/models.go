@@ -10,7 +10,7 @@ import (
 var (
 	ErrUserNotFound = fmt.Errorf("user not found")
 	// Example: "22.08.2022 16:30"
-	RegxAdEventDate = regexp.MustCompile(`^(0[1-9]|[12][0-9]|3[01]).(0[1-9]|1[0-2]).(\d{4}) ([01][0-9]|2[0-3]):[0-5][0-9]$`)
+	RegxAdEventDate = regexp.MustCompile(`^(0[1-9]|[12][0-9]|3[01]).(0[1-9]|1[0-2]).(\d{4}) ([0-1]?[0-9]|2[0-3]):[0-5][0-9]$`)
 	// Example: "https://t.me/nikname", "@nikname"
 	RegxUrlType1 = regexp.MustCompile(`^https:\/\/t\.me\/[a-zA-Z0-9_]+$`)
 	// Example: "https://t.me/nikname", "@nikname"

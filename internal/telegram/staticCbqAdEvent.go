@@ -138,7 +138,7 @@ func cbqAdEventCreateMutual(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	b.db.SetStepUser(userId, "ad_event.create.partner")
 
 	botMsg := `
-	Теперь требуется отправить мне ссылку на продавца.
+	Теперь требуется отправить мне ссылку на пратнера по взаимному пиару.
 	Пример: @AdaTelegramBot или https://t.me/AdaTelegramBot`
 
 	if err := b.sendMessage(userId, tgbotapi.NewEditMessageText(userId, messageID, botMsg)); err != nil {

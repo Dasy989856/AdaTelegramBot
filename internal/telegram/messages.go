@@ -3,7 +3,6 @@ package telegram
 import (
 	"AdaTelegramBot/internal/models"
 	"fmt"
-	"regexp"
 	"strconv"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -56,12 +55,9 @@ func (b *BotTelegram) handlerMessage(msg *tgbotapi.Message) error {
 }
 
 func adEventPartner(b *BotTelegram, msg *tgbotapi.Message) error {
-	// Example: https://t.me/nikname ; @nikname
-	regxType1 := regexp.MustCompile(`^https:\/\/t\.me\/[a-zA-Z0-9_]+$`)
-	regxType2 := regexp.MustCompile(`^@[a-zA-Z0-9_]+$`)
 	userId := msg.Chat.ID
 
-	if !regxType1.MatchString(msg.Text) && !regxType2.MatchString(msg.Text) {
+	if !models.RegxUrlType1.MatchString(msg.Text) && !models.RegxUrlType2.MatchString(msg.Text) {
 		botMsg := tgbotapi.NewMessage(userId, `Вы ввели некорректную ссылку на пользователя, попробуйте снова.
 		Пример: @AdaTelegramBot или https://t.me/AdaTelegramBot`)
 		if err := b.sendMessage(userId, botMsg); err != nil {
@@ -71,7 +67,7 @@ func adEventPartner(b *BotTelegram, msg *tgbotapi.Message) error {
 	}
 
 	// Приведение в единный тип.
-	if regxType2.MatchString(msg.Text) {
+	if models.RegxUrlType2.MatchString(msg.Text) {
 		msg.Text = "https://t.me/" + msg.Text[1:]
 	}
 
@@ -128,7 +124,7 @@ func adEventChanel(b *BotTelegram, msg *tgbotapi.Message) error {
 	}
 
 	// Приведение в единный тип.
-	if models.RegxUrlType1.MatchString(msg.Text) {
+	if models.RegxUrlType2.MatchString(msg.Text) {
 		msg.Text = "https://t.me/" + msg.Text[1:]
 	}
 
@@ -163,7 +159,8 @@ func adEventChanel(b *BotTelegram, msg *tgbotapi.Message) error {
 			return err
 		}
 	case "mutual":
-		botMsg := tgbotapi.NewMessage(msg.Chat.ID, "Теперь требуется отправить дату размещения поста взаимного пиара.")
+		botMsg := tgbotapi.NewMessage(msg.Chat.ID, `Теперь требуется отправить дату размещения поста взаимного пиара.
+		Пример: 22.08.2022 16:30`)
 		if err := b.sendMessage(userId, botMsg); err != nil {
 			return err
 		}
@@ -357,10 +354,6 @@ func adEventDateDelete(b *BotTelegram, msg *tgbotapi.Message) error {
 			return err
 		}
 		return fmt.Errorf("unknow type adEvent")
-	}
-	botMsg := tgbotapi.NewMessage(msg.Chat.ID, "")
-	if err := b.sendMessage(userId, botMsg); err != nil {
-		return err
 	}
 
 	// Показать ad событие.
