@@ -32,7 +32,7 @@ func (b *BotTelegram) cmdStart(msg *tgbotapi.Message) error {
 	userId := msg.Chat.ID
 
 	// Регистрация пользователя.
-	if err := b.db.DefaultUserCreation(msg.Chat.ID, msg.Chat.UserName, msg.Chat.FirstName); err != nil {
+	if err := b.db.DefaultUserCreation(userId, msg.Chat.UserName, msg.Chat.FirstName); err != nil {
 		return err
 	}
 
