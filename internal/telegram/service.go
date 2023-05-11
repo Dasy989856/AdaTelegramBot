@@ -185,7 +185,6 @@ func createAdEventDescription(a *models.AdEvent) (descriptionAdEvent string) {
 		- Цена продажи: %d, 
 		- Дата постинга рекламы: %s,
 		- Дата удаления рекламы: %s
-		
 		`, a.Partner, a.Channel, a.Price, a.DatePosting, a.DateDelete)
 	case models.TypeBuy:
 		descriptionAdEvent = fmt.Sprintf(`
@@ -194,7 +193,6 @@ func createAdEventDescription(a *models.AdEvent) (descriptionAdEvent string) {
 		- Цена покупки: %d, 
 		- Дата постинга рекламы: %s,
 		- Дата удаления рекламы: %s
-		
 		`, a.Partner, a.Channel, a.Price, a.DatePosting, a.DateDelete)
 	case models.TypeMutual:
 		descriptionAdEvent = fmt.Sprintf(`
@@ -203,7 +201,6 @@ func createAdEventDescription(a *models.AdEvent) (descriptionAdEvent string) {
 		- Цена взаимного пиара: %d,
 		- Дата постинга рекламы: %s,
 		- Дата удаления рекламы: %s
-		
 		`, a.Partner, a.Channel, a.Price, a.DatePosting, a.DateDelete)
 	}
 

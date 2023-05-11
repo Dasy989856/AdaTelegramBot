@@ -152,8 +152,8 @@ func (b *BotTelegram) sendAdMessage(userId int64) error {
 func updateAdMessage(b *BotTelegram, userId int64, admessageId int, keyboard tgbotapi.InlineKeyboardMarkup, text string) error {
 	botMsg := tgbotapi.NewMessage(userId, text)
 	botMsg.ReplyMarkup = keyboard
-
-	if viper.GetBool("ada_bot.adMessage") {
+	
+	if viper.GetBool("ada_bot.ad_message") {
 		// Создание нового adMessage.
 		newAdMessage, err := b.bot.Send(botMsg)
 		if err != nil {

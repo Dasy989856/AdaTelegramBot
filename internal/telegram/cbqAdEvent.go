@@ -6,6 +6,7 @@ import (
 	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/spf13/viper"
 )
 
 func cbqAdEvent(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
@@ -249,6 +250,7 @@ func cbqAdEventViewAny(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 func cbqAdEventViewAnyAll(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	userId := cbq.Message.Chat.ID
 	messageId := cbq.Message.MessageID
+	lenRow := viper.GetInt("ada_bot.len_dinamic_row")
 
 	// Получение событий из БД.
 	adEvents, err := b.db.GetAdEventsOfUser(userId, models.TypeAny)
@@ -257,8 +259,10 @@ func cbqAdEventViewAnyAll(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	}
 
 	// Создание списка кнопок.
-	text := "🗓 Список выбранных событий: "
-	lenRow := 5 // Длина строки кнопок.
+	text := `🗓 Отображены выбранные события.
+	🖋 Выберите номер события на кнопках ниже для редактирования события.
+	`
+	
 
 	bufButtonRow := make([]tgbotapi.InlineKeyboardButton, 0, 3)
 	bufButtonRows := make([][]tgbotapi.InlineKeyboardButton, 0, 3)
@@ -269,18 +273,25 @@ func cbqAdEventViewAnyAll(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 		bufButtonRow = append(bufButtonRow, button)
 
 		// Новая строка кнопок.
-		if (i+1)%lenRow == 0 {
+		if (i+1)%lenRow == 0 || (i+1) == len(adEvents) {
 			bufButtonRows = append(bufButtonRows, bufButtonRow)
 			bufButtonRow = make([]tgbotapi.InlineKeyboardButton, 0, lenRow)
 		}
 
-		text = text + fmt.Sprintf("\n Событе № %s:", buttonId)
+		text = text + fmt.Sprintf("\n<b>Событе № %s</b>:", buttonId)
 		text = text + createAdEventDescription(&adEvent)
 	}
 
 	// Создание клавиатуры.
+	backRow := tgbotapi.NewInlineKeyboardRow(
+		tgbotapi.NewInlineKeyboardButtonData("Назад.", "ad_event.view.any"),
+	)
+	bufButtonRows = append(bufButtonRows, backRow)
+
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(bufButtonRows...)
-	if err := b.sendMessage(userId, tgbotapi.NewEditMessageTextAndMarkup(userId, messageId, text, keyboard)); err != nil {
+	botMsg := tgbotapi.NewEditMessageTextAndMarkup(userId, messageId, text, keyboard)
+	botMsg.ParseMode = "html"
+	if err := b.sendMessage(userId, botMsg); err != nil {
 		return fmt.Errorf("error edit msg in cbqAdEventViewAllToday: %w", err)
 	}
 
