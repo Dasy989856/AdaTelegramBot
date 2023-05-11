@@ -7,14 +7,35 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
+func parseCbq(cbq *tgbotapi.CallbackQuery) (path []string, data string, err error) {
+	cbqDataSlice := strings.Split(cbq.Data, ":")
+	if len(cbqDataSlice) < 1 {
+		return nil, "", fmt.Errorf("len cbq incorrect. cbq: %s ", cbq.Data)
+	}
+
+	cbqPathSlice := strings.Split(cbqDataSlice[0], ".")
+	if len(cbqPathSlice) < 1 {
+		return nil, "", fmt.Errorf("len cbq path incorrect. cbq: %s ", cbq.Data)
+	}
+
+	switch len(cbqDataSlice) {
+	case 1:
+		return cbqPathSlice, "", nil
+	case 2:
+		return cbqPathSlice, cbqDataSlice[1], nil
+	default:
+		return nil, "", fmt.Errorf("len cbq incorrect. cbq: %s", cbq.Data)
+	}
+}
+
 func (b *BotTelegram) handlerCbq(cbq *tgbotapi.CallbackQuery) error {
-	cbqSteps := strings.Split(cbq.Data, ".")
-	if len(cbqSteps) < 1 {
-		return fmt.Errorf("error len cbqSteps. cbqData: %s", cbq.Data)
+	path, _, err := parseCbq(cbq)
+	if err != nil {
+		return err
 	}
 
 	fmt.Println("CBQ: " + cbq.Data)
-	switch cbqSteps[0] {
+	switch path[0] {
 	case "start":
 		if err := b.cmdStart(cbq.Message); err != nil {
 			return err
@@ -38,7 +59,12 @@ func (b *BotTelegram) handlerCbq(cbq *tgbotapi.CallbackQuery) error {
 }
 
 func handlerCbqAdEvent(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
-	switch cbq.Data {
+	path, _, err := parseCbq(cbq)
+	if err != nil {
+		return err
+	}
+
+	switch strings.Join(path, ".") {
 	case "ad_event":
 		if err := cbqAdEvent(b, cbq); err != nil {
 			return err
@@ -84,7 +110,12 @@ func handlerCbqAdEvent(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 }
 
 func handlerCbqStatistics(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
-	switch cbq.Data {
+	path, _, err := parseCbq(cbq)
+	if err != nil {
+		return err
+	}
+
+	switch strings.Join(path, ".") {
 	case "statistics":
 		if err := cbqStatistics(b, cbq); err != nil {
 			return err
@@ -93,11 +124,10 @@ func handlerCbqStatistics(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 		if err := cbqStatisticsBrief(b, cbq); err != nil {
 			return err
 		}
-	case "statistics.full":
-		// TODO no work
-		// if err := cbqAdEventViewAll(b, cbq); err != nil {
-		// 	return err
-		// }
+	case "statistics.brief.select":
+		if err := cbqStatisticsBriefSelect(b, cbq); err != nil {
+			return err
+		}
 	}
 	return nil
 }
