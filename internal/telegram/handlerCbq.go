@@ -68,12 +68,12 @@ func handlerCbqAdEvent(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 		if err := cbqAdEventView(b, cbq); err != nil {
 			return err
 		}
-	case "ad_event.view.all":
-		if err := cbqAdEventViewAll(b, cbq); err != nil {
+	case "ad_event.view.any":
+		if err := cbqAdEventViewAny(b, cbq); err != nil {
 			return err
 		}
-	case "ad_event.view.all.today":
-		if err := cbqAdEventViewAllToday(b, cbq); err != nil {
+	case "ad_event.view.any.all":
+		if err := cbqAdEventViewAnyAll(b, cbq); err != nil {
 			return err
 		}
 		// case "ad_event.edit.":
@@ -89,14 +89,14 @@ func handlerCbqStatistics(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	switch cbq.Data {
 	case "statistics.brief":
 		// TODO no work
-		if err := cbqAdEventView(b, cbq); err != nil {
-			return err
-		}
+		// if err := cbqAdEventView(b, cbq); err != nil {
+		// 	return err
+		// }
 	case "statistics.full":
 		// TODO no work
-		if err := cbqAdEventViewAll(b, cbq); err != nil {
-			return err
-		}
+		// if err := cbqAdEventViewAll(b, cbq); err != nil {
+		// 	return err
+		// }
 	}
 	return nil
 }
@@ -105,9 +105,9 @@ func handlerCbqStatistics(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 func handlerCbqHelp(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	switch cbq.Data {
 	case "help.feature":
-		if err := cbqAdEvent(b, cbq); err != nil {
-			return err
-		}
+		// if err := cbqAdEvent(b, cbq); err != nil {
+		// 	return err
+		// }
 	}
 	return nil
 }

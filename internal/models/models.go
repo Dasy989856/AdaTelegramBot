@@ -23,6 +23,7 @@ var (
 
 // Типы событий.
 var (
+	TypeAny    = "any"
 	TypeSale   = "sale"
 	TypeBuy    = "buy"
 	TypeMutual = "mutual"
@@ -107,8 +108,8 @@ type TelegramBotDB interface {
 
 	// Получение ad события.
 	GetAdEvent(eventId int64) (*AdEvent, error)
-	// Получение списка все ad событий запрашиваемого типа.
-	GetUserListAdEvent(userId int64, typeAdEvent string) ([]AdEvent, error)
+	// Получение всех ad событий пользователя запрашиваемого типа.
+	GetAdEventsOfUser(userId int64, typeAdEvent string) ([]AdEvent, error)
 	// Создание ad события.
 	AdEventCreation(event *AdEvent) (int64, error)
 	// Удаление ad события.

@@ -166,20 +166,11 @@ func (b *BotTelegram) sendMessage(userId int64, c tgbotapi.Chattable) error {
 	return nil
 }
 
-// Изменение сообщения c ReplyMarkup.
+// Изменение сообщения c ReplyMarkup. // TODO delete и взять с cbq
 func editMessageReplyMarkup(b *BotTelegram, userId int64, messageId int, keyboard tgbotapi.InlineKeyboardMarkup, text string) error {
 	botMsg := tgbotapi.NewEditMessageTextAndMarkup(userId, messageId, text, keyboard)
 	if _, err := b.bot.Send(botMsg); err != nil {
 		return fmt.Errorf("error editMessageReplyMarkup: %w", err)
-	}
-	return nil
-}
-
-// Изменение сообщения.
-func editMessage(b *BotTelegram, userId int64, messageId int, text string) error {
-	botMsg := tgbotapi.NewEditMessageText(userId, messageId, text)
-	if _, err := b.bot.Send(botMsg); err != nil {
-		return fmt.Errorf("error editMessage: %w", err)
 	}
 	return nil
 }
@@ -189,7 +180,6 @@ func createAdEventDescription(a *models.AdEvent) (descriptionAdEvent string) {
 	switch a.Type {
 	case models.TypeSale:
 		descriptionAdEvent = fmt.Sprintf(`
-		Ваше событие:
 		- Покупатель: %s,
 		- Канал покупателя: %s,
 		- Цена продажи: %d, 
@@ -199,7 +189,6 @@ func createAdEventDescription(a *models.AdEvent) (descriptionAdEvent string) {
 		`, a.Partner, a.Channel, a.Price, a.DatePosting, a.DateDelete)
 	case models.TypeBuy:
 		descriptionAdEvent = fmt.Sprintf(`
-		Ваше событие:
 		- Продавец: %s,
 		- Канал продавца: %s,
 		- Цена продажи: %d, 
@@ -209,7 +198,6 @@ func createAdEventDescription(a *models.AdEvent) (descriptionAdEvent string) {
 		`, a.Partner, a.Channel, a.Price, a.DatePosting, a.DateDelete)
 	case "mutal":
 		descriptionAdEvent = fmt.Sprintf(`
-		Ваше событие:
 		- Партнер по ВП: %s,
 		- Канал партнера по ВП: %s,
 		- Дата постинга рекламы: %s,
@@ -220,8 +208,6 @@ func createAdEventDescription(a *models.AdEvent) (descriptionAdEvent string) {
 
 	return descriptionAdEvent
 }
-
-// TODO not used functions vvv
 
 // Проверка cbq на динамические данные. Возвращает данные и идификатор успешности.
 func cbqGetData(cbq *tgbotapi.CallbackQuery) (data string, ok bool) {

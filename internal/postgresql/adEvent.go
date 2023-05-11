@@ -2,10 +2,10 @@ package postgresql
 
 import (
 	"AdaTelegramBot/internal/models"
+	"database/sql"
 	"fmt"
 )
 
-// Получение ad события.
 func (t *TelegramBotDB) GetAdEvent(eventId int64) (adEvent *models.AdEvent, err error) {
 	tx := t.db.MustBegin()
 	defer func() {
@@ -22,10 +22,10 @@ func (t *TelegramBotDB) GetAdEvent(eventId int64) (adEvent *models.AdEvent, err 
 	if err := tx.QueryRow(sql, eventId).Scan(&aE); err != nil {
 		return nil, fmt.Errorf("error creation event: %w", err)
 	}
-	
+
 	fmt.Println(aE)
 
-		// Изменение формата времени.
+	// Изменение формата времени.
 	// timeDatePosting, err := models.ParseDateToTime(event.DatePosting)
 	// if err != nil {
 	// 	return 0, err
@@ -41,8 +41,7 @@ func (t *TelegramBotDB) GetAdEvent(eventId int64) (adEvent *models.AdEvent, err 
 	return &aE, nil
 }
 
-// Получение ad события.
-func (t *TelegramBotDB) GetUserListAdEvent(userId int64, typeAdEvent string) (list []models.AdEvent, err error) {
+func (t *TelegramBotDB) GetAdEventsOfUser(userId int64, typeAdEvent string) (listAdEvent []models.AdEvent, err error) {
 	tx := t.db.MustBegin()
 	defer func() {
 		if err != nil {
@@ -51,30 +50,54 @@ func (t *TelegramBotDB) GetUserListAdEvent(userId int64, typeAdEvent string) (li
 			tx.Commit()
 		}
 	}()
+	listAdEvent = make([]models.AdEvent, 0, 50)
 
-	var aE models.AdEvent
-	sql := fmt.Sprintf(`SELECT (id, created_at, user_id, "type", partner, channel, price, date_posting, date_delete, arrival_of_subscribers)
-	FROM public.%s WHERE id=$1 AND "type"=$2;`, adEventsTable)
-	if rows, err := tx.Query(sql, userId, typeAdEvent); err != nil {
-		return nil, fmt.Errorf("error creation event: %w", err)
+	var rows *sql.Rows
+	if typeAdEvent == models.TypeAny {
+		query := fmt.Sprintf(`SELECT id, created_at, user_id, "type", partner, channel, price,
+		date_posting, date_delete, arrival_of_subscribers
+		FROM public.%s WHERE user_id=$1;`, adEventsTable)
+
+		rows, err = tx.Query(query, userId)
+		if err != nil {
+			return nil, fmt.Errorf("error select ad_events TypeAny `%s`: %w", typeAdEvent, err)
+		}
+	} else {
+		query := fmt.Sprintf(`SELECT id, created_at, user_id, "type", partner, channel, price,
+		date_posting, date_delete, arrival_of_subscribers
+		FROM public.%s WHERE user_id=$1 AND "type"=$2;`, adEventsTable)
+
+		rows, err = tx.Query(query, userId, typeAdEvent)
+		if err != nil {
+			return nil, fmt.Errorf("error select ad_events TypeAny `%s`: %w", typeAdEvent, err)
+		}
 	}
-	
-	fmt.Println(aE)
+
+	for rows.Next() {
+		var aE models.AdEvent
+		if err := rows.Scan(&aE.Id, &aE.CreatedAt, &aE.UserId, &aE.Type, &aE.Partner, &aE.Channel, &aE.Price,
+			&aE.DatePosting, &aE.DateDelete, &aE.ArrivalOfSubscribers); err != nil {
+			return nil, fmt.Errorf("error scan AdEvent in GetAdEventsOfUser: %w", err)
+		}
 
 		// Изменение формата времени.
-	// timeDatePosting, err := models.ParseDateToTime(event.DatePosting)
-	// if err != nil {
-	// 	return 0, err
-	// }
-	// event.DatePosting = timeDatePosting.Format("2006-01-02 15:04:05.999")
+		// timeDatePosting, err := models.ParseDateToTime(event.DatePosting)
+		// if err != nil {
+		// 	return 0, err
+		// }
+		// event.DatePosting = timeDatePosting.Format("2006-01-02 15:04:05.999")
 
-	// timeDateDelete, err := models.ParseDateToTime(event.DateDelete)
-	// if err != nil {
-	// 	return 0, err
-	// }
-	// event.DateDelete = timeDateDelete.Format("2006-01-02 15:04:05.999")
+		// timeDateDelete, err := models.ParseDateToTime(event.DateDelete)
+		// if err != nil {
+		// 	return 0, err
+		// }
+		// event.DateDelete = timeDateDelete.Format("2006-01-02 15:04:05.999")
+		fmt.Println(aE)
 
-	return &aE, nil
+		listAdEvent = append(listAdEvent, aE)
+	}
+
+	return listAdEvent, nil
 }
 
 // Создание ad события.

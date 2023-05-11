@@ -187,7 +187,7 @@ func cbqAdEventView(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	text := "Выберите тип событий:"
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Все.", "ad_event.view.all"),
+			tgbotapi.NewInlineKeyboardButtonData("Все типы.", "ad_event.view.any"),
 		),
 		// tgbotapi.NewInlineKeyboardRow(
 		// 	tgbotapi.NewInlineKeyboardButtonData("Проданная реклама.", "ad_event.view.sale"),
@@ -213,15 +213,18 @@ func cbqAdEventView(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	return nil
 }
 
-func cbqAdEventViewAll(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
+func cbqAdEventViewAny(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	userId := cbq.Message.Chat.ID
 	messageId := cbq.Message.MessageID
 
-	text := "Выберите фильтр для всех событий:"
+	text := "Выберите фильтр событий:"
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Сегодня.", "ad_event.view.all.today"),
+			tgbotapi.NewInlineKeyboardButtonData("Все события.", "ad_event.view.any.all"),
 		),
+		// tgbotapi.NewInlineKeyboardRow(
+		// 	tgbotapi.NewInlineKeyboardButtonData("Сегодня.", "ad_event.view.any.today"),
+		// ),
 		// tgbotapi.NewInlineKeyboardRow(
 		// 	tgbotapi.NewInlineKeyboardButtonData("Текущая неделя.", "ad_event.view.all.this_week"),
 		// ),
@@ -246,37 +249,43 @@ func cbqAdEventViewAll(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	return nil
 }
 
-func cbqAdEventViewAllToday(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
+func cbqAdEventViewAnyAll(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	userId := cbq.Message.Chat.ID
 	messageId := cbq.Message.MessageID
 
-	// Получение списка событий из БД
-	var adEvents []models.AdEvent
+	// Получение событий из БД.
+	adEvents, err := b.db.GetAdEventsOfUser(userId, models.TypeAny)
+	if err != nil {
+		return err
+	}
 
-	// Создание списка кнопок
+
+	// Создание списка кнопок.
 	text := "🗓 Список выбранных событий: "
-	lenRow := 3
+	lenRow := 5
 
 	var buttonRow []tgbotapi.InlineKeyboardButton
 	var buttorRows [][]tgbotapi.InlineKeyboardButton
 	for i, adEvent := range adEvents {
+
 		buttonId := fmt.Sprintf("%d", i+1)
 		buttonData := fmt.Sprintf("%d", adEvent.Id)
 		button := tgbotapi.NewInlineKeyboardButtonData(buttonId, buttonData)
 		buttonRow = append(buttonRow, button)
 
-		if lenRow-len(buttonRow) == 0 {
+		if (lenRow-len(buttonRow)) == 0 || i == len(adEvents) {
+			fmt.Println("NEXT ROWS")
 			buttorRows = append(buttorRows, buttonRow)
 		}
 
-		text = text + fmt.Sprintf("\n %s) ", buttonId)
+		
+		text = text + fmt.Sprintf("\n Событе №%s:", buttonId)
 		text = text + createAdEventDescription(&adEvent)
 	}
 
 	// Создание клавиатуры.
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(buttorRows...)
-
-	if err := editMessageReplyMarkup(b, userId, messageId, keyboard, text); err != nil {
+	if err := b.sendMessage(userId, tgbotapi.NewEditMessageTextAndMarkup(userId, messageId, text, keyboard)); err != nil {
 		return fmt.Errorf("error edit msg in cbqAdEventViewAllToday: %w", err)
 	}
 
