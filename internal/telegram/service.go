@@ -191,19 +191,20 @@ func createAdEventDescription(a *models.AdEvent) (descriptionAdEvent string) {
 		descriptionAdEvent = fmt.Sprintf(`
 		- Продавец: %s,
 		- Канал продавца: %s,
-		- Цена продажи: %d, 
+		- Цена покупки: %d, 
 		- Дата постинга рекламы: %s,
 		- Дата удаления рекламы: %s
 		
 		`, a.Partner, a.Channel, a.Price, a.DatePosting, a.DateDelete)
-	case "mutal":
+	case models.TypeMutual:
 		descriptionAdEvent = fmt.Sprintf(`
 		- Партнер по ВП: %s,
 		- Канал партнера по ВП: %s,
+		- Цена взаимного пиара: %d,
 		- Дата постинга рекламы: %s,
 		- Дата удаления рекламы: %s
 		
-		`, a.Partner, a.Channel, a.DatePosting, a.DateDelete)
+		`, a.Partner, a.Channel, a.Price, a.DatePosting, a.DateDelete)
 	}
 
 	return descriptionAdEvent

@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"log"
 	"regexp"
 	"time"
 )
@@ -58,34 +59,37 @@ type AdEvent struct {
 // Если ad событе полностью заполенно - возвращается true. Иначе false.
 func (ae *AdEvent) AllData() bool {
 	if ae.UserId == 0 {
+		log.Println("not found ae.UserId event")
 		return false
 	}
 
 	if ae.Type == "" {
+		log.Println("not found ae.Type event")
 		return false
 	}
 
 	if ae.CreatedAt == "" {
+		log.Println("not found ae.CreatedAt event")
 		return false
 	}
 
 	if ae.DatePosting == "" {
+		log.Println("not found ae.DatePosting event")
 		return false
 	}
 
 	if ae.DateDelete == "" {
+		log.Println("not found ae.DateDelete event")
 		return false
 	}
 
 	if ae.Partner == "" {
+		log.Println("not found ae.Partner event")
 		return false
 	}
 
 	if ae.Channel == "" {
-		return false
-	}
-
-	if ae.Type != "barter" && ae.Price == 0 {
+		log.Println("not found ae.Channel event")
 		return false
 	}
 
@@ -145,7 +149,7 @@ type TelegramBotDB interface {
 
 // Парсинг даты в time.Time
 func ParseDateToTime(timeString string) (*time.Time, error) {
-	layout := "02.01.2006 15:04"
+	layout := "2006-01-02T15:04:00+03:00"
 
 	t1, err := time.Parse(layout, timeString)
 	if err != nil {

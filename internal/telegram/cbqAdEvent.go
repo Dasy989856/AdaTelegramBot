@@ -103,11 +103,11 @@ func cbqAdEventCreateBuy(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 
 	b.db.SetStepUser(userId, "ad_event.create.partner")
 
-	botMsg := `
+	text := `
 	Теперь требуется отправить мне ссылку на продавца.
 	Пример: @AdaTelegramBot или https://t.me/AdaTelegramBot`
 
-	if err := b.sendMessage(userId, tgbotapi.NewEditMessageText(userId, messageId, botMsg)); err != nil {
+	if err := b.sendMessage(userId, tgbotapi.NewEditMessageText(userId, messageId, text)); err != nil {
 		return fmt.Errorf("error edit msg in cbqAdEventCreateBuy: %w", err)
 	}
 
@@ -129,12 +129,12 @@ func cbqAdEventCreateMutual(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 
 	b.db.SetStepUser(userId, "ad_event.create.partner")
 
-	botMsg := `
+	text := `
 	Теперь требуется отправить мне ссылку на пратнера по взаимному пиару.
 	Пример: @AdaTelegramBot или https://t.me/AdaTelegramBot`
 
-	if err := b.sendMessage(userId, tgbotapi.NewEditMessageText(userId, messageId, botMsg)); err != nil {
-		return fmt.Errorf("error edit msg in cbqAdEventCreateMutal: %w", err)
+	if err := b.sendMessage(userId, tgbotapi.NewEditMessageText(userId, messageId, text)); err != nil {
+		return fmt.Errorf("error edit msg in cbqAdEventCreateMutual: %w", err)
 	}
 
 	return nil
@@ -142,6 +142,7 @@ func cbqAdEventCreateMutual(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 
 func cbqAdEventCreateEnd(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	userId := cbq.Message.Chat.ID
+	messageId := cbq.Message.MessageID
 
 	adEvent, err := getAdEventFromCash(b, userId)
 	if err != nil {
@@ -150,11 +151,8 @@ func cbqAdEventCreateEnd(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 
 	// Валидация события.
 	if !adEvent.AllData() {
-		botMsg := tgbotapi.NewMessage(userId, "Были введены не все данные, попробуйте снова.")
+		botMsg := tgbotapi.NewMessage(userId, "Были введены не все данные, что бы повторить воспользуйтесь командой /start.")
 		if err := b.sendMessage(userId, botMsg); err != nil {
-			return err
-		}
-		if err := b.cmdStart(cbq.Message); err != nil {
 			return err
 		}
 		return nil
@@ -166,15 +164,14 @@ func cbqAdEventCreateEnd(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 		return err
 	}
 
-	botMsgString := fmt.Sprintf("Отлично! Событие добавлено! Индификатор события: %d.", adEventId)
-	botMsg := tgbotapi.NewMessage(userId, botMsgString)
-	if err := b.sendMessage(userId, botMsg); err != nil {
-		return err
-	}
-
-	botMsg = tgbotapi.NewMessage(userId, "Для возврата в главное меню воспользуйтесь командой /start.")
-	if err := b.sendMessage(userId, botMsg); err != nil {
-		return err
+	text := fmt.Sprintf("Отлично! Событие добавлено! Индификатор события: %d.", adEventId)
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("В главное меню.", "start"),
+		),
+	)
+	if err := b.sendMessage(userId, tgbotapi.NewEditMessageTextAndMarkup(userId, messageId, text, keyboard)); err != nil {
+		return fmt.Errorf("error edit msg in cbqAdEventCreate: %w", err)
 	}
 
 	return nil
@@ -259,32 +256,30 @@ func cbqAdEventViewAnyAll(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 		return err
 	}
 
-
 	// Создание списка кнопок.
 	text := "🗓 Список выбранных событий: "
-	lenRow := 5
+	lenRow := 5 // Длина строки кнопок.
 
-	var buttonRow []tgbotapi.InlineKeyboardButton
-	var buttorRows [][]tgbotapi.InlineKeyboardButton
+	bufButtonRow := make([]tgbotapi.InlineKeyboardButton, 0, 3)
+	bufButtonRows := make([][]tgbotapi.InlineKeyboardButton, 0, 3)
 	for i, adEvent := range adEvents {
-
 		buttonId := fmt.Sprintf("%d", i+1)
 		buttonData := fmt.Sprintf("%d", adEvent.Id)
 		button := tgbotapi.NewInlineKeyboardButtonData(buttonId, buttonData)
-		buttonRow = append(buttonRow, button)
+		bufButtonRow = append(bufButtonRow, button)
 
-		if (lenRow-len(buttonRow)) == 0 || i == len(adEvents) {
-			fmt.Println("NEXT ROWS")
-			buttorRows = append(buttorRows, buttonRow)
+		// Новая строка кнопок.
+		if (i+1)%lenRow == 0 {
+			bufButtonRows = append(bufButtonRows, bufButtonRow)
+			bufButtonRow = make([]tgbotapi.InlineKeyboardButton, 0, lenRow)
 		}
 
-		
-		text = text + fmt.Sprintf("\n Событе №%s:", buttonId)
+		text = text + fmt.Sprintf("\n Событе № %s:", buttonId)
 		text = text + createAdEventDescription(&adEvent)
 	}
 
 	// Создание клавиатуры.
-	keyboard := tgbotapi.NewInlineKeyboardMarkup(buttorRows...)
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(bufButtonRows...)
 	if err := b.sendMessage(userId, tgbotapi.NewEditMessageTextAndMarkup(userId, messageId, text, keyboard)); err != nil {
 		return fmt.Errorf("error edit msg in cbqAdEventViewAllToday: %w", err)
 	}

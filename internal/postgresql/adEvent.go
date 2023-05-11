@@ -81,18 +81,17 @@ func (t *TelegramBotDB) GetAdEventsOfUser(userId int64, typeAdEvent string) (lis
 		}
 
 		// Изменение формата времени.
-		// timeDatePosting, err := models.ParseDateToTime(event.DatePosting)
-		// if err != nil {
-		// 	return 0, err
-		// }
-		// event.DatePosting = timeDatePosting.Format("2006-01-02 15:04:05.999")
+		timeDatePosting, err := models.ParseDateToTime(aE.DatePosting)
+		if err != nil {
+			return nil, err
+		}
+		aE.DatePosting = models.ParseTimeToDate(timeDatePosting)
 
-		// timeDateDelete, err := models.ParseDateToTime(event.DateDelete)
-		// if err != nil {
-		// 	return 0, err
-		// }
-		// event.DateDelete = timeDateDelete.Format("2006-01-02 15:04:05.999")
-		fmt.Println(aE)
+		timeDateDelete, err := models.ParseDateToTime(aE.DateDelete)
+		if err != nil {
+			return nil, err
+		}
+		aE.DateDelete = models.ParseTimeToDate(timeDateDelete)
 
 		listAdEvent = append(listAdEvent, aE)
 	}
