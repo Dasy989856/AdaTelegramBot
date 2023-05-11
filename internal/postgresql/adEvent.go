@@ -2,6 +2,8 @@ package postgresql
 
 import (
 	"AdaTelegramBot/internal/models"
+	"AdaTelegramBot/internal/sdk"
+
 	"database/sql"
 	"fmt"
 )
@@ -75,23 +77,24 @@ func (t *TelegramBotDB) GetAdEventsOfUser(userId int64, typeAdEvent string) (lis
 
 	for rows.Next() {
 		var aE models.AdEvent
+		var datePostingFromDB, dateDeleteFromDB string
 		if err := rows.Scan(&aE.Id, &aE.CreatedAt, &aE.UserId, &aE.Type, &aE.Partner, &aE.Channel, &aE.Price,
-			&aE.DatePosting, &aE.DateDelete, &aE.ArrivalOfSubscribers); err != nil {
+			&datePostingFromDB, &dateDeleteFromDB, &aE.ArrivalOfSubscribers); err != nil {
 			return nil, fmt.Errorf("error scan AdEvent in GetAdEventsOfUser: %w", err)
 		}
 
 		// Изменение формата времени.
-		timeDatePosting, err := models.ParseDateToTime(aE.DatePosting)
+		timeDatePostingFromDB, err := parseDateDataBaseToTime(datePostingFromDB)
 		if err != nil {
 			return nil, err
 		}
-		aE.DatePosting = models.ParseTimeToDate(timeDatePosting)
+		aE.DatePosting = sdk.ParseTimeToDate(timeDatePostingFromDB)
 
-		timeDateDelete, err := models.ParseDateToTime(aE.DateDelete)
+		timeDateDeleteFromDB, err := parseDateDataBaseToTime(dateDeleteFromDB)
 		if err != nil {
 			return nil, err
 		}
-		aE.DateDelete = models.ParseTimeToDate(timeDateDelete)
+		aE.DateDelete = sdk.ParseTimeToDate(timeDateDeleteFromDB)
 
 		listAdEvent = append(listAdEvent, aE)
 	}
@@ -111,16 +114,17 @@ func (t *TelegramBotDB) AdEventCreation(event *models.AdEvent) (eventId int64, e
 	}()
 
 	// Изменение формата времени.
-	timeDatePosting, err := models.ParseDateToTime(event.DatePosting)
+	timeDatePosting, err := sdk.ParseDateToTime(event.DatePosting)
 	if err != nil {
 		return 0, err
 	}
-	event.DatePosting = timeDatePosting.Format("2006-01-02 15:04:05.999")
-	timeDateDelete, err := models.ParseDateToTime(event.DateDelete)
+	event.DatePosting = parseTimeToDateDataBase(timeDatePosting)
+
+	timeDateDelete, err := sdk.ParseDateToTime(event.DateDelete)
 	if err != nil {
 		return 0, err
 	}
-	event.DateDelete = timeDateDelete.Format("2006-01-02 15:04:05.999")
+	event.DateDelete = parseTimeToDateDataBase(timeDateDelete)
 
 	sql := fmt.Sprintf(`INSERT INTO public.%s (ready, user_id, "type", partner, channel, price, date_posting, date_delete)
 	values (true, $1, $2, $3, $4, $5, $6, $7) RETURNING id;`, adEventsTable)

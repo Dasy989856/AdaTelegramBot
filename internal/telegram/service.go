@@ -99,7 +99,7 @@ func getAdEventFromCash(b *BotTelegram, userId int64) (*models.AdEvent, error) {
 		return adEvent, nil
 	}
 
-	if err := sendRequestRestartMsg(b, userId); err != nil {
+	if err := b.sendRequestRestartMsg(userId); err != nil {
 		return nil, err
 	}
 
@@ -107,7 +107,7 @@ func getAdEventFromCash(b *BotTelegram, userId int64) (*models.AdEvent, error) {
 }
 
 // Отправка в чат сообщения о повторной попытке.
-func sendRequestRestartMsg(b *BotTelegram, userId int64) error {
+func (b *BotTelegram) sendRequestRestartMsg(userId int64) error {
 	b.db.SetStepUser(userId, "start")
 	botMsg := tgbotapi.NewMessage(userId, "К сожалению что то пошло не так. Выберите действие из меню /start повторно. 🥲")
 	if err := b.sendMessage(userId, botMsg); err != nil {

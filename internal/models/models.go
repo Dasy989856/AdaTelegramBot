@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"regexp"
-	"time"
 )
 
 // Ошибки.
@@ -51,8 +50,8 @@ type AdEvent struct {
 	Partner              string `json:"partner" db:"partner"`                             // Ссылка партнера. (Продавец / Покупатель)
 	Channel              string `json:"channel" db:"channel"`                             // Ссылка на канал. (Продавец / Покупатель)
 	Price                int64  `json:"price" db:"price"`                                 // Цена.
-	DatePosting          string `json:"datePosting" db:"date_posting"`                    // Дата постинга.
-	DateDelete           string `json:"dateDelete" db:"date_delete"`                      // Дата удаления поста.
+	DatePosting          string `json:"datePosting" db:"date_posting"`                    // Дата постинга. "02.01.2006 15:04"
+	DateDelete           string `json:"dateDelete" db:"date_delete"`                      // Дата удаления поста. "02.01.2006 15:04"
 	ArrivalOfSubscribers int64  `json:"arrivalOfSubscribers" db:"arrival_of_subscribers"` // Приход подписчиков.
 }
 
@@ -96,6 +95,14 @@ func (ae *AdEvent) AllData() bool {
 	return true
 }
 
+// Статистика.
+type StatisticsBrief struct {
+	CountAdEventSale int64
+	CountAdEventBuy int64
+	CountAdEventMutaul int64
+	CountAdEventCustom int64
+
+}
 // БД для телеграмм бота.
 type TelegramBotDB interface {
 	// Закрытие БД.
@@ -145,21 +152,4 @@ type TelegramBotDB interface {
 	GetAdmessageId(userId int64) (messageId int, err error)
 	// Обновление AdmessageId. Это сообщение которое не удаляется, купленная в боте реклама.
 	UpdateAdmessageId(userId int64, messageId int) (err error)
-}
-
-// Парсинг даты в time.Time
-func ParseDateToTime(timeString string) (*time.Time, error) {
-	layout := "2006-01-02T15:04:00+03:00"
-
-	t1, err := time.Parse(layout, timeString)
-	if err != nil {
-		return nil, fmt.Errorf("error parsing date: %w", err)
-	}
-
-	return &t1, nil
-}
-
-// Парсинг time.Time в дату.
-func ParseTimeToDate(time *time.Time) string {
-	return time.Format("02.01.2006 15:04")
 }

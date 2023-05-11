@@ -24,10 +24,9 @@ func (b *BotTelegram) handlerCbq(cbq *tgbotapi.CallbackQuery) error {
 			return err
 		}
 	case "statistics":
-		fmt.Println("statistics NO WORK")
-		// if err := handlerCbqAdEvent(b, cbq); err != nil {
-		// 	return err
-		// }
+		if err := handlerCbqStatistics(b, cbq); err != nil {
+			return err
+		}
 	case "help":
 		fmt.Println("help NO WORK")
 		// if err := handlerCbqAdEvent(b, cbq); err != nil {
@@ -84,14 +83,16 @@ func handlerCbqAdEvent(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	return nil
 }
 
-// TODO no work
 func handlerCbqStatistics(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	switch cbq.Data {
+	case "statistics":
+		if err := cbqStatistics(b, cbq); err != nil {
+			return err
+		}
 	case "statistics.brief":
-		// TODO no work
-		// if err := cbqAdEventView(b, cbq); err != nil {
-		// 	return err
-		// }
+		if err := cbqStatisticsBrief(b, cbq); err != nil {
+			return err
+		}
 	case "statistics.full":
 		// TODO no work
 		// if err := cbqAdEventViewAll(b, cbq); err != nil {

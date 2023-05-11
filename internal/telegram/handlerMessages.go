@@ -2,6 +2,7 @@ package telegram
 
 import (
 	"AdaTelegramBot/internal/models"
+	"AdaTelegramBot/internal/sdk"
 	"fmt"
 	"strconv"
 
@@ -102,7 +103,7 @@ func adEventPartner(b *BotTelegram, msg *tgbotapi.Message) error {
 			return err
 		}
 	default:
-		if err := sendRequestRestartMsg(b, userId); err != nil {
+		if err := b.sendRequestRestartMsg(userId); err != nil {
 			return err
 		}
 		return fmt.Errorf("unknow type adEvent")
@@ -165,7 +166,7 @@ func adEventChanel(b *BotTelegram, msg *tgbotapi.Message) error {
 			return err
 		}
 	default:
-		if err := sendRequestRestartMsg(b, userId); err != nil {
+		if err := b.sendRequestRestartMsg(userId); err != nil {
 			return err
 		}
 		return fmt.Errorf("unknow type adEvent")
@@ -225,7 +226,7 @@ func adEventPrice(b *BotTelegram, msg *tgbotapi.Message) error {
 			return err
 		}
 	default:
-		if err := sendRequestRestartMsg(b, userId); err != nil {
+		if err := b.sendRequestRestartMsg(userId); err != nil {
 			return err
 		}
 		return fmt.Errorf("unknow type adEvent")
@@ -280,15 +281,10 @@ func adEventDatePosting(b *BotTelegram, msg *tgbotapi.Message) error {
 			return err
 		}
 	default:
-		if err := sendRequestRestartMsg(b, userId); err != nil {
+		if err := b.sendRequestRestartMsg(userId); err != nil {
 			return err
 		}
 		return fmt.Errorf("unknow type adEvent")
-	}
-
-	botMsg = tgbotapi.NewMessage(userId, ``)
-	if err := b.sendMessage(userId, botMsg); err != nil {
-		return err
 	}
 
 	return nil
@@ -314,12 +310,12 @@ func adEventDateDelete(b *BotTelegram, msg *tgbotapi.Message) error {
 	adEvent.DateDelete = msg.Text
 
 	// Сравнение даты постинга и удаления.
-	durationDatePosting, err := models.ParseDateToTime(adEvent.DatePosting)
+	durationDatePosting, err := sdk.ParseDateToTime(adEvent.DatePosting)
 	if err != nil {
 		return fmt.Errorf("error parse durationDatePosting: %w", err)
 	}
 
-	durationDateDelete, err := models.ParseDateToTime(adEvent.DateDelete)
+	durationDateDelete, err := sdk.ParseDateToTime(adEvent.DateDelete)
 	if err != nil {
 		return fmt.Errorf("error parse durationDateDelete: %w", err)
 	}
@@ -350,7 +346,7 @@ func adEventDateDelete(b *BotTelegram, msg *tgbotapi.Message) error {
 			return err
 		}
 	default:
-		if err := sendRequestRestartMsg(b, userId); err != nil {
+		if err := b.sendRequestRestartMsg(userId); err != nil {
 			return err
 		}
 		return fmt.Errorf("unknow type adEvent")

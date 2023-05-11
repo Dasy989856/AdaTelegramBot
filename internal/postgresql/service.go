@@ -4,6 +4,7 @@ import (
 	"AdaTelegramBot/internal/models"
 	"database/sql"
 	"fmt"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
@@ -153,4 +154,21 @@ func (t *TelegramBotDB) GetStepUser(userId int64) (step string, err error) {
 	}
 
 	return step, nil
+}
+
+// Парсинг даты из БД в time.Time
+func parseDateDataBaseToTime(timeString string) (*time.Time, error) {
+	layout := "2006-01-02T15:04:00+03:00"
+
+	t, err := time.Parse(layout, timeString)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing date: %w", err)
+	}
+
+	return &t, nil
+}
+
+// Парсинг time.Time в дату из БД
+func parseTimeToDateDataBase(time *time.Time) string {
+	return time.Format("2006-01-02T15:04:00+03:00")
 }
