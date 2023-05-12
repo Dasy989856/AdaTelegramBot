@@ -157,7 +157,7 @@ func (t *TelegramBotDB) GetStepUser(userId int64) (step string, err error) {
 }
 
 // Получение данных пользователя для статистики.
-func (t *TelegramBotDB) GetRangeDataForStatistics(userId int64, typeAdEvent models.TypeAdEvent, startDate, endDate *time.Time) (data *models.DataForStatistics, err error) {
+func (t *TelegramBotDB) GetRangeDataForStatistics(userId int64, typeAdEvent models.TypeAdEvent, startDate, endDate time.Time) (data *models.DataForStatistics, err error) {
 	tx := t.db.MustBegin()
 	defer func() {
 		if err != nil {
@@ -193,18 +193,18 @@ func (t *TelegramBotDB) GetRangeDataForStatistics(userId int64, typeAdEvent mode
 }
 
 // Парсинг даты из БД в time.Time
-func parseDateDataBaseToTime(timeString string) (*time.Time, error) {
-	layout := "2006-01-02T15:04:00+03:00"
-
+func parseDateDataBaseToTime(timeString string) (time.Time, error) {
+	layout := "2006-01-02 15:04:05.999"
+	var t time.Time
 	t, err := time.Parse(layout, timeString)
 	if err != nil {
-		return nil, fmt.Errorf("error parsing date: %w", err)
+		return t, fmt.Errorf("error parsing date: %w", err)
 	}
 
-	return &t, nil
+	return t, nil
 }
 
 // Парсинг time.Time в дату из БД
-func parseTimeToDateDataBase(time *time.Time) string {
-	return time.Format("2006-01-02T15:04:00+03:00")
+func parseTimeToDateDataBase(time time.Time) string {
+	return time.Format("2006-01-02 15:04:05.999")
 }

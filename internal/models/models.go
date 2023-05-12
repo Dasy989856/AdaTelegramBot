@@ -2,10 +2,22 @@ package models
 
 import (
 	"fmt"
-	"log"
 	"regexp"
 	"time"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
+
+// Пользователь при регистрации.
+type User struct {
+	Id        int64  `json:"id"`                        // Chat_ID
+	CreatedAt string `json:"createdAt" db:"created_at"` // Дата создания.
+	Name      string `json:"name" db:"name"`            // Имя пользователя.
+	UserURL   string `json:"userUrl" db:"user_url"`     // Ссылка пользователя.
+	Step      string `json:"stap" db:"stap"`            // Шаг пользвателя (на каком шаге находится пользователь)
+	Login     string `json:"login" db:"login"`
+	Password  string `json:"password" db:"password"`
+}
 
 // Ошибки.
 var (
@@ -22,7 +34,16 @@ var (
 	RegxID = regexp.MustCompile(`[0-9]+`)
 )
 
-// Типы событий.
+// Типы CallbackQuery.
+
+type CbqStatic tgbotapi.CallbackQuery  // CallbackQuery без CbqData
+type CbqDinamic tgbotapi.CallbackQuery // CallbackQuery с CbqData
+type CbqPath []string                  // Путь
+type CbqData []byte
+
+var CbqSep string = "?" // Разделитель между cbqPath{[]string} и cbqData{json}
+
+// Тип AdEvent.
 type TypeAdEvent string
 
 var (
@@ -31,17 +52,6 @@ var (
 	TypeBuy    TypeAdEvent = "buy"
 	TypeMutual TypeAdEvent = "mutual"
 )
-
-// Пользователь при регистрации.
-type User struct {
-	Id        int64  `json:"id"`                        // Chat_ID
-	CreatedAt string `json:"createdAt" db:"created_at"` // Дата создания.
-	Name      string `json:"name" db:"name"`            // Имя пользователя.
-	UserURL   string `json:"userUrl" db:"user_url"`     // Ссылка пользователя.
-	Step      string `json:"stap" db:"stap"`            // Шаг пользвателя (на каком шаге находится пользователь)
-	Login     string `json:"login" db:"login"`
-	Password  string `json:"password" db:"password"`
-}
 
 // Ad событие.
 type AdEvent struct {
@@ -56,46 +66,6 @@ type AdEvent struct {
 	DatePosting          string      `json:"datePosting" db:"date_posting"`                    // Дата постинга. "02.01.2006 15:04"
 	DateDelete           string      `json:"dateDelete" db:"date_delete"`                      // Дата удаления поста. "02.01.2006 15:04"
 	ArrivalOfSubscribers int64       `json:"arrivalOfSubscribers" db:"arrival_of_subscribers"` // Приход подписчиков.
-}
-
-// Если ad событе полностью заполенно - возвращается true. Иначе false.
-func (ae *AdEvent) AllData() bool {
-	if ae.UserId == 0 {
-		log.Println("not found ae.UserId event")
-		return false
-	}
-
-	if ae.Type == "" {
-		log.Println("not found ae.Type event")
-		return false
-	}
-
-	if ae.CreatedAt == "" {
-		log.Println("not found ae.CreatedAt event")
-		return false
-	}
-
-	if ae.DatePosting == "" {
-		log.Println("not found ae.DatePosting event")
-		return false
-	}
-
-	if ae.DateDelete == "" {
-		log.Println("not found ae.DateDelete event")
-		return false
-	}
-
-	if ae.Partner == "" {
-		log.Println("not found ae.Partner event")
-		return false
-	}
-
-	if ae.Channel == "" {
-		log.Println("not found ae.Channel event")
-		return false
-	}
-
-	return true
 }
 
 // Данные для создания статистики.
@@ -123,10 +93,12 @@ type TelegramBotDB interface {
 
 	// Получение ad события.
 	GetAdEvent(eventId int64) (*AdEvent, error)
+	// Получение всех ad событий в указаном диапазоне времени.
+	GetRangeAdEvents(typeAdEvent TypeAdEvent, startDate, endDate time.Time) ([]AdEvent, error)
 	// Получение всех ad событий пользователя запрашиваемого типа.
 	GetAdEventsOfUser(userId int64, typeAdEvent TypeAdEvent) ([]AdEvent, error)
-	// Получение всех ad событий пользователя запрашиваемого типа в указзаном диапазоне времени.
-	GetRangeAdEventsOfUser(userId int64, typeAdEvent TypeAdEvent, startDate, endDate *time.Time) ([]AdEvent, error)
+	// Получение всех ad событий пользователя запрашиваемого типа в указаном диапазоне времени.
+	GetRangeAdEventsOfUser(userId int64, typeAdEvent TypeAdEvent, startDate, endDate time.Time) ([]AdEvent, error)
 	// Создание ad события.
 	AdEventCreation(event *AdEvent) (int64, error)
 	// Удаление ad события.
@@ -162,5 +134,5 @@ type TelegramBotDB interface {
 	// Statistics
 
 	// Получение данных пользователя для статистики.
-	GetRangeDataForStatistics(userId int64, typeAdEvent TypeAdEvent, startDate, endDate *time.Time) (data *DataForStatistics, err error)
+	GetRangeDataForStatistics(userId int64, typeAdEvent TypeAdEvent, startDate, endDate time.Time) (data *DataForStatistics, err error)
 }

@@ -20,6 +20,7 @@ func (b *BotTelegram) handlerCommand(msg *tgbotapi.Message) error {
 			return err
 		}
 		// botMsg := tgbotapi.NewMessage(userId, `Неизвестная команда 🥲`)
+		// botMsg.ParseMode = tgbotapi.ModeHTML
 		// if err := b.sendMessage(userId, botMsg); err != nil {
 		// 	return fmt.Errorf("error send unknow command error: %w", err)
 		// }
@@ -61,7 +62,7 @@ func (b *BotTelegram) sendStartMessage(userId int64) error {
 		return err
 	}
 
-	text := `📓 Возможности телеграмм бота Ада:`
+	text := `📓 <b>Возможности телеграмм бота:</b>`
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Управление событиями.", "ad_event"),
@@ -100,7 +101,7 @@ func (b *BotTelegram) sendStartMessage(userId int64) error {
 // Обновление startMessage.
 func updateStartMessage(b *BotTelegram, userId int64, startmessageId int, keyboard tgbotapi.InlineKeyboardMarkup, text string) error {
 	botMsg := tgbotapi.NewMessage(userId, text)
-	botMsg.ReplyMarkup = keyboard
+	botMsg.ParseMode = tgbotapi.ModeHTML
 
 	// Создание нового startMessage.
 	newStartMessage, err := b.bot.Send(botMsg)
@@ -151,8 +152,8 @@ func (b *BotTelegram) sendAdMessage(userId int64) error {
 // Обновление adMessage.
 func updateAdMessage(b *BotTelegram, userId int64, admessageId int, keyboard tgbotapi.InlineKeyboardMarkup, text string) error {
 	botMsg := tgbotapi.NewMessage(userId, text)
-	botMsg.ReplyMarkup = keyboard
-	
+	botMsg.ParseMode = tgbotapi.ModeHTML
+
 	if viper.GetBool("ada_bot.ad_message") {
 		// Создание нового adMessage.
 		newAdMessage, err := b.bot.Send(botMsg)

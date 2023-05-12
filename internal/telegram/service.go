@@ -86,6 +86,7 @@ func (b *BotTelegram) handlerUpdates(updates tgbotapi.UpdatesChannel) error {
 func (b *BotTelegram) StartBotUpdater() error {
 	log.Printf("Authorized on account %s", b.bot.Self.UserName)
 	updates := b.InitUpdatesChanel()
+	go b.adEventChecker()
 	if err := b.handlerUpdates(updates); err != nil {
 		return err
 	}
@@ -109,7 +110,8 @@ func getAdEventFromCash(b *BotTelegram, userId int64) (*models.AdEvent, error) {
 // Отправка в чат сообщения о повторной попытке.
 func (b *BotTelegram) sendRequestRestartMsg(userId int64) error {
 	b.db.SetStepUser(userId, "start")
-	botMsg := tgbotapi.NewMessage(userId, "К сожалению что то пошло не так. Выберите действие из меню /start повторно. 🥲")
+	botMsg := tgbotapi.NewMessage(userId, "К сожалению что то пошло не так 🥲. Попробуйте повторно <b>/start</b> ")
+	botMsg.ParseMode = tgbotapi.ModeHTML
 	if err := b.sendMessage(userId, botMsg); err != nil {
 		return fmt.Errorf("error send message in sendRestartMessage: %w", err)
 	}
@@ -169,6 +171,7 @@ func (b *BotTelegram) sendMessage(userId int64, c tgbotapi.Chattable) error {
 // Изменение сообщения c ReplyMarkup. // TODO delete и взять с cbq
 func editMessageReplyMarkup(b *BotTelegram, userId int64, messageId int, keyboard tgbotapi.InlineKeyboardMarkup, text string) error {
 	botMsg := tgbotapi.NewEditMessageTextAndMarkup(userId, messageId, text, keyboard)
+	botMsg.ParseMode = tgbotapi.ModeHTML
 	if _, err := b.bot.Send(botMsg); err != nil {
 		return fmt.Errorf("error editMessageReplyMarkup: %w", err)
 	}
@@ -177,10 +180,50 @@ func editMessageReplyMarkup(b *BotTelegram, userId int64, messageId int, keyboar
 
 // Проверка cbq на динамические данные. Возвращает данные и идификатор успешности.
 func cbqGetData(cbq *tgbotapi.CallbackQuery) (data string, ok bool) {
-	cbqPart := strings.Split(cbq.Data, ":")
+	cbqPart := strings.Split(cbq.Data, "?")
 	//Dinamic type
 	if len(cbqPart) == 2 {
 		return cbqPart[1], true
 	}
 	return "", false
+}
+
+// Если ad событе полностью заполенно - возвращается true. Иначе false.
+func fullDataAdEvent(ae *models.AdEvent) bool {
+	if ae.UserId == 0 {
+		log.Println("not found ae.UserId event")
+		return false
+	}
+
+	if ae.Type == "" {
+		log.Println("not found ae.Type event")
+		return false
+	}
+
+	if ae.CreatedAt == "" {
+		log.Println("not found ae.CreatedAt event")
+		return false
+	}
+
+	if ae.DatePosting == "" {
+		log.Println("not found ae.DatePosting event")
+		return false
+	}
+
+	if ae.DateDelete == "" {
+		log.Println("not found ae.DateDelete event")
+		return false
+	}
+
+	if ae.Partner == "" {
+		log.Println("not found ae.Partner event")
+		return false
+	}
+
+	if ae.Channel == "" {
+		log.Println("not found ae.Channel event")
+		return false
+	}
+
+	return true
 }

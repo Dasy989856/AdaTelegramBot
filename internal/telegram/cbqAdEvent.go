@@ -13,7 +13,7 @@ func cbqAdEvent(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	userId := cbq.Message.Chat.ID
 	messageId := cbq.Message.MessageID
 
-	text := "Управление событиями:"
+	text := "<b>Управление событиями:</b>"
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Создать событие.", "ad_event.create"),
@@ -25,8 +25,10 @@ func cbqAdEvent(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 			tgbotapi.NewInlineKeyboardButtonData("Назад.", "start"),
 		),
 	)
+	botMsg := tgbotapi.NewEditMessageTextAndMarkup(userId, messageId, text, keyboard)
+	botMsg.ParseMode = tgbotapi.ModeHTML
 
-	if err := b.sendMessage(userId, tgbotapi.NewEditMessageTextAndMarkup(userId, messageId, text, keyboard)); err != nil {
+	if err := b.sendMessage(userId, botMsg); err != nil {
 		return fmt.Errorf("error edit msg in cbqAdEventMenu: %w", err)
 	}
 
@@ -37,7 +39,7 @@ func cbqAdEventCreate(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	userId := cbq.Message.Chat.ID
 	messageId := cbq.Message.MessageID
 
-	text := "Выберите тип события:"
+	text := "<b>Выберите тип события:</b>"
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Продажа рекламы.", "ad_event.create.sale"),
@@ -55,8 +57,9 @@ func cbqAdEventCreate(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 			tgbotapi.NewInlineKeyboardButtonData("Назад.", "ad_event"),
 		),
 	)
-
-	if err := b.sendMessage(userId, tgbotapi.NewEditMessageTextAndMarkup(userId, messageId, text, keyboard)); err != nil {
+	botMsg := tgbotapi.NewEditMessageTextAndMarkup(userId, messageId, text, keyboard)
+	botMsg.ParseMode = tgbotapi.ModeHTML
+	if err := b.sendMessage(userId, botMsg); err != nil {
 		return fmt.Errorf("error edit msg in cbqAdEventCreate: %w", err)
 	}
 
@@ -78,11 +81,11 @@ func cbqAdEventCreateSale(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 
 	b.db.SetStepUser(userId, "ad_event.create.partner")
 
-	botMsg := `
-	Теперь требуется отправить мне ссылку на покупателя.
-	Пример: @AdaTelegramBot или https://t.me/AdaTelegramBot`
-
-	if err := b.sendMessage(userId, tgbotapi.NewEditMessageText(userId, messageId, botMsg)); err != nil {
+	text := `Теперь требуется отправить мне ссылку на покупателя.
+	<b>Пример:</b> @AdaTelegramBot или https://t.me/AdaTelegramBot`
+	botMsg := tgbotapi.NewEditMessageText(userId, messageId, text)
+	botMsg.ParseMode = tgbotapi.ModeHTML
+	if err := b.sendMessage(userId, botMsg); err != nil {
 		return fmt.Errorf("error edit msg in cbqAdEventCreateSale: %w", err)
 	}
 
@@ -104,11 +107,12 @@ func cbqAdEventCreateBuy(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 
 	b.db.SetStepUser(userId, "ad_event.create.partner")
 
-	text := `
-	Теперь требуется отправить мне ссылку на продавца.
-	Пример: @AdaTelegramBot или https://t.me/AdaTelegramBot`
+	text := `Теперь требуется отправить мне ссылку на продавца.
+	<b>Пример:</b> @AdaTelegramBot или https://t.me/AdaTelegramBot`
+	botMsg := tgbotapi.NewEditMessageText(userId, messageId, text)
+	botMsg.ParseMode = tgbotapi.ModeHTML
 
-	if err := b.sendMessage(userId, tgbotapi.NewEditMessageText(userId, messageId, text)); err != nil {
+	if err := b.sendMessage(userId, botMsg); err != nil {
 		return fmt.Errorf("error edit msg in cbqAdEventCreateBuy: %w", err)
 	}
 
@@ -130,11 +134,12 @@ func cbqAdEventCreateMutual(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 
 	b.db.SetStepUser(userId, "ad_event.create.partner")
 
-	text := `
-	Теперь требуется отправить мне ссылку на пратнера по взаимному пиару.
-	Пример: @AdaTelegramBot или https://t.me/AdaTelegramBot`
+	text := `Теперь требуется отправить мне ссылку на пратнера по взаимному пиару.
+	<b>Пример:</b> @AdaTelegramBot или https://t.me/AdaTelegramBot`
+	botMsg := tgbotapi.NewEditMessageText(userId, messageId, text)
+	botMsg.ParseMode = tgbotapi.ModeHTML
 
-	if err := b.sendMessage(userId, tgbotapi.NewEditMessageText(userId, messageId, text)); err != nil {
+	if err := b.sendMessage(userId, botMsg); err != nil {
 		return fmt.Errorf("error edit msg in cbqAdEventCreateMutual: %w", err)
 	}
 
@@ -151,8 +156,9 @@ func cbqAdEventCreateEnd(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	}
 
 	// Валидация события.
-	if !adEvent.AllData() {
-		botMsg := tgbotapi.NewMessage(userId, "Были введены не все данные, что бы повторить воспользуйтесь командой /start.")
+	if fullDataAdEvent(adEvent) {
+		botMsg := tgbotapi.NewMessage(userId, "Были введены не все данные, что бы повторить воспользуйтесь командой <b>/start</b>")
+		botMsg.ParseMode = tgbotapi.ModeHTML
 		if err := b.sendMessage(userId, botMsg); err != nil {
 			return err
 		}
@@ -171,7 +177,9 @@ func cbqAdEventCreateEnd(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 			tgbotapi.NewInlineKeyboardButtonData("В главное меню.", "start"),
 		),
 	)
-	if err := b.sendMessage(userId, tgbotapi.NewEditMessageTextAndMarkup(userId, messageId, text, keyboard)); err != nil {
+	botMsg := tgbotapi.NewEditMessageTextAndMarkup(userId, messageId, text, keyboard)
+	botMsg.ParseMode = tgbotapi.ModeHTML
+	if err := b.sendMessage(userId, botMsg); err != nil {
 		return fmt.Errorf("error edit msg in cbqAdEventCreate: %w", err)
 	}
 
@@ -291,7 +299,7 @@ func cbqAdEventViewAnyAll(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(bufButtonRows...)
 	botMsg := tgbotapi.NewEditMessageTextAndMarkup(userId, messageId, text, keyboard)
-	botMsg.ParseMode = "html"
+	botMsg.ParseMode = tgbotapi.ModeHTML
 	if err := b.sendMessage(userId, botMsg); err != nil {
 		return fmt.Errorf("error edit msg in cbqAdEventViewAllToday: %w", err)
 	}
