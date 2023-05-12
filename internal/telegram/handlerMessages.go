@@ -354,7 +354,7 @@ func adEventDateDelete(b *BotTelegram, msg *tgbotapi.Message) error {
 
 	// Показать ad событие.
 	{
-		botMsgText := createAdEventDescription(adEvent)
+		botMsgText := createAdEventDescriptionText(adEvent)
 		keyboard := tgbotapi.NewInlineKeyboardMarkup(
 			tgbotapi.NewInlineKeyboardRow(
 				tgbotapi.NewInlineKeyboardButtonData("Да.", "ad_event.create.end"),
@@ -400,7 +400,7 @@ func adEventDelete(b *BotTelegram, msg *tgbotapi.Message) error {
 
 	// Показать ad событие.
 	{
-		botMsgText := createAdEventDescription(adEvent)
+		botMsgText := createAdEventDescriptionText(adEvent)
 		botMsgText = botMsgText + "Что хотите сделать с событием?"
 		keyboard := tgbotapi.NewInlineKeyboardMarkup(
 			tgbotapi.NewInlineKeyboardRow(

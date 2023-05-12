@@ -175,38 +175,6 @@ func editMessageReplyMarkup(b *BotTelegram, userId int64, messageId int, keyboar
 	return nil
 }
 
-// Создание текст-описания ad события.
-func createAdEventDescription(a *models.AdEvent) (descriptionAdEvent string) {
-	switch a.Type {
-	case models.TypeSale:
-		descriptionAdEvent = fmt.Sprintf(`
-		- Покупатель: %s,
-		- Канал покупателя: %s,
-		- Цена продажи: %d, 
-		- Дата постинга рекламы: %s,
-		- Дата удаления рекламы: %s
-		`, a.Partner, a.Channel, a.Price, a.DatePosting, a.DateDelete)
-	case models.TypeBuy:
-		descriptionAdEvent = fmt.Sprintf(`
-		- Продавец: %s,
-		- Канал продавца: %s,
-		- Цена покупки: %d, 
-		- Дата постинга рекламы: %s,
-		- Дата удаления рекламы: %s
-		`, a.Partner, a.Channel, a.Price, a.DatePosting, a.DateDelete)
-	case models.TypeMutual:
-		descriptionAdEvent = fmt.Sprintf(`
-		- Партнер по ВП: %s,
-		- Канал партнера по ВП: %s,
-		- Цена взаимного пиара: %d,
-		- Дата постинга рекламы: %s,
-		- Дата удаления рекламы: %s
-		`, a.Partner, a.Channel, a.Price, a.DatePosting, a.DateDelete)
-	}
-
-	return descriptionAdEvent
-}
-
 // Проверка cbq на динамические данные. Возвращает данные и идификатор успешности.
 func cbqGetData(cbq *tgbotapi.CallbackQuery) (data string, ok bool) {
 	cbqPart := strings.Split(cbq.Data, ":")

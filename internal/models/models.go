@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"regexp"
+	"time"
 )
 
 // Ошибки.
@@ -22,11 +23,13 @@ var (
 )
 
 // Типы событий.
+type TypeAdEvent string
+
 var (
-	TypeAny    = "any"
-	TypeSale   = "sale"
-	TypeBuy    = "buy"
-	TypeMutual = "mutual"
+	TypeAny    TypeAdEvent = "any"
+	TypeSale   TypeAdEvent = "sale"
+	TypeBuy    TypeAdEvent = "buy"
+	TypeMutual TypeAdEvent = "mutual"
 )
 
 // Пользователь при регистрации.
@@ -42,17 +45,17 @@ type User struct {
 
 // Ad событие.
 type AdEvent struct {
-	Id                   int64  `json:"id" db:"id"`
-	CreatedAt            string `json:"createdAt" db:"created_at"`                        // Дата создания события.
-	Ready                bool   `json:"ready" db:"ready"`                                 // Состояние события (Временно не используется)
-	UserId               int64  `json:"userId" db:"user_id"`                              // Id пользователя.
-	Type                 string `json:"type" db:"type"`                                   // Тип события. (sale, buy ...)
-	Partner              string `json:"partner" db:"partner"`                             // Ссылка партнера. (Продавец / Покупатель)
-	Channel              string `json:"channel" db:"channel"`                             // Ссылка на канал. (Продавец / Покупатель)
-	Price                int64  `json:"price" db:"price"`                                 // Цена.
-	DatePosting          string `json:"datePosting" db:"date_posting"`                    // Дата постинга. "02.01.2006 15:04"
-	DateDelete           string `json:"dateDelete" db:"date_delete"`                      // Дата удаления поста. "02.01.2006 15:04"
-	ArrivalOfSubscribers int64  `json:"arrivalOfSubscribers" db:"arrival_of_subscribers"` // Приход подписчиков.
+	Id                   int64       `json:"id" db:"id"`
+	CreatedAt            string      `json:"createdAt" db:"created_at"`                        // Дата создания события.
+	Ready                bool        `json:"ready" db:"ready"`                                 // Состояние события (Временно не используется)
+	UserId               int64       `json:"userId" db:"user_id"`                              // Id пользователя.
+	Type                 TypeAdEvent `json:"type" db:"type"`                                   // Тип события. (sale, buy ...)
+	Partner              string      `json:"partner" db:"partner"`                             // Ссылка партнера. (Продавец / Покупатель)
+	Channel              string      `json:"channel" db:"channel"`                             // Ссылка на канал. (Продавец / Покупатель)
+	Price                int64       `json:"price" db:"price"`                                 // Цена.
+	DatePosting          string      `json:"datePosting" db:"date_posting"`                    // Дата постинга. "02.01.2006 15:04"
+	DateDelete           string      `json:"dateDelete" db:"date_delete"`                      // Дата удаления поста. "02.01.2006 15:04"
+	ArrivalOfSubscribers int64       `json:"arrivalOfSubscribers" db:"arrival_of_subscribers"` // Приход подписчиков.
 }
 
 // Если ad событе полностью заполенно - возвращается true. Иначе false.
@@ -95,14 +98,15 @@ func (ae *AdEvent) AllData() bool {
 	return true
 }
 
-// Статистика.
-type StatisticsBrief struct {
-	CountAdEventSale int64
-	CountAdEventBuy int64
-	CountAdEventMutaul int64
-	CountAdEventCustom int64
-
+// Данные для создания статистики.
+type DataForStatistics struct {
+	CountAdEventSale   int64 // Кол-во проданных реклам.
+	CountAdEventBuy    int64 // Кол-во купленных реклам.
+	CountAdEventMutaul int64 // Кол-во взаимных пиаров.
+	Profit             int64 // Прибыль.
+	Losses             int64 // Убытки.
 }
+
 // БД для телеграмм бота.
 type TelegramBotDB interface {
 	// Закрытие БД.
@@ -120,7 +124,9 @@ type TelegramBotDB interface {
 	// Получение ad события.
 	GetAdEvent(eventId int64) (*AdEvent, error)
 	// Получение всех ad событий пользователя запрашиваемого типа.
-	GetAdEventsOfUser(userId int64, typeAdEvent string) ([]AdEvent, error)
+	GetAdEventsOfUser(userId int64, typeAdEvent TypeAdEvent) ([]AdEvent, error)
+	// Получение всех ad событий пользователя запрашиваемого типа в указзаном диапазоне времени.
+	GetRangeAdEventsOfUser(userId int64, typeAdEvent TypeAdEvent, startDate, endDate *time.Time) ([]AdEvent, error)
 	// Создание ad события.
 	AdEventCreation(event *AdEvent) (int64, error)
 	// Удаление ad события.
@@ -152,4 +158,9 @@ type TelegramBotDB interface {
 	GetAdmessageId(userId int64) (messageId int, err error)
 	// Обновление AdmessageId. Это сообщение которое не удаляется, купленная в боте реклама.
 	UpdateAdmessageId(userId int64, messageId int) (err error)
+
+	// Statistics
+
+	// Получение данных пользователя для статистики.
+	GetRangeDataForStatistics(userId int64, typeAdEvent TypeAdEvent, startDate, endDate *time.Time) (data *DataForStatistics, err error)
 }

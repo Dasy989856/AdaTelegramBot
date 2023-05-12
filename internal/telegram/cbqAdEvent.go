@@ -259,10 +259,9 @@ func cbqAdEventViewAnyAll(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	}
 
 	// Создание списка кнопок.
-	text := `🗓 Отображены выбранные события.
-	🖋 Выберите номер события на кнопках ниже для редактирования события.
+	text := `<b>    🗓 Отображены выбранные события.</b>
+	<b>  🖋 Выберите номер события на кнопках ниже для редактирования события.</b>
 	`
-	
 
 	bufButtonRow := make([]tgbotapi.InlineKeyboardButton, 0, 3)
 	bufButtonRows := make([][]tgbotapi.InlineKeyboardButton, 0, 3)
@@ -278,8 +277,8 @@ func cbqAdEventViewAnyAll(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 			bufButtonRow = make([]tgbotapi.InlineKeyboardButton, 0, lenRow)
 		}
 
-		text = text + fmt.Sprintf("\n<b>Событе № %s</b>:", buttonId)
-		text = text + createAdEventDescription(&adEvent)
+		text = text + fmt.Sprintf("\n<b>    ✍️ Событе № %s</b>:", buttonId)
+		text = text + createAdEventDescriptionText(&adEvent)
 	}
 
 	// Создание клавиатуры.

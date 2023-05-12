@@ -3,6 +3,7 @@ package postgresql
 import (
 	"AdaTelegramBot/internal/models"
 	"AdaTelegramBot/internal/sdk"
+	"time"
 
 	"database/sql"
 	"fmt"
@@ -19,31 +20,31 @@ func (t *TelegramBotDB) GetAdEvent(eventId int64) (adEvent *models.AdEvent, err 
 	}()
 
 	var aE models.AdEvent
+	var datePostingFromDB, dateDeleteFromDB string
+
 	sql := fmt.Sprintf(`SELECT (id, created_at, user_id, "type", partner, channel, price, date_posting, date_delete, arrival_of_subscribers)
 	FROM public.%s WHERE id=$1`, adEventsTable)
 	if err := tx.QueryRow(sql, eventId).Scan(&aE); err != nil {
 		return nil, fmt.Errorf("error creation event: %w", err)
 	}
 
-	fmt.Println(aE)
-
 	// Изменение формата времени.
-	// timeDatePosting, err := models.ParseDateToTime(event.DatePosting)
-	// if err != nil {
-	// 	return 0, err
-	// }
-	// event.DatePosting = timeDatePosting.Format("2006-01-02 15:04:05.999")
+	timeDatePostingFromDB, err := parseDateDataBaseToTime(datePostingFromDB)
+	if err != nil {
+		return nil, err
+	}
+	aE.DatePosting = sdk.ParseTimeToDate(timeDatePostingFromDB)
 
-	// timeDateDelete, err := models.ParseDateToTime(event.DateDelete)
-	// if err != nil {
-	// 	return 0, err
-	// }
-	// event.DateDelete = timeDateDelete.Format("2006-01-02 15:04:05.999")
+	timeDateDeleteFromDB, err := parseDateDataBaseToTime(dateDeleteFromDB)
+	if err != nil {
+		return nil, err
+	}
+	aE.DateDelete = sdk.ParseTimeToDate(timeDateDeleteFromDB)
 
 	return &aE, nil
 }
 
-func (t *TelegramBotDB) GetAdEventsOfUser(userId int64, typeAdEvent string) (listAdEvent []models.AdEvent, err error) {
+func (t *TelegramBotDB) GetAdEventsOfUser(userId int64, typeAdEvent models.TypeAdEvent) (listAdEvent []models.AdEvent, err error) {
 	tx := t.db.MustBegin()
 	defer func() {
 		if err != nil {
@@ -70,6 +71,72 @@ func (t *TelegramBotDB) GetAdEventsOfUser(userId int64, typeAdEvent string) (lis
 		FROM public.%s WHERE user_id=$1 AND "type"=$2;`, adEventsTable)
 
 		rows, err = tx.Query(query, userId, typeAdEvent)
+		if err != nil {
+			return nil, fmt.Errorf("error select ad_events TypeAny `%s`: %w", typeAdEvent, err)
+		}
+	}
+
+	for rows.Next() {
+		var aE models.AdEvent
+		var datePostingFromDB, dateDeleteFromDB string
+		if err := rows.Scan(&aE.Id, &aE.CreatedAt, &aE.UserId, &aE.Type, &aE.Partner, &aE.Channel, &aE.Price,
+			&datePostingFromDB, &dateDeleteFromDB, &aE.ArrivalOfSubscribers); err != nil {
+			return nil, fmt.Errorf("error scan AdEvent in GetAdEventsOfUser: %w", err)
+		}
+
+		// Изменение формата времени.
+		timeDatePostingFromDB, err := parseDateDataBaseToTime(datePostingFromDB)
+		if err != nil {
+			return nil, err
+		}
+		aE.DatePosting = sdk.ParseTimeToDate(timeDatePostingFromDB)
+
+		timeDateDeleteFromDB, err := parseDateDataBaseToTime(dateDeleteFromDB)
+		if err != nil {
+			return nil, err
+		}
+		aE.DateDelete = sdk.ParseTimeToDate(timeDateDeleteFromDB)
+
+		listAdEvent = append(listAdEvent, aE)
+	}
+
+	return listAdEvent, nil
+}
+
+func (t *TelegramBotDB) GetRangeAdEventsOfUser(userId int64, typeAdEvent models.TypeAdEvent, startDate, endDate *time.Time) (listAdEvent []models.AdEvent, err error) {
+	tx := t.db.MustBegin()
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		} else {
+			tx.Commit()
+		}
+	}()
+	//  SELECT id, created_at, user_id, "type", partner, channel, price,
+	// 	date_posting, date_delete, arrival_of_subscribers
+	// 	FROM public.ad_events WHERE user_id=959606248 AND ((date_posting BETWEEN '2021-01-01' AND '2023-12-31')
+	// 	OR (date_delete BETWEEN '2021-01-01' AND '2023-12-31'))
+
+	listAdEvent = make([]models.AdEvent, 0, 50)
+	var rows *sql.Rows
+
+	if typeAdEvent == models.TypeAny {
+		query := fmt.Sprintf(`SELECT id, created_at, user_id, "type", partner, channel, price,
+		date_posting, date_delete, arrival_of_subscribers
+		FROM public.%s WHERE user_id=$1 AND ((date_posting BETWEEN $2 AND $3)
+		OR (date_delete BETWEEN $2 AND $3));`, adEventsTable)
+
+		rows, err = tx.Query(query, userId, parseTimeToDateDataBase(startDate), parseTimeToDateDataBase(endDate))
+		if err != nil {
+			return nil, fmt.Errorf("error select ad_events TypeAny `%s`: %w", typeAdEvent, err)
+		}
+	} else {
+		query := fmt.Sprintf(`SELECT id, created_at, user_id, "type", partner, channel, price,
+		date_posting, date_delete, arrival_of_subscribers
+		FROM public.%s WHERE user_id=$1 AND "type"=$4 AND ((date_posting BETWEEN $2 AND $3)
+		OR (date_delete BETWEEN $2 AND $3));`, adEventsTable)
+
+		rows, err = tx.Query(query, userId, parseTimeToDateDataBase(startDate), parseTimeToDateDataBase(endDate), typeAdEvent)
 		if err != nil {
 			return nil, fmt.Errorf("error select ad_events TypeAny `%s`: %w", typeAdEvent, err)
 		}

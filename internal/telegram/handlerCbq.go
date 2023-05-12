@@ -8,7 +8,7 @@ import (
 )
 
 func parseCbq(cbq *tgbotapi.CallbackQuery) (path []string, data string, err error) {
-	cbqDataSlice := strings.Split(cbq.Data, ":")
+	cbqDataSlice := strings.Split(cbq.Data, "?")
 	if len(cbqDataSlice) < 1 {
 		return nil, "", fmt.Errorf("len cbq incorrect. cbq: %s ", cbq.Data)
 	}
@@ -29,12 +29,13 @@ func parseCbq(cbq *tgbotapi.CallbackQuery) (path []string, data string, err erro
 }
 
 func (b *BotTelegram) handlerCbq(cbq *tgbotapi.CallbackQuery) error {
+	fmt.Println("CBQ: " + cbq.Data)
+
 	path, _, err := parseCbq(cbq)
 	if err != nil {
 		return err
 	}
 
-	fmt.Println("CBQ: " + cbq.Data)
 	switch path[0] {
 	case "start":
 		if err := b.cmdStart(cbq.Message); err != nil {

@@ -10,4 +10,4 @@ In the future it is planned:
 # Wiki
 ## Types CallbackQuery.
 - static:  "ad_event.create"
-- dinamic: "ad_event.delete:id"
+- dinamic: "ad_event.delete?{"json":"json"}

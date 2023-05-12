@@ -156,6 +156,42 @@ func (t *TelegramBotDB) GetStepUser(userId int64) (step string, err error) {
 	return step, nil
 }
 
+// Получение данных пользователя для статистики.
+func (t *TelegramBotDB) GetRangeDataForStatistics(userId int64, typeAdEvent models.TypeAdEvent, startDate, endDate *time.Time) (data *models.DataForStatistics, err error) {
+	tx := t.db.MustBegin()
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		} else {
+			tx.Commit()
+		}
+	}()
+
+	// Данные для создание статистик.
+	var d models.DataForStatistics
+
+	listAdEvents, err := t.GetRangeAdEventsOfUser(userId, typeAdEvent, startDate, endDate)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, adEvent := range listAdEvents {
+		switch adEvent.Type {
+		case models.TypeSale:
+			d.CountAdEventSale++
+			d.Profit += adEvent.Price
+		case models.TypeBuy:
+			d.CountAdEventBuy++
+			d.Losses += adEvent.Price
+		case models.TypeMutual:
+			d.CountAdEventMutaul++
+			d.Profit += adEvent.Price
+		}
+	}
+
+	return &d, nil
+}
+
 // Парсинг даты из БД в time.Time
 func parseDateDataBaseToTime(timeString string) (*time.Time, error) {
 	layout := "2006-01-02T15:04:00+03:00"
