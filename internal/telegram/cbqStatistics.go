@@ -4,6 +4,7 @@ import (
 	"AdaTelegramBot/internal/models"
 	"AdaTelegramBot/internal/sdk"
 	"fmt"
+	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -12,7 +13,7 @@ func cbqStatistics(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	userId := cbq.Message.Chat.ID
 	messageId := cbq.Message.MessageID
 
-	text := "Статистика:"
+	text := "📈 <b>Статистика:</b>"
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Краткая статистика.", "statistics.brief"),
@@ -24,9 +25,11 @@ func cbqStatistics(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 			tgbotapi.NewInlineKeyboardButtonData("Назад.", "start"),
 		),
 	)
+	botMsg := tgbotapi.NewEditMessageTextAndMarkup(userId, messageId, text, keyboard)
+	botMsg.ParseMode = tgbotapi.ModeHTML
 
-	if err := b.sendMessage(userId, tgbotapi.NewEditMessageTextAndMarkup(userId, messageId, text, keyboard)); err != nil {
-		return fmt.Errorf("error edit msg in cbqAdEventMenu: %w", err)
+	if err := b.sendMessage(userId, botMsg); err != nil {
+		return fmt.Errorf("error edit msg in cbqStatistics: %w", err)
 	}
 
 	return nil
@@ -35,10 +38,9 @@ func cbqStatistics(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 func cbqStatisticsBrief(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	userId := cbq.Message.Chat.ID
 	messageId := cbq.Message.MessageID
-	// Получение данных и бд.
 
 	// Сборка сообщения.
-	text := "Выберите период:"
+	text := "<b>🕐 Выберите период:</b>"
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Вчера", "statistics.brief.select?"+sdk.ParseTimeToRangeDate(sdk.GetTimeRangeYesterday())),
@@ -64,8 +66,10 @@ func cbqStatisticsBrief(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 			tgbotapi.NewInlineKeyboardButtonData("Назад.", "statistics"),
 		),
 	)
+	botMsg := tgbotapi.NewEditMessageTextAndMarkup(userId, messageId, text, keyboard)
+	botMsg.ParseMode = tgbotapi.ModeHTML
 
-	if err := b.sendMessage(userId, tgbotapi.NewEditMessageTextAndMarkup(userId, messageId, text, keyboard)); err != nil {
+	if err := b.sendMessage(userId, botMsg); err != nil {
 		return fmt.Errorf("error edit msg in cbqAdEventCreate: %w", err)
 	}
 
@@ -76,8 +80,27 @@ func cbqStatisticsBriefSelect(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error
 	userId := cbq.Message.Chat.ID
 	messageId := cbq.Message.MessageID
 
+	_, data, err := parseCbq(cbq)
+	if err != nil {
+		return err
+	}
+	fmt.Println("DATA", data)
+
+	dataSlice := strings.Split(data, ";")
+	if len(dataSlice) != 2 {
+		return fmt.Errorf("dataSlice incorrect. dataSlice: %v", dataSlice)
+	}
+
+	startDate, err := sdk.ParseDateToTime(dataSlice[0])
+	if err != nil {
+		return err
+	}
+	endDate, err := sdk.ParseDateToTime(dataSlice[1])
+	if err != nil {
+		return err
+	}
+
 	// Получение данных из БД.
-	startDate, endDate := sdk.GetTimeRangeToday()
 	d, err := b.db.GetRangeDataForStatistics(userId, models.TypeAny, startDate, endDate)
 	if err != nil {
 		return err
@@ -94,7 +117,7 @@ func cbqStatisticsBriefSelect(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error
 	botMsg := tgbotapi.NewEditMessageTextAndMarkup(userId, messageId, text, keyboard)
 	botMsg.ParseMode = tgbotapi.ModeHTML
 	if err := b.sendMessage(userId, botMsg); err != nil {
-		return fmt.Errorf("error edit msg in cbqAdEventMenu: %w", err)
+		return fmt.Errorf("error edit msg in cbqStatisticsBriefSelect: %w", err)
 	}
 
 	return nil

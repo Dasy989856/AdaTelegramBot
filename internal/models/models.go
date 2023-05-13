@@ -63,7 +63,7 @@ type AdEvent struct {
 	Partner              string      `json:"partner" db:"partner"`                             // Ссылка партнера. (Продавец / Покупатель)
 	Channel              string      `json:"channel" db:"channel"`                             // Ссылка на канал. (Продавец / Покупатель)
 	Price                int64       `json:"price" db:"price"`                                 // Цена.
-	DatePosting          string      `json:"datePosting" db:"date_posting"`                    // Дата постинга. "02.01.2006 15:04"
+	DatePosting          string      `json:"datePosting" db:"date_posting"`                    // Дата размещения. "02.01.2006 15:04"
 	DateDelete           string      `json:"dateDelete" db:"date_delete"`                      // Дата удаления поста. "02.01.2006 15:04"
 	ArrivalOfSubscribers int64       `json:"arrivalOfSubscribers" db:"arrival_of_subscribers"` // Приход подписчиков.
 }

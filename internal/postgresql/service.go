@@ -194,7 +194,7 @@ func (t *TelegramBotDB) GetRangeDataForStatistics(userId int64, typeAdEvent mode
 
 // Парсинг даты из БД в time.Time
 func parseDateDataBaseToTime(timeString string) (time.Time, error) {
-	layout := "2006-01-02 15:04:05.999"
+	layout := "2006-01-02T15:04:05+03:00"
 	var t time.Time
 	t, err := time.Parse(layout, timeString)
 	if err != nil {
@@ -206,5 +206,5 @@ func parseDateDataBaseToTime(timeString string) (time.Time, error) {
 
 // Парсинг time.Time в дату из БД
 func parseTimeToDateDataBase(time time.Time) string {
-	return time.Format("2006-01-02 15:04:05.999")
+	return time.Format("2006-01-02 15:04:05")
 }

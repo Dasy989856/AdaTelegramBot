@@ -156,9 +156,16 @@ func cbqAdEventCreateEnd(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	}
 
 	// Валидация события.
-	if fullDataAdEvent(adEvent) {
+	if !fullDataAdEvent(adEvent) {
 		botMsg := tgbotapi.NewMessage(userId, "Были введены не все данные, что бы повторить воспользуйтесь командой <b>/start</b>")
 		botMsg.ParseMode = tgbotapi.ModeHTML
+		keyboard := tgbotapi.NewInlineKeyboardMarkup(
+			tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData("В главное меню.", "start"),
+			),
+		)
+		botMsg.ReplyMarkup = keyboard
+
 		if err := b.sendMessage(userId, botMsg); err != nil {
 			return err
 		}
@@ -300,6 +307,7 @@ func cbqAdEventViewAnyAll(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(bufButtonRows...)
 	botMsg := tgbotapi.NewEditMessageTextAndMarkup(userId, messageId, text, keyboard)
 	botMsg.ParseMode = tgbotapi.ModeHTML
+	botMsg.DisableWebPagePreview = true 
 	if err := b.sendMessage(userId, botMsg); err != nil {
 		return fmt.Errorf("error edit msg in cbqAdEventViewAllToday: %w", err)
 	}

@@ -112,6 +112,12 @@ func (b *BotTelegram) sendRequestRestartMsg(userId int64) error {
 	b.db.SetStepUser(userId, "start")
 	botMsg := tgbotapi.NewMessage(userId, "К сожалению что то пошло не так 🥲. Попробуйте повторно <b>/start</b> ")
 	botMsg.ParseMode = tgbotapi.ModeHTML
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("В главное меню.", "start"),
+		),
+	)
+	botMsg.ReplyMarkup = keyboard
 	if err := b.sendMessage(userId, botMsg); err != nil {
 		return fmt.Errorf("error send message in sendRestartMessage: %w", err)
 	}
