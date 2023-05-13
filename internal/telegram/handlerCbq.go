@@ -49,11 +49,14 @@ func (b *BotTelegram) handlerCbq(cbq *tgbotapi.CallbackQuery) error {
 		if err := handlerCbqStatistics(b, cbq); err != nil {
 			return err
 		}
+	case "info":
+		if err := handlerCbqInfo(b, cbq); err != nil {
+			return err
+		}
 	case "help":
-		fmt.Println("help NO WORK")
-		// if err := handlerCbqAdEvent(b, cbq); err != nil {
-		// 	return err
-		// }
+		if err := handlerCbqHelp(b, cbq); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -133,13 +136,39 @@ func handlerCbqStatistics(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	return nil
 }
 
-// TODO no work
-func handlerCbqHelp(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
-	switch cbq.Data {
-	case "help.feature":
-		// if err := cbqAdEvent(b, cbq); err != nil {
-		// 	return err
-		// }
+func handlerCbqInfo(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
+	path, _, err := parseCbq(cbq)
+	if err != nil {
+		return err
 	}
+
+	switch strings.Join(path, ".") {
+	case "info":
+		if err := cbqInfo(b, cbq); err != nil {
+			return err
+		}
+		return nil
+	}
+
+	return nil
+}
+
+func handlerCbqHelp(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
+	path, _, err := parseCbq(cbq)
+	if err != nil {
+		return err
+	}
+
+	switch strings.Join(path, ".") {
+	case "help":
+		if err := cbqHelp(b, cbq); err != nil {
+			return err
+		}
+	case "help.feature":
+		if err := cbqHelpFeature(b, cbq); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }

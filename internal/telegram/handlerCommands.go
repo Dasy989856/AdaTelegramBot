@@ -84,16 +84,19 @@ func (b *BotTelegram) sendStartMessage(userId int64) error {
 	text := `📓 <b>Возможности телеграмм бота:</b>`
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Управление событиями.", "ad_event"),
+			tgbotapi.NewInlineKeyboardButtonData("Управление событиями", "ad_event"),
 		),
 		// tgbotapi.NewInlineKeyboardRow(
 		// 	tgbotapi.NewInlineKeyboardButtonData("Биржа рекламных интеграций.", "exchange"),
 		// ),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Статистика.", "statistics"),
+			tgbotapi.NewInlineKeyboardButtonData("Статистика", "statistics"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Тех. поддержка.", "help"),
+			tgbotapi.NewInlineKeyboardButtonData("Информация", "info"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Тех. поддержка", "help"),
 		),
 	)
 	botMsg := tgbotapi.NewMessage(userId, text)

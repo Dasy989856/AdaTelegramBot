@@ -16,13 +16,13 @@ func cbqAdEvent(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	text := "<b>Управление событиями:</b>"
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Создать событие.", "ad_event.create"),
+			tgbotapi.NewInlineKeyboardButtonData("Создать событие", "ad_event.create"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Просмотреть события.", "ad_event.view"),
+			tgbotapi.NewInlineKeyboardButtonData("Просмотреть события", "ad_event.view"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Назад.", "start"),
+			tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
 		),
 	)
 	botMsg := tgbotapi.NewEditMessageTextAndMarkup(userId, messageId, text, keyboard)
@@ -55,6 +55,9 @@ func cbqAdEventCreate(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 		// ),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Назад.", "ad_event"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
 		),
 	)
 	botMsg := tgbotapi.NewEditMessageTextAndMarkup(userId, messageId, text, keyboard)
@@ -217,6 +220,9 @@ func cbqAdEventView(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Назад.", "ad_event"),
 		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
+		),
 	)
 
 	if err := b.sendMessage(userId, tgbotapi.NewEditMessageTextAndMarkup(userId, messageId, text, keyboard)); err != nil {
@@ -252,6 +258,9 @@ func cbqAdEventViewAny(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 		// ),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Назад.", "ad_event.view"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
 		),
 	)
 
@@ -301,8 +310,13 @@ func cbqAdEventViewAnyAll(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	// Создание клавиатуры.
 	backRow := tgbotapi.NewInlineKeyboardRow(
 		tgbotapi.NewInlineKeyboardButtonData("Назад.", "ad_event.view.any"),
+		
 	)
-	bufButtonRows = append(bufButtonRows, backRow)
+	backRowStartMessage := tgbotapi.NewInlineKeyboardRow(
+		tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
+	)
+	
+	bufButtonRows = append(bufButtonRows, backRow, backRowStartMessage)
 
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(bufButtonRows...)
 	botMsg := tgbotapi.NewEditMessageTextAndMarkup(userId, messageId, text, keyboard)

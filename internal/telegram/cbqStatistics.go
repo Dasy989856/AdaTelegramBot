@@ -24,6 +24,9 @@ func cbqStatistics(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Назад.", "start"),
 		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
+		),
 	)
 	botMsg := tgbotapi.NewEditMessageTextAndMarkup(userId, messageId, text, keyboard)
 	botMsg.ParseMode = tgbotapi.ModeHTML
@@ -65,6 +68,9 @@ func cbqStatisticsBrief(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Назад.", "statistics"),
 		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
+		),
 	)
 	botMsg := tgbotapi.NewEditMessageTextAndMarkup(userId, messageId, text, keyboard)
 	botMsg.ParseMode = tgbotapi.ModeHTML
@@ -84,7 +90,6 @@ func cbqStatisticsBriefSelect(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error
 	if err != nil {
 		return err
 	}
-	fmt.Println("DATA", data)
 
 	dataSlice := strings.Split(data, ";")
 	if len(dataSlice) != 2 {
@@ -111,6 +116,9 @@ func cbqStatisticsBriefSelect(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Назад.", "statistics.brief"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
 		),
 	)
 
