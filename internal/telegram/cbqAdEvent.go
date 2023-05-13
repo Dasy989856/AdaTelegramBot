@@ -42,19 +42,19 @@ func cbqAdEventCreate(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	text := "<b>Выберите тип события:</b>"
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Продажа рекламы.", "ad_event.create.sale"),
+			tgbotapi.NewInlineKeyboardButtonData("Продажа рекламы", "ad_event.create.sale"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Покупка рекламы.", "ad_event.create.buy"),
+			tgbotapi.NewInlineKeyboardButtonData("Покупка рекламы", "ad_event.create.buy"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Взаимный пиар.", "ad_event.create.mutual"),
+			tgbotapi.NewInlineKeyboardButtonData("Взаимный пиар", "ad_event.create.mutual"),
 		),
 		// tgbotapi.NewInlineKeyboardRow(
 		// 	tgbotapi.NewInlineKeyboardButtonData("Кастомное.", "ad_event.create.custom"),
 		// ),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Назад.", "ad_event"),
+			tgbotapi.NewInlineKeyboardButtonData("Назад", "ad_event"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
@@ -80,7 +80,7 @@ func cbqAdEventCreateSale(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 		Ready:     true,
 		Type:      models.TypeSale,
 	}
-	b.cashAdEvents[userId] = &adEvent
+	b.adEventCreatingCache[userId] = &adEvent
 
 	b.db.SetStepUser(userId, "ad_event.create.partner")
 
@@ -106,7 +106,7 @@ func cbqAdEventCreateBuy(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 		Ready:     true,
 		Type:      models.TypeBuy,
 	}
-	b.cashAdEvents[userId] = &adEvent
+	b.adEventCreatingCache[userId] = &adEvent
 
 	b.db.SetStepUser(userId, "ad_event.create.partner")
 
@@ -133,7 +133,7 @@ func cbqAdEventCreateMutual(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 		Ready:     true,
 		Type:      models.TypeMutual,
 	}
-	b.cashAdEvents[userId] = &adEvent
+	b.adEventCreatingCache[userId] = &adEvent
 
 	b.db.SetStepUser(userId, "ad_event.create.partner")
 
@@ -153,7 +153,7 @@ func cbqAdEventCreateEnd(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	userId := cbq.Message.Chat.ID
 	messageId := cbq.Message.MessageID
 
-	adEvent, err := getAdEventFromCash(b, userId)
+	adEvent, err := getAdEventCreatingCache(b, userId)
 	if err != nil {
 		return err
 	}
@@ -181,18 +181,21 @@ func cbqAdEventCreateEnd(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 		return err
 	}
 
-	text := fmt.Sprintf("Отлично! Событие добавлено! Индификатор события: %d.", adEventId)
+	// Отправка сообщения.
+	text := fmt.Sprintf("<b>🎊 Отлично! Событие добавлено! Индификатор события: %d.</b>", adEventId)
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("В главное меню.", "start"),
+			tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
 		),
 	)
 	botMsg := tgbotapi.NewEditMessageTextAndMarkup(userId, messageId, text, keyboard)
 	botMsg.ParseMode = tgbotapi.ModeHTML
 	if err := b.sendMessage(userId, botMsg); err != nil {
-		return fmt.Errorf("error edit msg in cbqAdEventCreate: %w", err)
+		return fmt.Errorf("error edit msg in cbqAdEventCreateEnd: %w", err)
 	}
 
+	// Очистка кэша.
+	delete(b.adEventCreatingCache, userId)
 	return nil
 }
 
@@ -203,7 +206,7 @@ func cbqAdEventView(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	text := "Выберите тип событий:"
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Все типы.", "ad_event.view.any"),
+			tgbotapi.NewInlineKeyboardButtonData("Все типы", "ad_event.view.any"),
 		),
 		// tgbotapi.NewInlineKeyboardRow(
 		// 	tgbotapi.NewInlineKeyboardButtonData("Проданная реклама.", "ad_event.view.sale"),
@@ -218,7 +221,7 @@ func cbqAdEventView(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 		// 	tgbotapi.NewInlineKeyboardButtonData("Кастомное.", "ad_event.create.castom"),
 		// ),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Назад.", "ad_event"),
+			tgbotapi.NewInlineKeyboardButtonData("Назад", "ad_event"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
@@ -239,25 +242,25 @@ func cbqAdEventViewAny(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	text := "Выберите фильтр событий:"
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Все события.", "ad_event.view.any.all"),
+			tgbotapi.NewInlineKeyboardButtonData("Все события", "ad_event.view.any.all"),
 		),
 		// tgbotapi.NewInlineKeyboardRow(
-		// 	tgbotapi.NewInlineKeyboardButtonData("Сегодня.", "ad_event.view.any.today"),
+		// 	tgbotapi.NewInlineKeyboardButtonData("Сегодня", "ad_event.view.any.today"),
 		// ),
 		// tgbotapi.NewInlineKeyboardRow(
-		// 	tgbotapi.NewInlineKeyboardButtonData("Текущая неделя.", "ad_event.view.all.this_week"),
+		// 	tgbotapi.NewInlineKeyboardButtonData("Текущая неделя", "ad_event.view.all.this_week"),
 		// ),
 		// tgbotapi.NewInlineKeyboardRow(
-		// 	tgbotapi.NewInlineKeyboardButtonData("Следующая неделя.", "ad_event.view.all.next_week"),
+		// 	tgbotapi.NewInlineKeyboardButtonData("Следующая неделя", "ad_event.view.all.next_week"),
 		// ),
 		// tgbotapi.NewInlineKeyboardRow(
-		// 	tgbotapi.NewInlineKeyboardButtonData("Прошлая неделя.", "ad_event.view.all.last_week"),
+		// 	tgbotapi.NewInlineKeyboardButtonData("Прошлая неделя", "ad_event.view.all.last_week"),
 		// ),
 		// tgbotapi.NewInlineKeyboardRow(
-		// 	tgbotapi.NewInlineKeyboardButtonData("Кастомное.", "ad_event.create.castom"),
+		// 	tgbotapi.NewInlineKeyboardButtonData("Кастомное", "ad_event.create.castom"),
 		// ),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Назад.", "ad_event.view"),
+			tgbotapi.NewInlineKeyboardButtonData("Назад", "ad_event.view"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
@@ -303,19 +306,19 @@ func cbqAdEventViewAnyAll(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 			bufButtonRow = make([]tgbotapi.InlineKeyboardButton, 0, lenRow)
 		}
 
-		text = text + fmt.Sprintf("\n<b>    ✍️ Событе № %s</b>:", buttonId)
+		text = text + fmt.Sprintf("\n<b>    ✍️ Событие № %s</b>:", buttonId)
 		text = text + createAdEventDescriptionText(&adEvent)
 	}
 
 	// Создание клавиатуры.
 	backRow := tgbotapi.NewInlineKeyboardRow(
-		tgbotapi.NewInlineKeyboardButtonData("Назад.", "ad_event.view.any"),
+		tgbotapi.NewInlineKeyboardButtonData("Назад", "ad_event.view.any"),
 		
 	)
 	backRowStartMessage := tgbotapi.NewInlineKeyboardRow(
 		tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
 	)
-	
+
 	bufButtonRows = append(bufButtonRows, backRow, backRowStartMessage)
 
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(bufButtonRows...)
@@ -323,7 +326,7 @@ func cbqAdEventViewAnyAll(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	botMsg.ParseMode = tgbotapi.ModeHTML
 	botMsg.DisableWebPagePreview = true 
 	if err := b.sendMessage(userId, botMsg); err != nil {
-		return fmt.Errorf("error edit msg in cbqAdEventViewAllToday: %w", err)
+		return fmt.Errorf("error edit msg in cbqAdEventViewAnyAll: %w", err)
 	}
 
 	return nil

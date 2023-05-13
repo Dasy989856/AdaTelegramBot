@@ -194,7 +194,7 @@ func (t *TelegramBotDB) GetRangeDataForStatistics(userId int64, typeAdEvent mode
 
 // Парсинг даты из БД в time.Time
 func parseDateDataBaseToTime(timeString string) (time.Time, error) {
-	layout := "2006-01-02T15:04:05+03:00"
+	layout := "2006-01-02T15:04:05Z"
 	var t time.Time
 	t, err := time.Parse(layout, timeString)
 	if err != nil {
@@ -205,6 +205,13 @@ func parseDateDataBaseToTime(timeString string) (time.Time, error) {
 }
 
 // Парсинг time.Time в дату из БД
-func parseTimeToDateDataBase(time time.Time) string {
-	return time.Format("2006-01-02 15:04:05")
+func parseTimeToDateDataBase(t time.Time) (string, error) {
+	// Получаем часовой пояс пользователя.
+	defaultTimeZoneInDataBase, err := time.LoadLocation("UTC")
+	if err != nil {
+		return "", fmt.Errorf("error create defaultTimeZoneInDataBase: %w", err)
+	}
+	t = t.In(defaultTimeZoneInDataBase)
+
+	return t.Format("2006-01-02T15:04:05Z"), nil
 }

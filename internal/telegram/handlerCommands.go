@@ -135,7 +135,7 @@ func (b *BotTelegram) sendAdMessage(userId int64) error {
 	text := `📓 <b>💵 РЕКЛАМА </b>`
 	// keyboard := tgbotapi.NewInlineKeyboardMarkup(
 	// 	tgbotapi.NewInlineKeyboardRow(
-	// 		tgbotapi.NewInlineKeyboardButtonData("Управление событиями.", "ad_event"),
+	// 		tgbotapi.NewInlineKeyboardButtonData("Управление событиями", "ad_event"),
 	// 	),
 	// )
 	botMsg := tgbotapi.NewMessage(userId, text)

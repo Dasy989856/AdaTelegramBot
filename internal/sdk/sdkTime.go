@@ -5,13 +5,20 @@ import (
 	"time"
 )
 
-// Парсинг даты в time.Time
-func ParseDateToTime(timeString string) (time.Time, error) {
-	// layout := "2006-01-02T15:04:00+03:00"
-	layout := "02.01.2006 15:04"
-	var t time.Time
 
-	t, err := time.Parse(layout, timeString)
+// Парсинг даты в time.Time
+func ParseUserDateToTime(timeString string) (time.Time, error) {
+	var t time.Time
+	layout := "02.01.2006 15:04"
+
+	// Парсинг даты в зависимости от локализации пользователя.
+	// Получаем часовой пояс пользователя
+	defaultTimeZone, err := time.LoadLocation("Europe/Moscow")
+	if err != nil {
+		return time.Time{}, fmt.Errorf("error create defaultTimeZone: %w", err)
+	}
+
+	t, err = time.ParseInLocation(layout, timeString, defaultTimeZone)
 	if err != nil {
 		return t, fmt.Errorf("error parsing date: %w", err)
 	}
@@ -20,8 +27,15 @@ func ParseDateToTime(timeString string) (time.Time, error) {
 }
 
 // Парсинг time.Time в дату.
-func ParseTimeToDate(time time.Time) string {
-	return time.Format("02.01.2006 15:04")
+func ParseTimeToUserDate(t time.Time) (string, error) {
+	// Получаем часовой пояс пользователя.
+	defaultTimeZone, err := time.LoadLocation("Europe/Moscow")
+	if err != nil {
+		return "", fmt.Errorf("error create defaultTimeZone: %w", err)
+	}
+	t = t.In(defaultTimeZone)
+
+	return t.Format("02.01.2006 15:04"), nil
 }
 
 // Парсинг time.Time в диапозон времени.

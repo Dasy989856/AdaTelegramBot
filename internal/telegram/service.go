@@ -11,9 +11,10 @@ import (
 
 // Структура телеграмм бота.
 type BotTelegram struct {
-	bot          *tgbotapi.BotAPI
-	db           models.TelegramBotDB
-	cashAdEvents map[int64]*models.AdEvent // Хэш-таблица ad событий.
+	bot                  *tgbotapi.BotAPI
+	db                   models.TelegramBotDB
+	adEventsCache        map[int64][][]*models.AdEvent // Хэш-таблица полученных из БД событий.
+	adEventCreatingCache map[int64]*models.AdEvent     // Хэш-таблица создаваемых ad событий.
 }
 
 // Создание телеграмм бота.
@@ -25,7 +26,14 @@ func NewBotTelegram(db models.TelegramBotDB) (*BotTelegram, error) {
 	}
 	bot.Debug = false
 
-	return &BotTelegram{bot: bot, db: db, cashAdEvents: make(map[int64]*models.AdEvent)}, nil
+	tgBot := BotTelegram{
+		bot:                  bot,
+		db:                   db,
+		adEventsCache:        make(map[int64][][]*models.AdEvent),
+		adEventCreatingCache: make(map[int64]*models.AdEvent),
+	}
+
+	return &tgBot, nil
 }
 
 // Инициализация канала событий.
@@ -85,7 +93,7 @@ func (b *BotTelegram) handlerUpdates(updates tgbotapi.UpdatesChannel) error {
 func (b *BotTelegram) StartBotUpdater() error {
 	log.Printf("Authorized on account %s", b.bot.Self.UserName)
 	updates := b.InitUpdatesChanel()
-	go b.adEventChecker()
+	// go b.adEventChecker()
 	if err := b.handlerUpdates(updates); err != nil {
 		return err
 	}
@@ -93,8 +101,8 @@ func (b *BotTelegram) StartBotUpdater() error {
 }
 
 // Получение хэша ad события.
-func getAdEventFromCash(b *BotTelegram, userId int64) (*models.AdEvent, error) {
-	adEvent, ok := b.cashAdEvents[userId]
+func getAdEventCreatingCache(b *BotTelegram, userId int64) (*models.AdEvent, error) {
+	adEvent, ok := b.adEventCreatingCache[userId]
 	if ok {
 		return adEvent, nil
 	}
@@ -113,7 +121,7 @@ func (b *BotTelegram) sendRequestRestartMsg(userId int64) error {
 	botMsg.ParseMode = tgbotapi.ModeHTML
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("В главное меню.", "start"),
+			tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
 		),
 	)
 	botMsg.ReplyMarkup = keyboard
@@ -184,7 +192,7 @@ func (b *BotTelegram) sendMessage(userId int64, c tgbotapi.Chattable) error {
 	return nil
 }
 
-// Если ad событе полностью заполенно - возвращается true. Иначе false.
+// Если ad событие полностью заполенно - возвращается true. Иначе false.
 func fullDataAdEvent(ae *models.AdEvent) bool {
 	if ae.UserId == 0 {
 		log.Println("not found ae.UserId event")

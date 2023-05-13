@@ -41,16 +41,13 @@ func (b *BotTelegram) handlerMessage(msg *tgbotapi.Message) error {
 			return err
 		}
 	case "ad_event.detele":
-		if err := adEventDelete(b, msg); err != nil {
-			return err
-		}
 
 	default:
 		botMsg := tgbotapi.NewMessage(userId, "Не получается обработать сообщение... 😔")
 		botMsg.ParseMode = tgbotapi.ModeHTML
 		keyboard := tgbotapi.NewInlineKeyboardMarkup(
 			tgbotapi.NewInlineKeyboardRow(
-				tgbotapi.NewInlineKeyboardButtonData("В главное меню.", "start"),
+				tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
 			),
 		)
 		botMsg.ReplyMarkup = keyboard
@@ -83,7 +80,7 @@ func adEventPartner(b *BotTelegram, msg *tgbotapi.Message) error {
 	}
 
 	// Заполнение информации в хэш-таблице ad событий.
-	adEvent, err := getAdEventFromCash(b, userId)
+	adEvent, err := getAdEventCreatingCache(b, userId)
 	if err != nil {
 		return err
 	}
@@ -145,7 +142,7 @@ func adEventChanel(b *BotTelegram, msg *tgbotapi.Message) error {
 	}
 
 	// Заполнение информации в хэш-таблице ad событий.
-	adEvent, err := getAdEventFromCash(b, userId)
+	adEvent, err := getAdEventCreatingCache(b, userId)
 	if err != nil {
 		return err
 	}
@@ -195,6 +192,10 @@ func adEventChanel(b *BotTelegram, msg *tgbotapi.Message) error {
 
 func adEventPrice(b *BotTelegram, msg *tgbotapi.Message) error {
 	userId := msg.Chat.ID
+	userDate, err := sdk.ParseTimeToUserDate(time.Now())
+	if err != nil {
+		return err
+	}
 
 	if !models.RegxPrice.MatchString(msg.Text) {
 		botMsg := tgbotapi.NewMessage(userId, `Вы ввели некорректную стоимость, попробуйте снова.
@@ -207,7 +208,7 @@ func adEventPrice(b *BotTelegram, msg *tgbotapi.Message) error {
 	}
 
 	// Заполнение информации в хэш-таблице ad событий.
-	adEvent, err := getAdEventFromCash(b, userId)
+	adEvent, err := getAdEventCreatingCache(b, userId)
 	if err != nil {
 		return err
 	}
@@ -229,21 +230,21 @@ func adEventPrice(b *BotTelegram, msg *tgbotapi.Message) error {
 	switch adEvent.Type {
 	case models.TypeSale:
 		botMsg := tgbotapi.NewMessage(userId, `Теперь требуется отправить дату и время размещения рекламного поста.
-		<b>Пример:</b> `+sdk.ParseTimeToDate(time.Now()))
+		<b>Пример:</b> `+userDate)
 		botMsg.ParseMode = tgbotapi.ModeHTML
 		if err := b.sendMessage(userId, botMsg); err != nil {
 			return err
 		}
 	case models.TypeBuy:
 		botMsg := tgbotapi.NewMessage(userId, `Теперь требуется отправить дату и время размещения рекламного поста.
-		<b>Пример:</b> `+sdk.ParseTimeToDate(time.Now()))
+		<b>Пример:</b> `+userDate)
 		botMsg.ParseMode = tgbotapi.ModeHTML
 		if err := b.sendMessage(userId, botMsg); err != nil {
 			return err
 		}
 	case models.TypeMutual:
 		botMsg := tgbotapi.NewMessage(userId, `Теперь требуется отправить дату и время размещения поста взаимного пиара.
-		<b>Пример:</b> `+sdk.ParseTimeToDate(time.Now()))
+		<b>Пример:</b> `+userDate)
 		botMsg.ParseMode = tgbotapi.ModeHTML
 		if err := b.sendMessage(userId, botMsg); err != nil {
 			return err
@@ -260,10 +261,14 @@ func adEventPrice(b *BotTelegram, msg *tgbotapi.Message) error {
 
 func adEventDatePosting(b *BotTelegram, msg *tgbotapi.Message) error {
 	userId := msg.Chat.ID
+	userDate, err := sdk.ParseTimeToUserDate(time.Now())
+	if err != nil {
+		return err
+	}
 
 	if !models.RegxAdEventDate.MatchString(msg.Text) {
 		botMsg := tgbotapi.NewMessage(userId, `Вы ввели некорректную дату, попробуйте снова.
-		<b>Пример:</b> `+sdk.ParseTimeToDate(time.Now()))
+		<b>Пример:</b> `+userDate)
 		botMsg.ParseMode = tgbotapi.ModeHTML
 		if err := b.sendMessage(userId, botMsg); err != nil {
 			return err
@@ -272,7 +277,7 @@ func adEventDatePosting(b *BotTelegram, msg *tgbotapi.Message) error {
 	}
 
 	// Заполнение информации в хэш-таблице ad событий.
-	adEvent, err := getAdEventFromCash(b, userId)
+	adEvent, err := getAdEventCreatingCache(b, userId)
 	if err != nil {
 		return err
 	}
@@ -289,21 +294,21 @@ func adEventDatePosting(b *BotTelegram, msg *tgbotapi.Message) error {
 	switch adEvent.Type {
 	case models.TypeSale:
 		botMsg := tgbotapi.NewMessage(userId, `Теперь требуется отправить дату и время удаления рекламного поста.
-		<b>Пример:</b> `+sdk.ParseTimeToDate(time.Now()))
+		<b>Пример:</b> `+userDate)
 		botMsg.ParseMode = tgbotapi.ModeHTML
 		if err := b.sendMessage(userId, botMsg); err != nil {
 			return err
 		}
 	case models.TypeBuy:
 		botMsg := tgbotapi.NewMessage(userId, `Теперь требуется отправить дату и время удаления рекламного поста.
-		<b>Пример:</b> `+sdk.ParseTimeToDate(time.Now()))
+		<b>Пример:</b> `+userDate)
 		botMsg.ParseMode = tgbotapi.ModeHTML
 		if err := b.sendMessage(userId, botMsg); err != nil {
 			return err
 		}
 	case models.TypeMutual:
 		botMsg := tgbotapi.NewMessage(userId, `Теперь требуется отправить дату и время удаления поста взаимного пиара.
-		<b>Пример:</b> `+sdk.ParseTimeToDate(time.Now()))
+		<b>Пример:</b> `+userDate)
 		botMsg.ParseMode = tgbotapi.ModeHTML
 		if err := b.sendMessage(userId, botMsg); err != nil {
 			return err
@@ -320,10 +325,14 @@ func adEventDatePosting(b *BotTelegram, msg *tgbotapi.Message) error {
 
 func adEventDateDelete(b *BotTelegram, msg *tgbotapi.Message) error {
 	userId := msg.Chat.ID
+	userDate, err := sdk.ParseTimeToUserDate(time.Now())
+	if err != nil {
+		return err
+	}
 
 	if !models.RegxAdEventDate.MatchString(msg.Text) {
 		botMsg := tgbotapi.NewMessage(userId, `Вы ввели некорректную дату, попробуйте снова.
-		<b>Пример:</b> `+sdk.ParseTimeToDate(time.Now()))
+		<b>Пример:</b> `+userDate)
 		botMsg.ParseMode = tgbotapi.ModeHTML
 		if err := b.sendMessage(userId, botMsg); err != nil {
 			return err
@@ -332,7 +341,7 @@ func adEventDateDelete(b *BotTelegram, msg *tgbotapi.Message) error {
 	}
 
 	// Заполнение информации в хэш-таблице ad событий.
-	adEvent, err := getAdEventFromCash(b, userId)
+	adEvent, err := getAdEventCreatingCache(b, userId)
 	if err != nil {
 		return err
 	}
@@ -340,12 +349,12 @@ func adEventDateDelete(b *BotTelegram, msg *tgbotapi.Message) error {
 	adEvent.DateDelete = msg.Text
 
 	// Сравнение даты размещения и удаления.
-	durationDatePosting, err := sdk.ParseDateToTime(adEvent.DatePosting)
+	durationDatePosting, err := sdk.ParseUserDateToTime(adEvent.DatePosting)
 	if err != nil {
 		return fmt.Errorf("error parse durationDatePosting: %w", err)
 	}
 
-	durationDateDelete, err := sdk.ParseDateToTime(adEvent.DateDelete)
+	durationDateDelete, err := sdk.ParseUserDateToTime(adEvent.DateDelete)
 	if err != nil {
 		return fmt.Errorf("error parse durationDateDelete: %w", err)
 	}
@@ -362,19 +371,19 @@ func adEventDateDelete(b *BotTelegram, msg *tgbotapi.Message) error {
 	// Ответ.
 	switch adEvent.Type {
 	case models.TypeSale:
-		botMsg := tgbotapi.NewMessage(userId, `Дата и время удаления рекламного поста добавлены успешно!`)
+		botMsg := tgbotapi.NewMessage(userId, `🎉 <b>Дата и время удаления рекламы добавлены!</b>`)
 		botMsg.ParseMode = tgbotapi.ModeHTML
 		if err := b.sendMessage(userId, botMsg); err != nil {
 			return err
 		}
 	case models.TypeBuy:
-		botMsg := tgbotapi.NewMessage(userId, `Дата и время удаления рекламного поста добавлены успешно!`)
+		botMsg := tgbotapi.NewMessage(userId, `🎉 <b>Дата и время удаления рекламы добавлены!</b>`)
 		botMsg.ParseMode = tgbotapi.ModeHTML
 		if err := b.sendMessage(userId, botMsg); err != nil {
 			return err
 		}
 	case models.TypeMutual:
-		botMsg := tgbotapi.NewMessage(userId, `Дата и время удаления поста взаимного пиара добавлены успешно!`)
+		botMsg := tgbotapi.NewMessage(userId, `🎉 <b>Дата и время удаления поста взаимного пиара добавлены!</b>`)
 		botMsg.ParseMode = tgbotapi.ModeHTML
 		if err := b.sendMessage(userId, botMsg); err != nil {
 			return err
@@ -386,6 +395,7 @@ func adEventDateDelete(b *BotTelegram, msg *tgbotapi.Message) error {
 		return fmt.Errorf("unknow type adEvent")
 	}
 
+	// Отправка завершающего создания ad события сообщения.
 	if err := adEventCreateLastMessage(b, userId, adEvent); err != nil {
 		return err
 	}
@@ -394,67 +404,14 @@ func adEventDateDelete(b *BotTelegram, msg *tgbotapi.Message) error {
 }
 
 func adEventCreateLastMessage(b *BotTelegram, userId int64, adEvent *models.AdEvent) error {
-	text := "<b>    ✍️ Вы хотите создать данное событие?</b>"
+	text := "<b>✍️ Вы хотите создать данное событие?</b>"
 	text = text + createAdEventDescriptionText(adEvent)
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Да.", "ad_event.create.end"),
+			tgbotapi.NewInlineKeyboardButtonData("Да", "ad_event.create.end"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Отменить.", "start"),
-		),
-	)
-	botMsg := tgbotapi.NewMessage(userId, text)
-	botMsg.ParseMode = tgbotapi.ModeHTML
-	botMsg.ReplyMarkup = keyboard
-	if err := b.sendMessage(userId, botMsg); err != nil {
-		return err
-	}
-	return nil
-}
-
-// TODO no work
-func adEventDelete(b *BotTelegram, msg *tgbotapi.Message) error {
-	userId := msg.Chat.ID
-
-	if !models.RegxID.MatchString(msg.Text) {
-		botMsgText := `
-		Вы ввели некорректный ID. Попробуйте снова.
-		<b>Пример:</b> 1.`
-		botMsg := tgbotapi.NewMessage(userId, botMsgText)
-		botMsg.ParseMode = tgbotapi.ModeHTML
-		if err := b.sendMessage(userId, botMsg); err != nil {
-			return err
-		}
-		return nil
-	}
-
-	adEventId, err := strconv.ParseInt(msg.Text, 0, 64)
-	if err != nil {
-		return fmt.Errorf("error passing adEventId: %w", err)
-	}
-
-	adEvent, err := b.db.GetAdEvent(adEventId)
-	if err != nil {
-		return err
-	}
-
-	if err := adEventDeleteLastMessage(b, userId, adEvent); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func adEventDeleteLastMessage(b *BotTelegram, userId int64, adEvent *models.AdEvent) error {
-	text := "<b>    ✍️ Вы хотите создать данное событие?</b>"
-	text = text + createAdEventDescriptionText(adEvent)
-	keyboard := tgbotapi.NewInlineKeyboardMarkup(
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Да.", "ad_event.create.end"),
-		),
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Отменить.", "start"),
+			tgbotapi.NewInlineKeyboardButtonData("Отменить", "start"),
 		),
 	)
 	botMsg := tgbotapi.NewMessage(userId, text)

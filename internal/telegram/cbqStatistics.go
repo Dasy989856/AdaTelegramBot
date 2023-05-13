@@ -16,13 +16,13 @@ func cbqStatistics(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	text := "📈 <b>Статистика:</b>"
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Краткая статистика.", "statistics.brief"),
+			tgbotapi.NewInlineKeyboardButtonData("Краткая статистика", "statistics.brief"),
 		),
 		// tgbotapi.NewInlineKeyboardRow(
-		// 	tgbotapi.NewInlineKeyboardButtonData("Полная статистика.", "statistics.full"),
+		// 	tgbotapi.NewInlineKeyboardButtonData("Полная статистика", "statistics.full"),
 		// ),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Назад.", "start"),
+			tgbotapi.NewInlineKeyboardButtonData("Назад", "start"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
@@ -66,7 +66,7 @@ func cbqStatisticsBrief(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 			tgbotapi.NewInlineKeyboardButtonData("Следующий год", "statistics.brief.select?"+sdk.ParseTimeToRangeDate(sdk.GetTimeRangeNextYear())),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Назад.", "statistics"),
+			tgbotapi.NewInlineKeyboardButtonData("Назад", "statistics"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
@@ -96,11 +96,11 @@ func cbqStatisticsBriefSelect(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error
 		return fmt.Errorf("dataSlice incorrect. dataSlice: %v", dataSlice)
 	}
 
-	startDate, err := sdk.ParseDateToTime(dataSlice[0])
+	startDate, err := sdk.ParseUserDateToTime(dataSlice[0])
 	if err != nil {
 		return err
 	}
-	endDate, err := sdk.ParseDateToTime(dataSlice[1])
+	endDate, err := sdk.ParseUserDateToTime(dataSlice[1])
 	if err != nil {
 		return err
 	}
@@ -115,7 +115,7 @@ func cbqStatisticsBriefSelect(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error
 	text := createStaticsBriefText(d)
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Назад.", "statistics.brief"),
+			tgbotapi.NewInlineKeyboardButtonData("Назад", "statistics.brief"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
