@@ -41,7 +41,7 @@ func (b *BotTelegram) handlerUpdates(updates tgbotapi.UpdatesChannel) error {
 	for update := range updates {
 		// Обработка команд.
 		if update.Message != nil && update.Message.IsCommand() {
-			if err := b.db.AddUsermessageId(update.Message.Chat.ID,
+			if err := b.db.AddUserMessageId(update.Message.Chat.ID,
 				update.Message.MessageID); err != nil {
 				return err
 			}
@@ -54,7 +54,7 @@ func (b *BotTelegram) handlerUpdates(updates tgbotapi.UpdatesChannel) error {
 
 		// Обработка сообщений.
 		if update.Message != nil {
-			if err := b.db.AddUsermessageId(update.Message.Chat.ID,
+			if err := b.db.AddUserMessageId(update.Message.Chat.ID,
 				update.Message.MessageID); err != nil {
 				return err
 			}
@@ -67,7 +67,7 @@ func (b *BotTelegram) handlerUpdates(updates tgbotapi.UpdatesChannel) error {
 
 		// Обработка CallbackQuery.
 		if update.CallbackQuery != nil {
-			if err := b.db.AddUsermessageId(update.CallbackQuery.Message.Chat.ID,
+			if err := b.db.AddUserMessageId(update.CallbackQuery.Message.Chat.ID,
 				update.CallbackQuery.Message.MessageID); err != nil {
 				return err
 			}
@@ -139,19 +139,30 @@ func (b *BotTelegram) cleareMessage(userId int64, messageId int) error {
 
 // Очистка чата.
 func (b *BotTelegram) cleareAllChat(userId int64) error {
-	startmessageId, err := b.db.GetStartmessageId(userId)
+	startMessageId, err := b.db.GetStartMessageId(userId)
 	if err != nil {
 		return err
 	}
 
-	messageIds, err := b.db.GetUsermessageIds(userId)
+	adMessageId, err := b.db.GetAdMessageId(userId)
 	if err != nil {
 		return err
 	}
 
-	// Удаление всех сообщений кроме startMessage.
+	infoMessageId, err := b.db.GetAdMessageId(userId)
+	if err != nil {
+		return err
+	}
+
+	// Получение всех messageId.
+	messageIds, err := b.db.GetUserMessageIds(userId)
+	if err != nil {
+		return err
+	}
+
+	// Удаление всех сообщений кроме startMessage / adMessage / infoMessage.
 	for _, messageId := range messageIds {
-		if startmessageId == messageId {
+		if messageId == startMessageId || messageId == adMessageId || messageId == infoMessageId {
 			continue
 		}
 		b.cleareMessage(userId, messageId)
@@ -167,31 +178,11 @@ func (b *BotTelegram) sendMessage(userId int64, c tgbotapi.Chattable) error {
 		return err
 	}
 
-	if err := b.db.AddUsermessageId(userId, botMsg.MessageID); err != nil {
+	if err := b.db.AddUserMessageId(userId, botMsg.MessageID); err != nil {
 		return err
 	}
 
 	return nil
-}
-
-// Изменение сообщения c ReplyMarkup. // TODO delete и взять с cbq
-func editMessageReplyMarkup(b *BotTelegram, userId int64, messageId int, keyboard tgbotapi.InlineKeyboardMarkup, text string) error {
-	botMsg := tgbotapi.NewEditMessageTextAndMarkup(userId, messageId, text, keyboard)
-	botMsg.ParseMode = tgbotapi.ModeHTML
-	if _, err := b.bot.Send(botMsg); err != nil {
-		return fmt.Errorf("error editMessageReplyMarkup: %w", err)
-	}
-	return nil
-}
-
-// Проверка cbq на динамические данные. Возвращает данные и идификатор успешности.
-func cbqGetData(cbq *tgbotapi.CallbackQuery) (data string, ok bool) {
-	cbqPart := strings.Split(cbq.Data, "?")
-	//Dinamic type
-	if len(cbqPart) == 2 {
-		return cbqPart[1], true
-	}
-	return "", false
 }
 
 // Если ad событе полностью заполенно - возвращается true. Иначе false.

@@ -117,19 +117,19 @@ type TelegramBotDB interface {
 	// Messages
 
 	// Добавление messageId пользователя.
-	AddUsermessageId(userId int64, messageId int) error
+	AddUserMessageId(userId int64, messageId int) error
 	// Удаление messageId пользователя.
 	DeleteUsermessageId(messageId int) error
 	// Возвращает список messageIds пользователя.
-	GetUsermessageIds(userId int64) ([]int, error)
+	GetUserMessageIds(userId int64) ([]int, error)
 	// Возвращает startmessageId. Это сообщение которое не удаляется а меняется на меню команды /start.
-	GetStartmessageId(userId int64) (messageId int, err error)
+	GetStartMessageId(userId int64) (messageId int, err error)
 	// Обновление startmessageId. Это сообщение которое не удаляется а меняется на меню команды /start.
-	UpdateStartmessageId(userId int64, messageId int) (err error)
+	UpdateStartMessageId(userId int64, messageId int) (err error)
 	// Возвращает admessageId. Это сообщение которое не удаляется, купленная в боте реклама.
-	GetAdmessageId(userId int64) (messageId int, err error)
+	GetAdMessageId(userId int64) (messageId int, err error)
 	// Обновление AdmessageId. Это сообщение которое не удаляется, купленная в боте реклама.
-	UpdateAdmessageId(userId int64, messageId int) (err error)
+	UpdateAdMessageId(userId int64, messageId int) (err error)
 
 	// Statistics
 

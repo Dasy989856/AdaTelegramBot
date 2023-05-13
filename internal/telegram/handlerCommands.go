@@ -2,6 +2,7 @@ package telegram
 
 import (
 	"fmt"
+	"log"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/spf13/viper"
@@ -38,9 +39,26 @@ func (b *BotTelegram) cmdStart(msg *tgbotapi.Message) error {
 	}
 
 	// Отправка рекламы.
-	if err := b.sendAdMessage(userId); err != nil {
-		return err
+	if viper.GetBool("ada_bot.ad_message") {
+		if err := b.sendAdMessage(userId); err != nil {
+			return err
+		}
+	} else {
+		if err := b.db.UpdateAdMessageId(userId, 0); err != nil {
+			return err
+		}
 	}
+
+	// TODO Отправка информации.
+	// if viper.GetBool("ada_bot.info_message") {
+	// 	if err := b.sendAdMessage(userId); err != nil {
+	// 		return err
+	// 	}
+	// } else {
+	// 	if err := b.db.UpdateAdMessageId(userId, 0); err != nil {
+	// 		return err
+	// 	}
+	// }
 
 	// Отправка меню /start.
 	if err := b.sendStartMessage(userId); err != nil {
@@ -62,6 +80,7 @@ func (b *BotTelegram) sendStartMessage(userId int64) error {
 		return err
 	}
 
+	// Создание botMsg startMessage.
 	text := `📓 <b>Возможности телеграмм бота:</b>`
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
@@ -77,43 +96,30 @@ func (b *BotTelegram) sendStartMessage(userId int64) error {
 			tgbotapi.NewInlineKeyboardButtonData("Тех. поддержка.", "help"),
 		),
 	)
-
-	// Создание/получение startMessage.
-	startmessageId, err := b.db.GetStartmessageId(userId)
-	if err != nil {
-		if err := updateStartMessage(b, userId, startmessageId, keyboard, text); err != nil {
-			return err
-		}
-		return nil
-	}
-
-	// Изменение startMenu.
-	if err := editMessageReplyMarkup(b, userId, startmessageId, keyboard, text); err != nil {
-		// Попытка создать новое старт меню.
-		if err := updateStartMessage(b, userId, startmessageId, keyboard, text); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-// Обновление startMessage.
-func updateStartMessage(b *BotTelegram, userId int64, startmessageId int, keyboard tgbotapi.InlineKeyboardMarkup, text string) error {
 	botMsg := tgbotapi.NewMessage(userId, text)
 	botMsg.ParseMode = tgbotapi.ModeHTML
+	botMsg.ReplyMarkup = keyboard
 
-	// Создание нового startMessage.
+	// Отправка botMsg startMessage.
 	newStartMessage, err := b.bot.Send(botMsg)
 	if err != nil {
 		return fmt.Errorf("error send new startMessage: %w", err)
 	}
 
+	// Сохранение startMessageId.
+	if err := b.db.AddUserMessageId(userId, newStartMessage.MessageID); err != nil {
+		return err
+	}
+
 	// Удаление если возможно старого startMessage.
-	b.cleareMessage(userId, startmessageId)
+	startMessageId, err := b.db.GetStartMessageId(userId)
+	if err != nil {
+		log.Println("b.db.GetStartmessageId startMenu error: ", err)
+	}
+	b.cleareMessage(userId, startMessageId)
 
 	// Установка нового startMessage.
-	if err := b.db.UpdateStartmessageId(userId, newStartMessage.MessageID); err != nil {
+	if err := b.db.UpdateStartMessageId(userId, newStartMessage.MessageID); err != nil {
 		return err
 	}
 
@@ -122,53 +128,39 @@ func updateStartMessage(b *BotTelegram, userId int64, startmessageId int, keyboa
 
 // Отправка adMessage.
 func (b *BotTelegram) sendAdMessage(userId int64) error {
-	text := `📓 Реклама: Присоединяйся к прекрасному каналу @ammka22`
-	keyboard := tgbotapi.NewInlineKeyboardMarkup(
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Спасибо!", "ad"),
-		),
-	)
-
-	// Создание/получение adMessage.
-	admessageId, err := b.db.GetAdmessageId(userId)
-	if err != nil {
-		if err := updateAdMessage(b, userId, admessageId, keyboard, text); err != nil {
-			return err
-		}
-		return nil
-	}
-
-	// Изменение adMessage.
-	if err := editMessageReplyMarkup(b, userId, admessageId, keyboard, text); err != nil {
-		// Попытка создать новое старт меню.
-		if err := updateAdMessage(b, userId, admessageId, keyboard, text); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-// Обновление adMessage.
-func updateAdMessage(b *BotTelegram, userId int64, admessageId int, keyboard tgbotapi.InlineKeyboardMarkup, text string) error {
+	// Создание botMsg adMessage.
+	text := `📓 <b>💵 РЕКЛАМА </b>`
+	// keyboard := tgbotapi.NewInlineKeyboardMarkup(
+	// 	tgbotapi.NewInlineKeyboardRow(
+	// 		tgbotapi.NewInlineKeyboardButtonData("Управление событиями.", "ad_event"),
+	// 	),
+	// )
 	botMsg := tgbotapi.NewMessage(userId, text)
 	botMsg.ParseMode = tgbotapi.ModeHTML
+	// botMsg.ReplyMarkup = keyboard
 
-	if viper.GetBool("ada_bot.ad_message") {
-		// Создание нового adMessage.
-		newAdMessage, err := b.bot.Send(botMsg)
-		if err != nil {
-			return fmt.Errorf("error send new adMessage: %w", err)
-		}
-
-		// Установка нового adMessage.
-		if err := b.db.UpdateAdmessageId(userId, newAdMessage.MessageID); err != nil {
-			return err
-		}
+	// Отправка botMsg adMessage.
+	newAdMessage, err := b.bot.Send(botMsg)
+	if err != nil {
+		return fmt.Errorf("error send new adMessage: %w", err)
 	}
 
-	// Удаление если возможно старого adMessage.
-	b.cleareMessage(userId, admessageId)
+	// Сохранение adMessageId.
+	if err := b.db.AddUserMessageId(userId, newAdMessage.MessageID); err != nil {
+		return err
+	}
+
+	// Удаление если возможно старого startMessage.
+	adMessageId, err := b.db.GetAdMessageId(userId)
+	if err != nil {
+		log.Println("b.db.GetStartmessageId startMenu error: ", err)
+	}
+	b.cleareMessage(userId, adMessageId)
+
+	// Установка нового adMessage.
+	if err := b.db.UpdateAdMessageId(userId, newAdMessage.MessageID); err != nil {
+		return err
+	}
 
 	return nil
 }
