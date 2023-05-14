@@ -179,13 +179,13 @@ func cbqAdEventCreateEnd(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	}
 
 	// Сохранение события в бд.
-	adEventId, err := b.db.AdEventCreation(adEvent)
+	_, err = b.db.AdEventCreation(adEvent)
 	if err != nil {
 		return err
 	}
 
 	// Отправка сообщения.
-	text := fmt.Sprintf("<b>🎊 Отлично! Событие добавлено! Индификатор события: %d.</b>", adEventId)
+	text := "<b>🎊 Отлично! Событие добавлено! 🥳.</b>"
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
