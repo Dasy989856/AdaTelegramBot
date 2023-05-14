@@ -2,7 +2,10 @@ package telegram
 
 import (
 	"AdaTelegramBot/internal/models"
+	"AdaTelegramBot/internal/sdk"
 	"fmt"
+	"strconv"
+	"strings"
 	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -239,26 +242,29 @@ func cbqAdEventViewAny(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	userId := cbq.Message.Chat.ID
 	messageId := cbq.Message.MessageID
 
-	text := "Выберите фильтр событий:"
+	// Сборка сообщения.
+	text := "<b>🕐 Выберите период:</b>"
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Все события", "ad_event.view.any.all"),
+			tgbotapi.NewInlineKeyboardButtonData("Вчера", "ad_event.view.select?"+sdk.ParseTimeToRangeDate(sdk.GetTimeRangeYesterday())+";any;1"),
+			tgbotapi.NewInlineKeyboardButtonData("Сегодня", "ad_event.view.select?"+sdk.ParseTimeToRangeDate(sdk.GetTimeRangeToday())+";any;1"),
+			tgbotapi.NewInlineKeyboardButtonData("Завтра", "ad_event.view.select?"+sdk.ParseTimeToRangeDate(sdk.GetTimeRangeTomorrow())+";any;1"),
 		),
-		// tgbotapi.NewInlineKeyboardRow(
-		// 	tgbotapi.NewInlineKeyboardButtonData("Сегодня", "ad_event.view.any.today"),
-		// ),
-		// tgbotapi.NewInlineKeyboardRow(
-		// 	tgbotapi.NewInlineKeyboardButtonData("Текущая неделя", "ad_event.view.all.this_week"),
-		// ),
-		// tgbotapi.NewInlineKeyboardRow(
-		// 	tgbotapi.NewInlineKeyboardButtonData("Следующая неделя", "ad_event.view.all.next_week"),
-		// ),
-		// tgbotapi.NewInlineKeyboardRow(
-		// 	tgbotapi.NewInlineKeyboardButtonData("Прошлая неделя", "ad_event.view.all.last_week"),
-		// ),
-		// tgbotapi.NewInlineKeyboardRow(
-		// 	tgbotapi.NewInlineKeyboardButtonData("Кастомное", "ad_event.create.castom"),
-		// ),
+		tgbotapi.NewInlineKeyboardRow(
+			// tgbotapi.NewInlineKeyboardButtonData("Предыдущая неделя", "ad_event.view.select?"+sdk.ParseTimeToRangeDate(sdk.GetTimeRangeLastWeek())+";any;1"),
+			tgbotapi.NewInlineKeyboardButtonData("Текущая неделя", "ad_event.view.select?"+sdk.ParseTimeToRangeDate(sdk.GetTimeRangeThisWeek())+";any;1"),
+			// tgbotapi.NewInlineKeyboardButtonData("Следующая неделя", "ad_event.view.select?"+sdk.ParseTimeToRangeDate(sdk.GetTimeRangeNextWeek())+";any;1"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			// tgbotapi.NewInlineKeyboardButtonData("Предыдущий месяц", "ad_event.view.select?"+sdk.ParseTimeToRangeDate(sdk.GetTimeRangeLastMonth())+";any;1"),
+			tgbotapi.NewInlineKeyboardButtonData("Текущий месяц", "ad_event.view.select?"+sdk.ParseTimeToRangeDate(sdk.GetTimeRangeThisMonth())+";any;1"),
+			// tgbotapi.NewInlineKeyboardButtonData("Следующий месяц", "ad_event.view.select?"+sdk.ParseTimeToRangeDate(sdk.GetTimeRangeNextMonth())+";any;1"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			// tgbotapi.NewInlineKeyboardButtonData("Предыдущий год", "ad_event.view.select?"+sdk.ParseTimeToRangeDate(sdk.GetTimeRangeLastYear())+";any;1"),
+			tgbotapi.NewInlineKeyboardButtonData("Текущий год", "ad_event.view.select?"+sdk.ParseTimeToRangeDate(sdk.GetTimeRangeThisYear())+";any;1"),
+			// tgbotapi.NewInlineKeyboardButtonData("Следующий год", "ad_event.view.select?"+sdk.ParseTimeToRangeDate(sdk.GetTimeRangeNextYear())+";any;1"),
+		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Назад", "ad_event.view"),
 		),
@@ -266,21 +272,156 @@ func cbqAdEventViewAny(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 			tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
 		),
 	)
+	botMsg := tgbotapi.NewEditMessageTextAndMarkup(userId, messageId, text, keyboard)
+	botMsg.ParseMode = tgbotapi.ModeHTML
 
-	if err := b.sendMessage(userId, tgbotapi.NewEditMessageTextAndMarkup(userId, messageId, text, keyboard)); err != nil {
-		return fmt.Errorf("error edit msg in cbqAdEventView: %w", err)
+	if err := b.sendMessage(userId, botMsg); err != nil {
+		return fmt.Errorf("error edit msg in cbqAdEventViewAny: %w", err)
 	}
 
 	return nil
 }
 
-func cbqAdEventViewAnyAll(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
+func cbqAdEventViewSelect(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	userId := cbq.Message.Chat.ID
 	messageId := cbq.Message.MessageID
 	lenRow := viper.GetInt("ada_bot.len_dinamic_row")
 
-	// Получение событий из БД.
-	adEvents, err := b.db.GetAdEventsOfUser(userId, models.TypeAny)
+	// Получение данных cbq.
+	_, cbqData, err := parseCbq(cbq)
+	if err != nil {
+		return err
+	}
+
+	// Парсинг данных.
+	data, err := parseDataAdEventView(cbqData)
+	if err != nil {
+		return err
+	}
+	fmt.Println(data)
+
+	// Получение данных пользователя.
+
+	// Проврека данных.
+	var adEventOld []models.AdEvent
+	if _, ok := b.adEventCreatingCache[userId]; !ok {
+		// Получение данных из БД.
+		adEvents, err := b.db.GetRangeAdEventsOfUser(userId, data.TypeAdEvent, data.StartDate, data.EndDate)
+		if err != nil {
+			return err
+		}
+		adEventOld = adEvents
+		// Разбиение событий и сохранение в кэш.
+		b.adEventsCache[userId] = sdk.ChunkSlice(adEvents, viper.GetInt("ada_bot.len_dinamic_row"))
+	}
+
+	// Создание списка кнопок.
+	text := `
+	<b>🗓 Отображены выбранные события.</b>
+
+	✔️ Выберите номер события на <b>кнопках ниже</b> для редактирования события.
+	`
+
+	bufButtonRow := make([]tgbotapi.InlineKeyboardButton, 0, 3)
+	bufButtonRows := make([][]tgbotapi.InlineKeyboardButton, 0, 3)
+	for i, adEvent := range adEventOld {
+		buttonId := fmt.Sprintf("%d", i+1)
+		buttonData := fmt.Sprintf("%d", adEvent.Id)
+		button := tgbotapi.NewInlineKeyboardButtonData(buttonId, buttonData)
+		bufButtonRow = append(bufButtonRow, button)
+
+		// Новая строка кнопок.
+		if (i+1)%lenRow == 0 || (i+1) == len(adEventOld) {
+			bufButtonRows = append(bufButtonRows, bufButtonRow)
+			bufButtonRow = make([]tgbotapi.InlineKeyboardButton, 0, lenRow)
+		}
+
+		text = text + fmt.Sprintf("\n<b>    ✍️ Событие № %s</b>:", buttonId)
+		text = text + createTextAdEventDescription(&adEvent)
+	}
+
+	// Создание клавиатуры.
+	backRow := tgbotapi.NewInlineKeyboardRow(
+		tgbotapi.NewInlineKeyboardButtonData("Назад", "ad_event.view.any"),
+	)
+	backRowStartMessage := tgbotapi.NewInlineKeyboardRow(
+		tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
+	)
+
+	bufButtonRows = append(bufButtonRows, backRow, backRowStartMessage)
+
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(bufButtonRows...)
+	botMsg := tgbotapi.NewEditMessageTextAndMarkup(userId, messageId, text, keyboard)
+	botMsg.ParseMode = tgbotapi.ModeHTML
+	botMsg.DisableWebPagePreview = true
+	if err := b.sendMessage(userId, botMsg); err != nil {
+		return fmt.Errorf("error edit msg in cbqAdEventViewAnyAll: %w", err)
+	}
+
+	return nil
+}
+
+func parseDataAdEventView(cbqData string) (data *models.CbqDataForCbqAdEventViewSelect, err error) {
+	// ad_event.view.any.select?14.05.2023 00:00;14.05.2023 23:59;any;1
+	dataSlice := strings.Split(cbqData, ";")
+	if len(dataSlice) != 4 {
+		return nil, fmt.Errorf("dataSlice incorrect. dataSlice: %v", dataSlice)
+	}
+	data = new(models.CbqDataForCbqAdEventViewSelect)
+
+	data.StartDate, err = sdk.ParseUserDateToTime(dataSlice[0])
+	if err != nil {
+		return nil, err
+	}
+
+	data.EndDate, err = sdk.ParseUserDateToTime(dataSlice[1])
+	if err != nil {
+		return nil, err
+	}
+
+	data.TypeAdEvent = models.TypeAdEvent(dataSlice[2])
+	if err != nil {
+		return nil, err
+	}
+
+	pageForDisplay, err := strconv.Atoi(dataSlice[3])
+	if err != nil {
+		return nil, fmt.Errorf("error pasge PageForDisplay: %w", err)
+	}
+	data.PageForDisplay = pageForDisplay
+
+	return data, nil
+}
+
+// ============= OLD ==============
+
+// TODO сохранение класическое отображение событий
+func cbqAdEventViewAnySelectOld(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
+	userId := cbq.Message.Chat.ID
+	messageId := cbq.Message.MessageID
+	lenRow := viper.GetInt("ada_bot.len_dinamic_row")
+
+	_, data, err := parseCbq(cbq)
+	if err != nil {
+		return err
+	}
+
+	dataSlice := strings.Split(data, ";")
+	if len(dataSlice) != 2 {
+		return fmt.Errorf("dataSlice incorrect. dataSlice: %v", dataSlice)
+	}
+
+	startDate, err := sdk.ParseUserDateToTime(dataSlice[0])
+	if err != nil {
+		return err
+	}
+	endDate, err := sdk.ParseUserDateToTime(dataSlice[1])
+	if err != nil {
+		return err
+	}
+
+	// Получение данных из БД.
+	adEvents, err := b.db.GetRangeAdEventsOfUser(userId, models.TypeAny, startDate, endDate)
 	if err != nil {
 		return err
 	}
@@ -313,7 +454,6 @@ func cbqAdEventViewAnyAll(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	// Создание клавиатуры.
 	backRow := tgbotapi.NewInlineKeyboardRow(
 		tgbotapi.NewInlineKeyboardButtonData("Назад", "ad_event.view.any"),
-		
 	)
 	backRowStartMessage := tgbotapi.NewInlineKeyboardRow(
 		tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
@@ -324,7 +464,7 @@ func cbqAdEventViewAnyAll(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(bufButtonRows...)
 	botMsg := tgbotapi.NewEditMessageTextAndMarkup(userId, messageId, text, keyboard)
 	botMsg.ParseMode = tgbotapi.ModeHTML
-	botMsg.DisableWebPagePreview = true 
+	botMsg.DisableWebPagePreview = true
 	if err := b.sendMessage(userId, botMsg); err != nil {
 		return fmt.Errorf("error edit msg in cbqAdEventViewAnyAll: %w", err)
 	}

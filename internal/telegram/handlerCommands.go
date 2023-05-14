@@ -34,11 +34,12 @@ func (b *BotTelegram) handlerCommand(msg *tgbotapi.Message) error {
 // Команда /start
 func (b *BotTelegram) cmdStart(msg *tgbotapi.Message) error {
 	userId := msg.Chat.ID
-
-	// Регистрация пользователя.
+	// Регистрация пользователя если его нет.
 	if err := b.db.DefaultUserCreation(userId, msg.Chat.UserName, msg.Chat.FirstName); err != nil {
 		return err
 	}
+
+	// Очистка кэша пользователя.
 
 	// Отправка рекламы.
 	if viper.GetBool("ada_bot.ad_message") {
@@ -167,5 +168,12 @@ func (b *BotTelegram) sendAdMessage(userId int64) error {
 		return err
 	}
 
+	return nil
+}
+
+// Очистка кэшей пользователя.
+func (b *BotTelegram) clearCacheOfUser(userId int64) error {
+	delete(b.adEventCreatingCache, userId)
+	delete(b.adEventsCache, userId)
 	return nil
 }

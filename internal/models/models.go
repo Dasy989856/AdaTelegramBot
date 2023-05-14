@@ -134,3 +134,10 @@ type TelegramBotDB interface {
 	// Получение данных пользователя для статистики.
 	GetRangeDataForStatistics(userId int64, typeAdEvent TypeAdEvent, startDate, endDate time.Time) (data *DataForStatistics, err error)
 }
+
+type CbqDataForCbqAdEventViewSelect struct {
+	StartDate      time.Time   // Начальная дата событий.
+	EndDate        time.Time   // Конечная дата событий.
+	TypeAdEvent    TypeAdEvent // Тип событий.
+	PageForDisplay int         // Страница для отображения.
+}
