@@ -43,6 +43,9 @@ func (b *BotTelegram) cmdStart(msg *tgbotapi.Message) error {
 	}
 
 	// Очистка кэша пользователя.
+	if err := b.clearCacheOfUser(userId); err != nil {
+		return err
+	}
 
 	// Отправка рекламы.
 	if viper.GetBool("ada_bot.ad_message") {
