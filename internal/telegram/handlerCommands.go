@@ -10,16 +10,19 @@ import (
 
 // Обработчик команд.
 func (b *BotTelegram) handlerCommand(msg *tgbotapi.Message) error {
+	userId := msg.Chat.ID
 	switch msg.Command() {
 	case "start":
 		if err := b.cmdStart(msg); err != nil {
 			log.Println("error in cmdStart: ", err)
+			b.sendRequestRestartMsg(userId)
 			return err
 		}
 		return nil
 	default:
 		if err := b.handlerMessage(msg); err != nil {
 			log.Println("error in handlerMessage: ", err)
+			b.sendRequestRestartMsg(userId)
 			return err
 		}
 		// botMsg := tgbotapi.NewMessage(userId, `Неизвестная команда 🥲`)

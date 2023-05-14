@@ -36,8 +36,7 @@ func createTextAdEventDescription(a *models.AdEvent) (descriptionAdEvent string)
 		- <b>Канал продавца:</b> %s
 		- <b>Цена покупки:</b> %d
 		- <b>Дата размещения рекламы:</b> %s
-		- <b>Дата удаления рекламы:</b> %s
-		`, a.Partner, a.Channel, a.Price, a.DatePosting, a.DateDelete)
+		`, a.Partner, a.Channel, a.Price, a.DatePosting)
 	case models.TypeMutual:
 		descriptionAdEvent = fmt.Sprintf(`
 		- <b>Партнер по взаимному пиару:</b> %s
@@ -70,8 +69,7 @@ func createTextAlertForAdEventPosting(a *models.AdEvent, minutesLeftAlert int64)
 		- <b>Канал продавца:</b> %s
 		- <b>Цена покупки:</b> %d
 		- <b>Дата размещения рекламы:</b> %s
-		- <b>Дата удаления рекламы:</b> %s
-		`, getTextTime(minutesLeftAlert), a.Partner, a.Channel, a.Price, a.DatePosting, a.DateDelete)
+		`, getTextTime(minutesLeftAlert), a.Partner, a.Channel, a.Price, a.DatePosting)
 	case models.TypeMutual:
 		descriptionAdEvent = fmt.Sprintf(`
 		Через %s у Вас начнется взаимный пиар. Подробнее:

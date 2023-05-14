@@ -16,7 +16,7 @@ func cbqAdEvent(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	userId := cbq.Message.Chat.ID
 	messageId := cbq.Message.MessageID
 
-	text := "<b>Управление событиями:</b>"
+	text := "<b>📓 Управление событиями:</b>"
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Создать событие", "ad_event.create"),

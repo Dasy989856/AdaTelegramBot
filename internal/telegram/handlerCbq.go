@@ -31,7 +31,7 @@ func parseCbq(cbq *tgbotapi.CallbackQuery) (path []string, data string, err erro
 
 func (b *BotTelegram) handlerCbq(cbq *tgbotapi.CallbackQuery) error {
 	fmt.Println("CBQ: " + cbq.Data)
-
+	userId := cbq.Message.Chat.ID
 	path, _, err := parseCbq(cbq)
 	if err != nil {
 		return err
@@ -41,26 +41,31 @@ func (b *BotTelegram) handlerCbq(cbq *tgbotapi.CallbackQuery) error {
 	case "start":
 		if err := b.cmdStart(cbq.Message); err != nil {
 			log.Println("error in cmdStart: ", err)
+			b.sendRequestRestartMsg(userId)
 			return err
 		}
 	case "ad_event":
 		if err := handlerCbqAdEvent(b, cbq); err != nil {
 			log.Println("error in handlerCbqAdEvent: ", err)
+			b.sendRequestRestartMsg(userId)
 			return err
 		}
 	case "statistics":
 		if err := handlerCbqStatistics(b, cbq); err != nil {
 			log.Println("error in handlerCbqStatistics: ", err)
+			b.sendRequestRestartMsg(userId)
 			return err
 		}
 	case "info":
 		if err := handlerCbqInfo(b, cbq); err != nil {
 			log.Println("error in handlerCbqInfo: ", err)
+			b.sendRequestRestartMsg(userId)
 			return err
 		}
 	case "help":
 		if err := handlerCbqHelp(b, cbq); err != nil {
 			log.Println("error in handlerCbqHelp: ", err)
+			b.sendRequestRestartMsg(userId)
 			return err
 		}
 	}

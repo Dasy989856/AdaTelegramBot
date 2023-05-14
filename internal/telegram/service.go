@@ -250,7 +250,7 @@ func fullDataAdEvent(ae *models.AdEvent) bool {
 		return false
 	}
 
-	if ae.DateDelete == "" {
+	if ae.Type != models.TypeBuy && ae.DateDelete == "" {
 		log.Println("not found ae.DateDelete event")
 		return false
 	}

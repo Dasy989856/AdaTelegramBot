@@ -23,26 +23,31 @@ func (b *BotTelegram) handlerMessage(msg *tgbotapi.Message) error {
 	case "ad_event.create.partner":
 		if err := adEventPartner(b, msg); err != nil {
 			log.Println("error in adEventPartner: ", err)
+			b.sendRequestRestartMsg(userId)
 			return err
 		}
 	case "ad_event.create.chanel":
 		if err := adEventChanel(b, msg); err != nil {
 			log.Println("error in adEventChanel: ", err)
+			b.sendRequestRestartMsg(userId)
 			return err
 		}
 	case "ad_event.create.price":
 		if err := adEventPrice(b, msg); err != nil {
 			log.Println("error in adEventPrice: ", err)
+			b.sendRequestRestartMsg(userId)
 			return err
 		}
 	case "ad_event.create.date_posting":
 		if err := adEventDatePosting(b, msg); err != nil {
 			log.Println("error in adEventDatePosting: ", err)
+			b.sendRequestRestartMsg(userId)
 			return err
 		}
 	case "ad_event.create.date_delete":
 		if err := adEventDateDelete(b, msg); err != nil {
 			log.Println("error in adEventDateDelete: ", err)
+			b.sendRequestRestartMsg(userId)
 			return err
 		}
 	case "ad_event.detele":
@@ -284,7 +289,6 @@ func adEventDatePosting(b *BotTelegram, msg *tgbotapi.Message) error {
 		return err
 	}
 	adEvent.DatePosting = msg.Text
-	b.db.SetStepUser(userId, "ad_event.create.date_delete")
 
 	botMsg := tgbotapi.NewMessage(userId, "🎉 <b>Дата и время размещения рекламы добавлены!</b>")
 	botMsg.ParseMode = tgbotapi.ModeHTML
@@ -294,6 +298,7 @@ func adEventDatePosting(b *BotTelegram, msg *tgbotapi.Message) error {
 
 	switch adEvent.Type {
 	case models.TypeSale:
+		b.db.SetStepUser(userId, "ad_event.create.date_delete")
 		botMsg := tgbotapi.NewMessage(userId, `Теперь требуется отправить дату и время удаления рекламного поста.
 		`+exampleDate)
 		botMsg.ParseMode = tgbotapi.ModeHTML
@@ -301,13 +306,12 @@ func adEventDatePosting(b *BotTelegram, msg *tgbotapi.Message) error {
 			return err
 		}
 	case models.TypeBuy:
-		botMsg := tgbotapi.NewMessage(userId, `Теперь требуется отправить дату и время удаления рекламного поста.
-		`+exampleDate)
-		botMsg.ParseMode = tgbotapi.ModeHTML
-		if err := b.sendMessage(userId, botMsg); err != nil {
+		// Отправка завершающего создания ad события сообщения.
+		if err := adEventCreateLastMessage(b, userId, adEvent); err != nil {
 			return err
 		}
 	case models.TypeMutual:
+		b.db.SetStepUser(userId, "ad_event.create.date_delete")
 		botMsg := tgbotapi.NewMessage(userId, `Теперь требуется отправить дату и время удаления поста взаимного пиара.
 		`+exampleDate)
 		botMsg.ParseMode = tgbotapi.ModeHTML
