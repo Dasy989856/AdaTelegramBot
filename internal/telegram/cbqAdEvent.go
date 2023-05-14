@@ -313,43 +313,11 @@ func cbqAdEventViewSelect(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	}
 
 	// Отображение событий.
-	adEvents, err := b.getAdEventsCache(userId)
+	text, keyboard, err := createTextAndKeyboardForAdEventView(b, userId, data)
 	if err != nil {
 		return err
 	}
 
-	// Создание списка кнопок.
-	text := fmt.Sprintf(`<b>🗓 Выбранные события. Страница %d/%d. </b>
-	✔️ Выберите номер события на <b>кнопках ниже</b> для редактирования события.
-	`, data.PageForDisplay, len(adEvents))
-
-	bufButtonRow := make([]tgbotapi.InlineKeyboardButton, 0, lenRow)
-	bufButtonRows := make([][]tgbotapi.InlineKeyboardButton, 0, len(adEvents))
-	for _, chunkAdEvents := range adEvents {
-		for i, adEvent := range chunkAdEvents {
-			buttonId := fmt.Sprintf("%d", i+1)
-			buttonData := fmt.Sprintf("adEventId%d", adEvent.Id)
-			button := tgbotapi.NewInlineKeyboardButtonData(buttonId, buttonData)
-			bufButtonRow = append(bufButtonRow, button)
-
-			text = text + fmt.Sprintf("\n<b>    ✍️ Событие № %s</b>:", buttonId)
-			text = text + createTextAdEventDescription(&adEvent)
-		}
-		bufButtonRows = append(bufButtonRows, bufButtonRow)
-		bufButtonRow = make([]tgbotapi.InlineKeyboardButton, 0, lenRow)
-	}
-
-	// Создание клавиатуры.
-	backRow := tgbotapi.NewInlineKeyboardRow(
-		tgbotapi.NewInlineKeyboardButtonData("Назад", "ad_event.view.any"),
-	)
-	backRowStartMessage := tgbotapi.NewInlineKeyboardRow(
-		tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
-	)
-
-	bufButtonRows = append(bufButtonRows, backRow, backRowStartMessage)
-
-	keyboard := tgbotapi.NewInlineKeyboardMarkup(bufButtonRows...)
 	botMsg := tgbotapi.NewEditMessageTextAndMarkup(userId, messageId, text, keyboard)
 	botMsg.ParseMode = tgbotapi.ModeHTML
 	botMsg.DisableWebPagePreview = true
@@ -392,81 +360,84 @@ func parseDataAdEventView(cbqData string) (data *models.CbqDataForCbqAdEventView
 	return data, nil
 }
 
-// ============= OLD ==============
-
-// TODO сохранение класическое отображение событий
-func cbqAdEventViewAnySelectOld(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
-	userId := cbq.Message.Chat.ID
-	messageId := cbq.Message.MessageID
+func createTextAndKeyboardForAdEventView(b *BotTelegram, userId int64, data *models.CbqDataForCbqAdEventViewSelect) (string, tgbotapi.InlineKeyboardMarkup, error) {
 	lenRow := viper.GetInt("ada_bot.len_dinamic_row")
 
-	_, data, err := parseCbq(cbq)
+	adEvents, err := b.getAdEventsCache(userId)
 	if err != nil {
-		return err
+		return "", tgbotapi.InlineKeyboardMarkup{}, err
 	}
 
-	dataSlice := strings.Split(data, ";")
-	if len(dataSlice) != 2 {
-		return fmt.Errorf("dataSlice incorrect. dataSlice: %v", dataSlice)
+	if len(adEvents) == 0 {
+		text := `<b>🗓 Нет событий.</b>`
+		keyboard := tgbotapi.NewInlineKeyboardMarkup(
+			tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData("Назад", "ad_event.view.any"),
+			),
+			tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
+			),
+		)
+		
+		return text, keyboard, nil
 	}
 
-	startDate, err := sdk.ParseUserDateToTime(dataSlice[0])
-	if err != nil {
-		return err
-	}
-	endDate, err := sdk.ParseUserDateToTime(dataSlice[1])
-	if err != nil {
-		return err
-	}
-
-	// Получение данных из БД.
-	adEvents, err := b.db.GetRangeAdEventsOfUser(userId, models.TypeAny, startDate, endDate)
-	if err != nil {
-		return err
-	}
-
-	// Создание списка кнопок.
-	text := `
-	<b>🗓 Отображены выбранные события.</b>
-
+	// Создание кнопок.
+	text := fmt.Sprintf(`<b>🗓 Выбранные события. Страница %d/%d. </b>
 	✔️ Выберите номер события на <b>кнопках ниже</b> для редактирования события.
-	`
+	`, data.PageForDisplay, len(adEvents))
 
-	bufButtonRow := make([]tgbotapi.InlineKeyboardButton, 0, 3)
 	bufButtonRows := make([][]tgbotapi.InlineKeyboardButton, 0, 3)
-	for i, adEvent := range adEvents {
+	bufButtonRow := make([]tgbotapi.InlineKeyboardButton, 0, lenRow)
+	for i, adEvent := range adEvents[data.PageForDisplay-1] {
 		buttonId := fmt.Sprintf("%d", i+1)
-		buttonData := fmt.Sprintf("%d", adEvent.Id)
+		buttonData := fmt.Sprintf("adEventId%d", adEvent.Id)
 		button := tgbotapi.NewInlineKeyboardButtonData(buttonId, buttonData)
 		bufButtonRow = append(bufButtonRow, button)
-
-		// Новая строка кнопок.
-		if (i+1)%lenRow == 0 || (i+1) == len(adEvents) {
-			bufButtonRows = append(bufButtonRows, bufButtonRow)
-			bufButtonRow = make([]tgbotapi.InlineKeyboardButton, 0, lenRow)
-		}
 
 		text = text + fmt.Sprintf("\n<b>    ✍️ Событие № %s</b>:", buttonId)
 		text = text + createTextAdEventDescription(&adEvent)
 	}
+	bufButtonRows = append(bufButtonRows, bufButtonRow)
 
-	// Создание клавиатуры.
+	if len(adEvents) > 1 {
+		pageRow := createPageRowForViewAdEvent(data, len(adEvents))
+		bufButtonRows = append(bufButtonRows, pageRow)
+	}
+
 	backRow := tgbotapi.NewInlineKeyboardRow(
 		tgbotapi.NewInlineKeyboardButtonData("Назад", "ad_event.view.any"),
 	)
-	backRowStartMessage := tgbotapi.NewInlineKeyboardRow(
+	bufButtonRows = append(bufButtonRows, backRow)
+
+	startMenuRow := tgbotapi.NewInlineKeyboardRow(
 		tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
 	)
-
-	bufButtonRows = append(bufButtonRows, backRow, backRowStartMessage)
+	bufButtonRows = append(bufButtonRows, startMenuRow)
 
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(bufButtonRows...)
-	botMsg := tgbotapi.NewEditMessageTextAndMarkup(userId, messageId, text, keyboard)
-	botMsg.ParseMode = tgbotapi.ModeHTML
-	botMsg.DisableWebPagePreview = true
-	if err := b.sendMessage(userId, botMsg); err != nil {
-		return fmt.Errorf("error edit msg in cbqAdEventViewAnyAll: %w", err)
+
+	return text, keyboard, nil
+}
+
+func createPageRowForViewAdEvent(data *models.CbqDataForCbqAdEventViewSelect, maxPage int) []tgbotapi.InlineKeyboardButton {
+	buffButton := make([]tgbotapi.InlineKeyboardButton, 0, 2)
+
+	if data.PageForDisplay-1 > 0 {
+		textDataPreviousPage := fmt.Sprintf("ad_event.view.select?%s;%s;%d",
+			sdk.ParseTimeToRangeDate(data.StartDate, data.EndDate), data.TypeAdEvent, data.PageForDisplay-1)
+		buffButton = append(buffButton, tgbotapi.NewInlineKeyboardButtonData("<<", textDataPreviousPage))
 	}
 
-	return nil
+	if data.PageForDisplay+1 <= maxPage {
+		textDataNextPage := fmt.Sprintf("ad_event.view.select?%s;%s;%d",
+			sdk.ParseTimeToRangeDate(data.StartDate, data.EndDate), data.TypeAdEvent, data.PageForDisplay+1)
+		buffButton = append(buffButton, tgbotapi.NewInlineKeyboardButtonData(">>", textDataNextPage))
+	}
+
+	tgbotapi.NewInlineKeyboardRow(
+		tgbotapi.NewInlineKeyboardButtonData("Назад", "ad_event.view.any"),
+	)
+
+	return tgbotapi.NewInlineKeyboardRow(buffButton...)
 }
