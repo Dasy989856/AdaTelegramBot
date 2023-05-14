@@ -103,7 +103,7 @@ func (b *BotTelegram) StartBotUpdater() error {
 }
 
 // Получение хэша ad события.
-func getAdEventCreatingCache(b *BotTelegram, userId int64) (*models.AdEvent, error) {
+func (b *BotTelegram) getAdEventCreatingCache(userId int64) (*models.AdEvent, error) {
 	adEvent, ok := b.adEventCreatingCache[userId]
 	if ok {
 		return adEvent, nil
@@ -114,6 +114,20 @@ func getAdEventCreatingCache(b *BotTelegram, userId int64) (*models.AdEvent, err
 	}
 
 	return nil, fmt.Errorf("adEvent cache not found")
+}
+
+// Получение хэша ad событий.
+func (b *BotTelegram) getAdEventsCache(userId int64) ([][]models.AdEvent, error) {
+	adEvents, ok := b.adEventsCache[userId]
+	if ok {
+		return adEvents, nil
+	}
+
+	if err := b.sendRequestRestartMsg(userId); err != nil {
+		return nil, err
+	}
+
+	return nil, fmt.Errorf("adEvents cache not found")
 }
 
 // Отправка в чат сообщения о повторной попытке.

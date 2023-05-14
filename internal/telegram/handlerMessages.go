@@ -84,8 +84,7 @@ func adEventPartner(b *BotTelegram, msg *tgbotapi.Message) error {
 		msg.Text = "https://t.me/" + msg.Text[1:]
 	}
 
-	// Заполнение информации в хэш-таблице ad событий.
-	adEvent, err := getAdEventCreatingCache(b, userId)
+	adEvent, err := b.getAdEventCreatingCache(userId)
 	if err != nil {
 		return err
 	}
@@ -146,8 +145,7 @@ func adEventChanel(b *BotTelegram, msg *tgbotapi.Message) error {
 		msg.Text = "https://t.me/" + msg.Text[1:]
 	}
 
-	// Заполнение информации в хэш-таблице ad событий.
-	adEvent, err := getAdEventCreatingCache(b, userId)
+	adEvent, err := b.getAdEventCreatingCache(userId)
 	if err != nil {
 		return err
 	}
@@ -208,8 +206,7 @@ func adEventPrice(b *BotTelegram, msg *tgbotapi.Message) error {
 		return nil
 	}
 
-	// Заполнение информации в хэш-таблице ad событий.
-	adEvent, err := getAdEventCreatingCache(b, userId)
+	adEvent, err := b.getAdEventCreatingCache(userId)
 	if err != nil {
 		return err
 	}
@@ -282,11 +279,10 @@ func adEventDatePosting(b *BotTelegram, msg *tgbotapi.Message) error {
 	}
 
 	// Заполнение информации в хэш-таблице ad событий.
-	adEvent, err := getAdEventCreatingCache(b, userId)
+	adEvent, err := b.getAdEventCreatingCache(userId)
 	if err != nil {
 		return err
 	}
-
 	adEvent.DatePosting = msg.Text
 	b.db.SetStepUser(userId, "ad_event.create.date_delete")
 
@@ -346,11 +342,10 @@ func adEventDateDelete(b *BotTelegram, msg *tgbotapi.Message) error {
 	}
 
 	// Заполнение информации в хэш-таблице ad событий.
-	adEvent, err := getAdEventCreatingCache(b, userId)
+	adEvent, err := b.getAdEventCreatingCache(userId)
 	if err != nil {
 		return err
 	}
-
 	adEvent.DateDelete = msg.Text
 
 	// Сравнение даты размещения и удаления.

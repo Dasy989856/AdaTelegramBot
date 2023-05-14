@@ -156,7 +156,7 @@ func cbqAdEventCreateEnd(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	userId := cbq.Message.Chat.ID
 	messageId := cbq.Message.MessageID
 
-	adEvent, err := getAdEventCreatingCache(b, userId)
+	adEvent, err := b.getAdEventCreatingCache(userId)
 	if err != nil {
 		return err
 	}
@@ -300,44 +300,43 @@ func cbqAdEventViewSelect(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	}
 	fmt.Println(data)
 
-	// Получение данных пользователя.
-
 	// Проврека данных.
-	var adEventOld []models.AdEvent
 	if _, ok := b.adEventCreatingCache[userId]; !ok {
 		// Получение данных из БД.
 		adEvents, err := b.db.GetRangeAdEventsOfUser(userId, data.TypeAdEvent, data.StartDate, data.EndDate)
 		if err != nil {
 			return err
 		}
-		adEventOld = adEvents
+
 		// Разбиение событий и сохранение в кэш.
-		b.adEventsCache[userId] = sdk.ChunkSlice(adEvents, viper.GetInt("ada_bot.len_dinamic_row"))
+		b.adEventsCache[userId] = sdk.ChunkSlice(adEvents, lenRow)
+	}
+
+	// Отображение событий.
+	adEvents, err := b.getAdEventsCache(userId)
+	if err != nil {
+		return err
 	}
 
 	// Создание списка кнопок.
-	text := `
-	<b>🗓 Отображены выбранные события.</b>
-
+	text := fmt.Sprintf(`<b>🗓 Выбранные события. Страница %d/%d. </b>
 	✔️ Выберите номер события на <b>кнопках ниже</b> для редактирования события.
-	`
+	`, data.PageForDisplay, len(adEvents))
 
-	bufButtonRow := make([]tgbotapi.InlineKeyboardButton, 0, 3)
-	bufButtonRows := make([][]tgbotapi.InlineKeyboardButton, 0, 3)
-	for i, adEvent := range adEventOld {
-		buttonId := fmt.Sprintf("%d", i+1)
-		buttonData := fmt.Sprintf("%d", adEvent.Id)
-		button := tgbotapi.NewInlineKeyboardButtonData(buttonId, buttonData)
-		bufButtonRow = append(bufButtonRow, button)
+	bufButtonRow := make([]tgbotapi.InlineKeyboardButton, 0, lenRow)
+	bufButtonRows := make([][]tgbotapi.InlineKeyboardButton, 0, len(adEvents))
+	for _, chunkAdEvents := range adEvents {
+		for i, adEvent := range chunkAdEvents {
+			buttonId := fmt.Sprintf("%d", i+1)
+			buttonData := fmt.Sprintf("adEventId%d", adEvent.Id)
+			button := tgbotapi.NewInlineKeyboardButtonData(buttonId, buttonData)
+			bufButtonRow = append(bufButtonRow, button)
 
-		// Новая строка кнопок.
-		if (i+1)%lenRow == 0 || (i+1) == len(adEventOld) {
-			bufButtonRows = append(bufButtonRows, bufButtonRow)
-			bufButtonRow = make([]tgbotapi.InlineKeyboardButton, 0, lenRow)
+			text = text + fmt.Sprintf("\n<b>    ✍️ Событие № %s</b>:", buttonId)
+			text = text + createTextAdEventDescription(&adEvent)
 		}
-
-		text = text + fmt.Sprintf("\n<b>    ✍️ Событие № %s</b>:", buttonId)
-		text = text + createTextAdEventDescription(&adEvent)
+		bufButtonRows = append(bufButtonRows, bufButtonRow)
+		bufButtonRow = make([]tgbotapi.InlineKeyboardButton, 0, lenRow)
 	}
 
 	// Создание клавиатуры.
