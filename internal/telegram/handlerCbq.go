@@ -2,6 +2,7 @@ package telegram
 
 import (
 	"fmt"
+	"log"
 	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -39,22 +40,27 @@ func (b *BotTelegram) handlerCbq(cbq *tgbotapi.CallbackQuery) error {
 	switch path[0] {
 	case "start":
 		if err := b.cmdStart(cbq.Message); err != nil {
+			log.Println("error in cmdStart: ", err)
 			return err
 		}
 	case "ad_event":
 		if err := handlerCbqAdEvent(b, cbq); err != nil {
+			log.Println("error in handlerCbqAdEvent: ", err)
 			return err
 		}
 	case "statistics":
 		if err := handlerCbqStatistics(b, cbq); err != nil {
+			log.Println("error in handlerCbqStatistics: ", err)
 			return err
 		}
 	case "info":
 		if err := handlerCbqInfo(b, cbq); err != nil {
+			log.Println("error in handlerCbqInfo: ", err)
 			return err
 		}
 	case "help":
 		if err := handlerCbqHelp(b, cbq); err != nil {
+			log.Println("error in handlerCbqHelp: ", err)
 			return err
 		}
 	}

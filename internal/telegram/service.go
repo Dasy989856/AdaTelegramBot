@@ -4,6 +4,7 @@ import (
 	"AdaTelegramBot/internal/models"
 	"fmt"
 	"log"
+	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/spf13/viper"
@@ -46,13 +47,14 @@ func (b *BotTelegram) InitUpdatesChanel() tgbotapi.UpdatesChannel {
 // Обработчики сообщений.
 func (b *BotTelegram) handlerUpdates(updates tgbotapi.UpdatesChannel) error {
 	for update := range updates {
+		// Добавление сообщения пользователя в БД.
+		if err := b.db.AddUserMessageId(update.Message.Chat.ID,
+			update.Message.MessageID); err != nil {
+			return err
+		}
+
 		// Обработка команд.
 		if update.Message != nil && update.Message.IsCommand() {
-			if err := b.db.AddUserMessageId(update.Message.Chat.ID,
-				update.Message.MessageID); err != nil {
-				return err
-			}
-
 			if err := b.handlerCommand(update.Message); err != nil {
 				log.Println(err)
 			}
@@ -93,7 +95,7 @@ func (b *BotTelegram) handlerUpdates(updates tgbotapi.UpdatesChannel) error {
 func (b *BotTelegram) StartBotUpdater() error {
 	log.Printf("Authorized on account %s", b.bot.Self.UserName)
 	updates := b.InitUpdatesChanel()
-	// go b.adEventChecker()
+	go b.adEventChecker()
 	if err := b.handlerUpdates(updates); err != nil {
 		return err
 	}
@@ -186,6 +188,26 @@ func (b *BotTelegram) sendMessage(userId int64, c tgbotapi.Chattable) error {
 	}
 
 	if err := b.db.AddUserMessageId(userId, botMsg.MessageID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// Отправка оповещения пользователю.
+func (b *BotTelegram) sendAlertMessage(userId int64, c tgbotapi.Chattable) error {
+	botMsg, err := b.bot.Send(c)
+	if err != nil {
+		return err
+	}
+
+	// Добавления ID сообщения в бд.
+	if err := b.db.AddUserMessageId(userId, botMsg.MessageID); err != nil {
+		return err
+	}
+
+	// Обновление даты оповещения.
+	if err := b.db.UpdateTimeLastAlert(userId, time.Now()); err != nil {
 		return err
 	}
 

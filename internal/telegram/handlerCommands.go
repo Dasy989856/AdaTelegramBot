@@ -13,11 +13,13 @@ func (b *BotTelegram) handlerCommand(msg *tgbotapi.Message) error {
 	switch msg.Command() {
 	case "start":
 		if err := b.cmdStart(msg); err != nil {
+			log.Println("error in cmdStart: ", err)
 			return err
 		}
 		return nil
 	default:
 		if err := b.handlerMessage(msg); err != nil {
+			log.Println("error in handlerMessage: ", err)
 			return err
 		}
 		// botMsg := tgbotapi.NewMessage(userId, `Неизвестная команда 🥲`)

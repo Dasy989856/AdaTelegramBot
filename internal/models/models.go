@@ -10,13 +10,17 @@ import (
 
 // Пользователь при регистрации.
 type User struct {
-	Id        int64  `json:"id"`                        // Chat_ID
-	CreatedAt string `json:"createdAt" db:"created_at"` // Дата создания.
-	Name      string `json:"name" db:"name"`            // Имя пользователя.
-	UserURL   string `json:"userUrl" db:"user_url"`     // Ссылка пользователя.
-	Step      string `json:"stap" db:"stap"`            // Шаг пользвателя (на каком шаге находится пользователь)
-	Login     string `json:"login" db:"login"`
-	Password  string `json:"password" db:"password"`
+	Id             int64  `json:"id"`                                   // Chat_ID
+	CreatedAt      string `json:"createdAt" db:"created_at"`            // Дата создания.
+	Name           string `json:"name" db:"name"`                       // Имя пользователя.
+	UserURL        string `json:"userUrl" db:"user_url"`                // Ссылка пользователя.
+	Step           string `json:"stap" db:"stap"`                       // Шаг пользвателя (на каком шаге находится пользователь)
+	Login          string `json:"login" db:"login"`                     // Логин пользователя.
+	PasswordHash   string `json:"password" db:"password"`               // Хэш пользовательского пароля.
+	StartMessageId int    `json:"startMessageId" db:"start_message_id"` // Индефикатор сообщения startMessage.
+	AdMessageId    int    `json:"adMessageId" db:"ad_message_id"`       // Индефикатор сообщения adMessage.
+	InfoMessageId  int    `json:"infoMessageId" db:"info_message_id"`   // Индефикатор сообщения infoMessage.
+	DateLastAlert  string `json:"DateLastAlert" db:"date_last_alert"`   // Даты последнего оповещения пользователя.
 }
 
 // Ошибки.
@@ -82,14 +86,14 @@ type TelegramBotDB interface {
 	// Закрытие БД.
 	Close() error
 
-	// User
-
 	// Получение данных пользователя.
 	GetUserData(userId int64) (user *User, err error)
 	// Создание пользователя.
 	DefaultUserCreation(chatId int64, userUrl, firstName string) error
-
-	// AdEvent
+	// Получение последней даты оповещения.
+	GetTimeLastAlert(userId int64) (timeLastAlert time.Time, err error)
+	// Обновление последней даты оповещения.
+	UpdateTimeLastAlert(userId int64, timeLastAlert time.Time) error
 
 	// Получение ad события.
 	GetAdEvent(eventId int64) (*AdEvent, error)
@@ -103,8 +107,6 @@ type TelegramBotDB interface {
 	AdEventCreation(event *AdEvent) (int64, error)
 	// Удаление ad события.
 	AdEventDelete(eventId int64) error
-	// Проверка доступа пользователя к ad событию.
-	// CheckUserAccessToAdEvent(userId, eventId int64) (bool, error)
 	// Обновление информации о приходе подписчиков.
 	UpdateSubscribesInAdEvent(eventId, subscribers int64) error
 	// Установка шага пользователя.
@@ -113,8 +115,6 @@ type TelegramBotDB interface {
 	GetStepUser(userId int64) (step string, err error)
 	// Подучение id незавершенного ad события.
 	GetUnfinishedAdEventId(userId int64) (eventId int64, err error)
-
-	// Messages
 
 	// Добавление messageId пользователя.
 	AddUserMessageId(userId int64, messageId int) error
@@ -130,8 +130,6 @@ type TelegramBotDB interface {
 	GetAdMessageId(userId int64) (messageId int, err error)
 	// Обновление AdmessageId. Это сообщение которое не удаляется, купленная в боте реклама.
 	UpdateAdMessageId(userId int64, messageId int) (err error)
-
-	// Statistics
 
 	// Получение данных пользователя для статистики.
 	GetRangeDataForStatistics(userId int64, typeAdEvent TypeAdEvent, startDate, endDate time.Time) (data *DataForStatistics, err error)

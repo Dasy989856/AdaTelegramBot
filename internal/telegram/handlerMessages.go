@@ -4,6 +4,7 @@ import (
 	"AdaTelegramBot/internal/models"
 	"AdaTelegramBot/internal/sdk"
 	"fmt"
+	"log"
 	"strconv"
 	"time"
 
@@ -22,22 +23,27 @@ func (b *BotTelegram) handlerMessage(msg *tgbotapi.Message) error {
 	switch step {
 	case "ad_event.create.partner":
 		if err := adEventPartner(b, msg); err != nil {
+			log.Println("error in adEventPartner: ", err)
 			return err
 		}
 	case "ad_event.create.chanel":
 		if err := adEventChanel(b, msg); err != nil {
+			log.Println("error in adEventChanel: ", err)
 			return err
 		}
 	case "ad_event.create.price":
 		if err := adEventPrice(b, msg); err != nil {
+			log.Println("error in adEventPrice: ", err)
 			return err
 		}
 	case "ad_event.create.date_posting":
 		if err := adEventDatePosting(b, msg); err != nil {
+			log.Println("error in adEventDatePosting: ", err)
 			return err
 		}
 	case "ad_event.create.date_delete":
 		if err := adEventDateDelete(b, msg); err != nil {
+			log.Println("error in adEventDateDelete: ", err)
 			return err
 		}
 	case "ad_event.detele":

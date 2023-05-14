@@ -76,7 +76,8 @@ func (t *TelegramBotDB) GetUserData(userId int64) (user *models.User, err error)
 	}()
 
 	u := new(models.User)
-	query := fmt.Sprintf(`SELECT (id, created_at, name, user_url, step, login, password) FROM public.%s WHERE id=$1;`, usersTable)
+	query := fmt.Sprintf(`SELECT (id, created_at, name, user_url, step, login, password)
+	FROM public.%s WHERE id=$1;`, usersTable)
 	if err := tx.QueryRow(query, userId).Scan(u); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, models.ErrUserNotFound
@@ -100,18 +101,18 @@ func (t *TelegramBotDB) DefaultUserCreation(chatId int64, userUrl, firstName str
 
 	// Default User
 	dU := models.User{
-		Id:       chatId,
-		Name:     firstName,
-		UserURL:  "@" + userUrl,
-		Step:     "start",
-		Login:    userUrl,
-		Password: "123",
+		Id:           chatId,
+		Name:         firstName,
+		UserURL:      "@" + userUrl,
+		Step:         "start",
+		Login:        userUrl,
+		PasswordHash: "123",
 	}
 
 	// Создание default пользователя.
 	sql := fmt.Sprintf(`INSERT INTO public.%s (id, name, user_url, step, login, password)
 		VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT DO NOTHING;`, usersTable)
-	if _, err := tx.Exec(sql, dU.Id, dU.Name, dU.UserURL, dU.Step, dU.Login, dU.Password); err != nil {
+	if _, err := tx.Exec(sql, dU.Id, dU.Name, dU.UserURL, dU.Step, dU.Login, dU.PasswordHash); err != nil {
 		return fmt.Errorf("error create default user. err: %w", err)
 	}
 
@@ -192,11 +193,70 @@ func (t *TelegramBotDB) GetRangeDataForStatistics(userId int64, typeAdEvent mode
 	return &d, nil
 }
 
+// Получение временной метки последнего предупреждения.
+func (t *TelegramBotDB) GetTimeLastAlert(userId int64) (timeLastAlert time.Time, err error) {
+	tx := t.db.MustBegin()
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		} else {
+			tx.Commit()
+		}
+	}()
+
+	var dateLastAlert string
+	query := fmt.Sprintf(`SELECT date_last_alert FROM public.%s WHERE id=$1;`, usersTable)
+	if err := tx.QueryRow(query, userId).Scan(&dateLastAlert); err != nil {
+		if err == sql.ErrNoRows {
+			return time.Time{}, models.ErrUserNotFound
+		}
+		return time.Time{}, fmt.Errorf("error scan user data. err: %w", err)
+	}
+
+	timeLastAlert, err = parseDateDataBaseToTime(dateLastAlert)
+	if err != nil {
+		return time.Time{}, fmt.Errorf("error pase date to time: %w", err)
+	}
+	return timeLastAlert, nil
+}
+
+// Обновление временной метки последнего предупреждения.
+func (t *TelegramBotDB) UpdateTimeLastAlert(userId int64, timeLastAlert time.Time) (err error) {
+	tx := t.db.MustBegin()
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		} else {
+			tx.Commit()
+		}
+	}()
+
+	dateLastAlert, err := parseTimeToDateDataBase(timeLastAlert)
+	if err != nil {
+		return err
+	}
+
+	sql := fmt.Sprintf(`UPDATE public.%s SET date_last_alert=$1
+	WHERE id=$2;`, usersTable)
+	if _, err := tx.Exec(sql, dateLastAlert, userId); err != nil {
+		return fmt.Errorf("error update date_last_alert user %d: %w", userId, err)
+	}
+
+	return nil
+}
+
 // Парсинг даты из БД в time.Time
 func parseDateDataBaseToTime(timeString string) (time.Time, error) {
 	layout := "2006-01-02T15:04:05Z"
 	var t time.Time
-	t, err := time.Parse(layout, timeString)
+
+	defaultTimeZoneInDataBase, err := time.LoadLocation("UTC")
+	if err != nil {
+		return time.Time{}, fmt.Errorf("error create defaultTimeZoneInDataBase: %w", err)
+	}
+	t = t.In(defaultTimeZoneInDataBase)
+	
+	t, err = time.ParseInLocation(layout, timeString, defaultTimeZoneInDataBase)
 	if err != nil {
 		return t, fmt.Errorf("error parsing date: %w", err)
 	}
@@ -206,7 +266,6 @@ func parseDateDataBaseToTime(timeString string) (time.Time, error) {
 
 // Парсинг time.Time в дату из БД
 func parseTimeToDateDataBase(t time.Time) (string, error) {
-	// Получаем часовой пояс пользователя.
 	defaultTimeZoneInDataBase, err := time.LoadLocation("UTC")
 	if err != nil {
 		return "", fmt.Errorf("error create defaultTimeZoneInDataBase: %w", err)
