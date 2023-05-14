@@ -12,14 +12,13 @@ import (
 )
 
 // Оповещение о предстоящих событиях.
-func (b *BotTelegram) adEventChecker() (err error) {
+func (b *BotTelegram) alertChecker() (err error) {
 	var cashAdEvents []models.AdEvent
 	for {
-		time.Sleep(5 * time.Second)
-		fmt.Println("START CHECK")
+		time.Sleep(20 * time.Second)
 
+		timeStart, _ := sdk.GetTimeRangeToday()
 		_, timeEnd := sdk.GetTimeRangeTomorrow()
-		timeStart := time.Now()
 		cashAdEvents, err = b.db.GetRangeAdEvents(models.TypeAny, timeStart, timeEnd)
 		if err != nil {
 			log.Println(fmt.Errorf("error get AdEvents from DB: %w", err))
@@ -55,10 +54,9 @@ func aletrPosting(b *BotTelegram, aE *models.AdEvent) error {
 	}
 
 	timeLeftAlert := int64(math.Abs(time.Since(timeDatePosting).Minutes()))
-	fmt.Println("POSTING: ", timeLeftAlert)
 
 	if checkTimeAlert(aE.UserId, timeLeftAlert) {
-		text := createAlertTextForAdEventPosting(aE, timeLeftAlert)
+		text := createTextAlertForAdEventPosting(aE, timeLeftAlert)
 		botMsg := tgbotapi.NewMessage(aE.UserId, text)
 		botMsg.ParseMode = tgbotapi.ModeHTML
 		botMsg.DisableWebPagePreview = true
@@ -79,7 +77,6 @@ func aletrDelete(b *BotTelegram, aE *models.AdEvent) error {
 	}
 
 	timeLeftAlert := int64(math.Abs(time.Since(timeDateDelete).Minutes()))
-	fmt.Println("DELETE: ", timeLeftAlert)
 
 	// Удаления  отображаются только за 1 час.
 	if timeLeftAlert > 60 {
@@ -87,7 +84,7 @@ func aletrDelete(b *BotTelegram, aE *models.AdEvent) error {
 	}
 
 	if checkTimeAlert(aE.UserId, timeLeftAlert) {
-		text := createAlertTextForAdEventDelete(aE, timeLeftAlert)
+		text := createTextAlertForAdEventDelete(aE, timeLeftAlert)
 		botMsg := tgbotapi.NewMessage(aE.UserId, text)
 		botMsg.ParseMode = tgbotapi.ModeHTML
 		botMsg.DisableWebPagePreview = true

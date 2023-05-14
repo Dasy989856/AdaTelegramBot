@@ -47,28 +47,44 @@ func (b *BotTelegram) InitUpdatesChanel() tgbotapi.UpdatesChannel {
 // Обработчики сообщений.
 func (b *BotTelegram) handlerUpdates(updates tgbotapi.UpdatesChannel) error {
 	for update := range updates {
-		// Добавление сообщения пользователя в БД.
-		if err := b.db.AddUserMessageId(update.Message.Chat.ID,
-			update.Message.MessageID); err != nil {
-			log.Println("critical error: error AddUserMessageId to data base: ", err)
-			return err
-		}
 
 		// Обработка команд.
 		if update.Message != nil && update.Message.IsCommand() {
+			// Добавление сообщения пользователя в БД.
+			if err := b.db.AddUserMessageId(update.Message.Chat.ID,
+				update.Message.MessageID); err != nil {
+				log.Println("critical error: error AddUserMessageId to data base: ", err)
+				return err
+			}
+
 			go b.handlerCommand(update.Message)
 			continue
 		}
 
 		// Обработка сообщений.
 		if update.Message != nil {
+			// Добавление сообщения пользователя в БД.
+			if err := b.db.AddUserMessageId(update.Message.Chat.ID,
+				update.Message.MessageID); err != nil {
+				log.Println("critical error: error AddUserMessageId to data base: ", err)
+				return err
+			}
+
 			go b.handlerMessage(update.Message)
 			continue
 		}
 
 		// Обработка CallbackQuery.
 		if update.CallbackQuery != nil {
+			// Добавление сообщения пользователя в БД.
+			if err := b.db.AddUserMessageId(update.CallbackQuery.Message.Chat.ID,
+				update.CallbackQuery.Message.MessageID); err != nil {
+				log.Println("critical error: error AddUserMessageId to data base: ", err)
+				return err
+			}
+
 			go b.handlerCbq(update.CallbackQuery)
+			continue
 		}
 	}
 
@@ -79,7 +95,7 @@ func (b *BotTelegram) handlerUpdates(updates tgbotapi.UpdatesChannel) error {
 func (b *BotTelegram) StartBotUpdater() error {
 	log.Printf("Authorized on account %s", b.bot.Self.UserName)
 	updates := b.InitUpdatesChanel()
-	go b.adEventChecker()
+	go b.alertChecker()
 	if err := b.handlerUpdates(updates); err != nil {
 		return err
 	}

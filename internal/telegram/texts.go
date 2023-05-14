@@ -2,7 +2,9 @@ package telegram
 
 import (
 	"AdaTelegramBot/internal/models"
+	"AdaTelegramBot/internal/sdk"
 	"fmt"
+	"time"
 )
 
 func createStaticsBriefText(d *models.DataForStatistics) string {
@@ -18,7 +20,7 @@ func createStaticsBriefText(d *models.DataForStatistics) string {
 }
 
 // Создание текст-описания ad события.
-func createAdEventDescriptionText(a *models.AdEvent) (descriptionAdEvent string) {
+func createTextAdEventDescription(a *models.AdEvent) (descriptionAdEvent string) {
 	switch a.Type {
 	case models.TypeSale:
 		descriptionAdEvent = fmt.Sprintf(`
@@ -50,11 +52,11 @@ func createAdEventDescriptionText(a *models.AdEvent) (descriptionAdEvent string)
 }
 
 // Создание текста оповещения для размещения рекламы.
-func createAlertTextForAdEventPosting(a *models.AdEvent, minutesLeftAlert int64) (descriptionAdEvent string) {
+func createTextAlertForAdEventPosting(a *models.AdEvent, minutesLeftAlert int64) (descriptionAdEvent string) {
 	switch a.Type {
 	case models.TypeSale:
 		descriptionAdEvent = fmt.Sprintf(`
-		Через %s Вы должны рамезтить рекламу. Подробнее:
+		Через %s Вы должны разместить рекламу. Подробнее:
 		- <b>Покупатель:</b> %s
 		- <b>Канал покупателя:</b> %s
 		- <b>Цена продажи:</b> %d
@@ -85,7 +87,7 @@ func createAlertTextForAdEventPosting(a *models.AdEvent, minutesLeftAlert int64)
 }
 
 // Создание текста оповещения для удаления рекламы.
-func createAlertTextForAdEventDelete(a *models.AdEvent, minutesLeftAlert int64) (descriptionAdEvent string) {
+func createTextAlertForAdEventDelete(a *models.AdEvent, minutesLeftAlert int64) (descriptionAdEvent string) {
 	switch a.Type {
 	case models.TypeSale:
 		descriptionAdEvent = fmt.Sprintf(`
@@ -145,4 +147,16 @@ func getTextTime(minutes int64) string {
 	}
 
 	return textTime
+}
+
+// Возвращает пример даты.
+func getTextExampleDate() (string, error) {
+	date, err := sdk.ParseTimeToUserDate(time.Now())
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf(`
+	В данный момент бот использует только время по МСК 'UTC+3'.
+	<b>Пример:</b> %s `, date), nil
 }

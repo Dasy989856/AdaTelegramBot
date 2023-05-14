@@ -307,7 +307,7 @@ func cbqAdEventViewAnyAll(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 		}
 
 		text = text + fmt.Sprintf("\n<b>    ✍️ Событие № %s</b>:", buttonId)
-		text = text + createAdEventDescriptionText(&adEvent)
+		text = text + createTextAdEventDescription(&adEvent)
 	}
 
 	// Создание клавиатуры.
