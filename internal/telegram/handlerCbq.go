@@ -112,6 +112,18 @@ func handlerCbqAdEvent(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 		if err := cbqAdEventViewAny(b, cbq); err != nil {
 			return err
 		}
+	case "ad_event.view.sale":
+		if err := cbqAdEventViewSale(b, cbq); err != nil {
+			return err
+		}
+	case "ad_event.view.buy":
+		if err := cbqAdEventViewBuy(b, cbq); err != nil {
+			return err
+		}
+	case "ad_event.view.mutual":
+		if err := cbqAdEventViewMutual(b, cbq); err != nil {
+			return err
+		}
 	case "ad_event.view.select":
 		if err := cbqAdEventViewSelect(b, cbq); err != nil {
 			return err
@@ -124,14 +136,14 @@ func handlerCbqAdEvent(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 		if err := cbqAdEventDelete(b, cbq); err != nil {
 			return err
 		}
+	case "ad_event.delete.end":
+		if err := cbqAdEventDeleteEnd(b, cbq); err != nil {
+			return err
+		}
 	case "ad_event.update.subscriber":
 		if err := cbqAdEventControl(b, cbq); err != nil {
 			return err
 		}
-		// case "ad_event.edit.":
-		// 	if err := cbqAdEventEdit(b, cbq); err != nil {
-		// 		return err
-		// 	}
 	}
 	return nil
 }

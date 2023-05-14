@@ -9,7 +9,7 @@ import (
 	"fmt"
 )
 
-func (t *TelegramBotDB) GetAdEvent(eventId int64) (adEvent *models.AdEvent, err error) {
+func (t *TelegramBotDB) GetAdEvent(adEventId int64) (adEvent *models.AdEvent, err error) {
 	tx := t.db.MustBegin()
 	defer func() {
 		if err != nil {
@@ -19,29 +19,20 @@ func (t *TelegramBotDB) GetAdEvent(eventId int64) (adEvent *models.AdEvent, err 
 		}
 	}()
 
+	query := fmt.Sprintf(`SELECT id, created_at, user_id, "type", partner, channel, price,
+		date_posting, date_delete, arrival_of_subscribers
+		FROM public.%s WHERE id=$1;`, adEventsTable)
+
 	var aE models.AdEvent
 	var datePostingFromDB, dateDeleteFromDB string
-
-	sql := fmt.Sprintf(`SELECT (id, created_at, user_id, "type", partner, channel, price, date_posting, date_delete, arrival_of_subscribers)
-	FROM public.%s WHERE id=$1`, adEventsTable)
-	if err := tx.QueryRow(sql, eventId).Scan(&aE); err != nil {
-		return nil, fmt.Errorf("error creation event: %w", err)
+	if err := tx.QueryRow(query, adEventId).Scan(&aE.Id, &aE.CreatedAt, &aE.UserId, &aE.Type, &aE.Partner, &aE.Channel, &aE.Price,
+		&datePostingFromDB, &dateDeleteFromDB, &aE.ArrivalOfSubscribers); err != nil {
+		return nil, fmt.Errorf("error scan AdEvent in GetAdEvent: %w", err)
 	}
-
-	// // Изменение формата времени.
-	// timeDatePostingFromDB, err := parseDateDataBaseToTime(datePostingFromDB)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// aE.DatePosting = sdk.ParseTimeToDate(timeDatePostingFromDB)
-
-	// timeDateDeleteFromDB, err := parseDateDataBaseToTime(dateDeleteFromDB)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// aE.DateDelete = sdk.ParseTimeToDate(timeDateDeleteFromDB)
-
 	aE.DatePosting, aE.DateDelete, err = editDateFromDataBaseToUserDate(datePostingFromDB, dateDeleteFromDB)
+	if err != nil {
+		return nil, err
+	}
 
 	return &aE, nil
 }
@@ -148,7 +139,9 @@ func (t *TelegramBotDB) GetAdEventsOfUser(userId int64, typeAdEvent models.TypeA
 		}
 
 		aE.DatePosting, aE.DateDelete, err = editDateFromDataBaseToUserDate(datePostingFromDB, dateDeleteFromDB)
-
+		if err != nil {
+			return nil, err
+		}
 		listAdEvent = append(listAdEvent, aE)
 	}
 
@@ -209,18 +202,6 @@ func (t *TelegramBotDB) GetRangeAdEventsOfUser(userId int64, typeAdEvent models.
 			return nil, fmt.Errorf("error scan AdEvent in GetRangeAdEventsOfUser: %w", err)
 		}
 
-		// Изменение формата времени.
-		// timeDatePostingFromDB, err := parseDateDataBaseToTime(datePostingFromDB)
-		// if err != nil {
-		// 	return nil, err
-		// }
-		// aE.DatePosting = sdk.ParseTimeToDate(timeDatePostingFromDB)
-
-		// timeDateDeleteFromDB, err := parseDateDataBaseToTime(dateDeleteFromDB)
-		// if err != nil {
-		// 	return nil, err
-		// }
-		// aE.DateDelete = sdk.ParseTimeToDate(timeDateDeleteFromDB)
 		aE.DatePosting, aE.DateDelete, err = editDateFromDataBaseToUserDate(datePostingFromDB, dateDeleteFromDB)
 
 		listAdEvent = append(listAdEvent, aE)

@@ -96,7 +96,7 @@ type TelegramBotDB interface {
 	UpdateTimeLastAlert(userId int64, timeLastAlert time.Time) error
 
 	// Получение ad события.
-	GetAdEvent(eventId int64) (*AdEvent, error)
+	GetAdEvent(adEventId int64) (*AdEvent, error)
 	// Получение всех ad событий в указаном диапазоне времени.
 	GetRangeAdEvents(typeAdEvent TypeAdEvent, startDate, endDate time.Time) ([]AdEvent, error)
 	// Получение всех ad событий пользователя запрашиваемого типа.
@@ -104,7 +104,7 @@ type TelegramBotDB interface {
 	// Получение всех ad событий пользователя запрашиваемого типа в указаном диапазоне времени.
 	GetRangeAdEventsOfUser(userId int64, typeAdEvent TypeAdEvent, startDate, endDate time.Time) ([]AdEvent, error)
 	// Создание ad события.
-	AdEventCreation(event *AdEvent) (int64, error)
+	AdEventCreation(adEvent *AdEvent) (int64, error)
 	// Удаление ad события.
 	AdEventDelete(eventId int64) error
 	// Обновление информации о приходе подписчиков.

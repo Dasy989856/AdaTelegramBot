@@ -50,7 +50,6 @@ func (b *BotTelegram) handlerMessage(msg *tgbotapi.Message) error {
 			b.sendRequestRestartMsg(userId)
 			return err
 		}
-	case "ad_event.detele":
 
 	default:
 		botMsg := tgbotapi.NewMessage(userId, "Не получается обработать сообщение... 😔")
