@@ -174,6 +174,10 @@ func handlerCbqHelp(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 		if err := cbqHelpFeature(b, cbq); err != nil {
 			return err
 		}
+	case "help.error":
+		if err := cbqHelpError(b, cbq); err != nil {
+			return err
+		}
 	}
 
 	return nil
