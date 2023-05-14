@@ -5,3 +5,9 @@ In the future it is planned:
 - Automatic check of the arrival of subscribers (collection of statistics from advertising).
 - Implementation of the average cost of a subscriber in a tegram.
 - Collecting general data and providing averages among all clients.
+
+
+# Wiki
+## Types CallbackQuery.
+- static:  "ad_event.create"
+- dinamic: "ad_event.delete?{"json":"json"}

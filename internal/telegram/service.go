@@ -12,9 +12,10 @@ import (
 
 // Структура телеграмм бота.
 type BotTelegram struct {
-	bot          *tgbotapi.BotAPI
-	db           models.TelegramBotDB
-	cashAdEvents map[int64]*models.AdEvent // Хэш-таблица ad событий.
+	bot                  *tgbotapi.BotAPI
+	db                   models.TelegramBotDB
+	adEventsCache        map[int64][][]*models.AdEvent // Хэш-таблица полученных из БД событий.
+	adEventCreatingCache map[int64]*models.AdEvent     // Хэш-таблица создаваемых ad событий.
 }
 
 // Создание телеграмм бота.
@@ -26,19 +27,17 @@ func NewBotTelegram(db models.TelegramBotDB) (*BotTelegram, error) {
 	}
 	bot.Debug = false
 
-	return &BotTelegram{bot: bot, db: db, cashAdEvents: make(map[int64]*models.AdEvent)}, nil
-}
-
-// Запуск апдейтера.
-func (b *BotTelegram) StartBotUpdater() error {
-	log.Printf("Authorized on account %s", b.bot.Self.UserName)
-	updates := b.InitUpdatesChanel()
-	if err := b.handlerUpdates(updates); err != nil {
-		return err
+	tgBot := BotTelegram{
+		bot:                  bot,
+		db:                   db,
+		adEventsCache:        make(map[int64][][]*models.AdEvent),
+		adEventCreatingCache: make(map[int64]*models.AdEvent),
 	}
-	return nil
+
+	return &tgBot, nil
 }
 
+// Инициализация канала событий.
 func (b *BotTelegram) InitUpdatesChanel() tgbotapi.UpdatesChannel {
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 30
@@ -48,27 +47,43 @@ func (b *BotTelegram) InitUpdatesChanel() tgbotapi.UpdatesChannel {
 // Обработчики сообщений.
 func (b *BotTelegram) handlerUpdates(updates tgbotapi.UpdatesChannel) error {
 	for update := range updates {
+
 		// Обработка команд.
 		if update.Message != nil && update.Message.IsCommand() {
-			if err := b.handlerCommand(update.Message); err != nil {
-				log.Println(err)
+			// Добавление сообщения пользователя в БД.
+			if err := b.db.AddUserMessageId(update.Message.Chat.ID,
+				update.Message.MessageID); err != nil {
+				log.Println("critical error: error AddUserMessageId to data base: ", err)
+				return err
 			}
+
+			go b.handlerCommand(update.Message)
 			continue
 		}
 
 		// Обработка сообщений.
 		if update.Message != nil {
-			if err := b.handlerMessage(update.Message); err != nil {
-				log.Println(err)
+			// Добавление сообщения пользователя в БД.
+			if err := b.db.AddUserMessageId(update.Message.Chat.ID,
+				update.Message.MessageID); err != nil {
+				log.Println("critical error: error AddUserMessageId to data base: ", err)
+				return err
 			}
+
+			go b.handlerMessage(update.Message)
 			continue
 		}
 
 		// Обработка CallbackQuery.
 		if update.CallbackQuery != nil {
-			if err := b.handlerCallbackQuery(&update); err != nil {
-				log.Println(err)
+			// Добавление сообщения пользователя в БД.
+			if err := b.db.AddUserMessageId(update.CallbackQuery.Message.Chat.ID,
+				update.CallbackQuery.Message.MessageID); err != nil {
+				log.Println("critical error: error AddUserMessageId to data base: ", err)
+				return err
 			}
+
+			go b.handlerCbq(update.CallbackQuery)
 			continue
 		}
 	}
@@ -76,14 +91,25 @@ func (b *BotTelegram) handlerUpdates(updates tgbotapi.UpdatesChannel) error {
 	return fmt.Errorf("updates chanel closed")
 }
 
+// Запуск апдейтера.
+func (b *BotTelegram) StartBotUpdater() error {
+	log.Printf("Authorized on account %s", b.bot.Self.UserName)
+	updates := b.InitUpdatesChanel()
+	go b.handlerAlerts()
+	if err := b.handlerUpdates(updates); err != nil {
+		return err
+	}
+	return nil
+}
+
 // Получение хэша ad события.
-func getAdEventFromCash(b *BotTelegram, userId int64) (*models.AdEvent, error) {
-	adEvent, ok := b.cashAdEvents[userId]
+func getAdEventCreatingCache(b *BotTelegram, userId int64) (*models.AdEvent, error) {
+	adEvent, ok := b.adEventCreatingCache[userId]
 	if ok {
 		return adEvent, nil
 	}
 
-	if err := sendRestart(b, userId); err != nil {
+	if err := b.sendRequestRestartMsg(userId); err != nil {
 		return nil, err
 	}
 
@@ -91,41 +117,139 @@ func getAdEventFromCash(b *BotTelegram, userId int64) (*models.AdEvent, error) {
 }
 
 // Отправка в чат сообщения о повторной попытке.
-func sendRestart(b *BotTelegram, userId int64) error {
+func (b *BotTelegram) sendRequestRestartMsg(userId int64) error {
 	b.db.SetStepUser(userId, "start")
-	botMsg := tgbotapi.NewMessage(userId, "К сожалению что то пошло не так. Выберите действие из меню /start повторно. 🥲")
-	if _, err := b.bot.Send(botMsg); err != nil {
+	botMsg := tgbotapi.NewMessage(userId, "К сожалению что то пошло не так 🥲. Попробуйте повторно <b>/start</b> ")
+	botMsg.ParseMode = tgbotapi.ModeHTML
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
+		),
+	)
+	botMsg.ReplyMarkup = keyboard
+	if err := b.sendMessage(userId, botMsg); err != nil {
 		return fmt.Errorf("error send message in sendRestartMessage: %w", err)
 	}
 	return nil
 }
 
-// Парсинг даты.
-func parseDate(timeString string) (*time.Time, error) {
-	layout := "2006-01-02 15:04" // формат даты-времени
-
-	t1, err := time.Parse(layout, timeString)
-	if err != nil {
-		return nil, fmt.Errorf("error parsing date: %w", err)
+// Очистка сообщения.
+func (b *BotTelegram) cleareMessage(userId int64, messageId int) error {
+	if err := b.db.DeleteUsermessageId(messageId); err != nil {
+		return err
 	}
 
-	return &t1, nil
-}
-
-// Очистка сообщения. Пока что не работает.
-func (b *BotTelegram) cleareMessage(userId int64, messageId int) error {
 	deleteMsg := tgbotapi.NewDeleteMessage(userId, messageId)
 	if _, err := b.bot.Send(deleteMsg); err != nil {
-		return fmt.Errorf("error cleare msgId%d: %w", messageId, err)
+		return fmt.Errorf("error cleare messageId%d: %w", messageId, err)
 	}
 	return nil
 }
 
-// TODO Очистка чата. Пока что не работает.
+// Очистка чата.
 func (b *BotTelegram) cleareAllChat(userId int64) error {
-	deleteMsg := tgbotapi.NewDeleteMessage(userId, -1)
-	if _, err := b.bot.Send(deleteMsg); err != nil {
-		return fmt.Errorf("error cleare all chat: %w", err)
+	startMessageId, err := b.db.GetStartMessageId(userId)
+	if err != nil {
+		return err
 	}
+
+	adMessageId, err := b.db.GetAdMessageId(userId)
+	if err != nil {
+		return err
+	}
+
+	infoMessageId, err := b.db.GetAdMessageId(userId)
+	if err != nil {
+		return err
+	}
+
+	// Получение всех messageId.
+	messageIds, err := b.db.GetUserMessageIds(userId)
+	if err != nil {
+		return err
+	}
+
+	// Удаление всех сообщений кроме startMessage / adMessage / infoMessage.
+	for _, messageId := range messageIds {
+		if messageId == startMessageId || messageId == adMessageId || messageId == infoMessageId {
+			continue
+		}
+		b.cleareMessage(userId, messageId)
+	}
+
 	return nil
+}
+
+// Отправка сообщения пользователю.
+func (b *BotTelegram) sendMessage(userId int64, c tgbotapi.Chattable) error {
+	botMsg, err := b.bot.Send(c)
+	if err != nil {
+		return err
+	}
+
+	if err := b.db.AddUserMessageId(userId, botMsg.MessageID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// Отправка оповещения пользователю.
+func (b *BotTelegram) sendAlertMessage(userId int64, c tgbotapi.Chattable) error {
+	botMsg, err := b.bot.Send(c)
+	if err != nil {
+		return err
+	}
+
+	// Добавления ID сообщения в бд.
+	if err := b.db.AddUserMessageId(userId, botMsg.MessageID); err != nil {
+		return err
+	}
+
+	// Обновление даты оповещения.
+	if err := b.db.UpdateTimeLastAlert(userId, time.Now()); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// Если ad событие полностью заполенно - возвращается true. Иначе false.
+func fullDataAdEvent(ae *models.AdEvent) bool {
+	if ae.UserId == 0 {
+		log.Println("not found ae.UserId event")
+		return false
+	}
+
+	if ae.Type == "" {
+		log.Println("not found ae.Type event")
+		return false
+	}
+
+	if ae.CreatedAt == "" {
+		log.Println("not found ae.CreatedAt event")
+		return false
+	}
+
+	if ae.DatePosting == "" {
+		log.Println("not found ae.DatePosting event")
+		return false
+	}
+
+	if ae.DateDelete == "" {
+		log.Println("not found ae.DateDelete event")
+		return false
+	}
+
+	if ae.Partner == "" {
+		log.Println("not found ae.Partner event")
+		return false
+	}
+
+	if ae.Channel == "" {
+		log.Println("not found ae.Channel event")
+		return false
+	}
+
+	return true
 }
