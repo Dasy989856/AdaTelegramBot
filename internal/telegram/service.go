@@ -50,41 +50,25 @@ func (b *BotTelegram) handlerUpdates(updates tgbotapi.UpdatesChannel) error {
 		// Добавление сообщения пользователя в БД.
 		if err := b.db.AddUserMessageId(update.Message.Chat.ID,
 			update.Message.MessageID); err != nil {
+			log.Println("critical error: error AddUserMessageId to data base: ", err)
 			return err
 		}
 
 		// Обработка команд.
 		if update.Message != nil && update.Message.IsCommand() {
-			if err := b.handlerCommand(update.Message); err != nil {
-				log.Println(err)
-			}
+			go b.handlerCommand(update.Message)
 			continue
 		}
 
 		// Обработка сообщений.
 		if update.Message != nil {
-			if err := b.db.AddUserMessageId(update.Message.Chat.ID,
-				update.Message.MessageID); err != nil {
-				return err
-			}
-
-			if err := b.handlerMessage(update.Message); err != nil {
-				log.Println(err)
-			}
+			go b.handlerMessage(update.Message)
 			continue
 		}
 
 		// Обработка CallbackQuery.
 		if update.CallbackQuery != nil {
-			if err := b.db.AddUserMessageId(update.CallbackQuery.Message.Chat.ID,
-				update.CallbackQuery.Message.MessageID); err != nil {
-				return err
-			}
-
-			if err := b.handlerCbq(update.CallbackQuery); err != nil {
-				log.Println(err)
-			}
-			continue
+			go b.handlerCbq(update.CallbackQuery)
 		}
 	}
 
