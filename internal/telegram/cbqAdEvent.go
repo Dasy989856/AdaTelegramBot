@@ -202,6 +202,61 @@ func cbqAdEventCreateEnd(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	return nil
 }
 
+func cbqAdEventControl(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
+	userId := cbq.Message.Chat.ID
+	messageId := cbq.Message.MessageID
+
+	// Получение данных cbq.
+	_, cbqData, err := parseCbq(cbq)
+	if err != nil {
+		return err
+	}
+
+	// Парсинг данных cbq.
+	adEventId, err := parseDataAdEventControl(cbqData)
+	if err != nil {
+		return err
+	}
+
+	text := "Выберите действие:"
+
+	deleteButtonData := fmt.Sprintf("ad_event.delete?%d", adEventId)
+	subscriberButtonData := fmt.Sprintf("ad_event.update.subscriber?%d", adEventId)
+
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Удалить", deleteButtonData),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Внести приход подписчиков", subscriberButtonData),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
+		),
+	)
+
+	if err := b.sendMessage(userId, tgbotapi.NewEditMessageTextAndMarkup(userId, messageId, text, keyboard)); err != nil {
+		return fmt.Errorf("error edit msg in cbqAdEventView: %w", err)
+	}
+
+	return nil
+}
+
+func parseDataAdEventControl(cbqData string) (adEventId int64, err error) {
+	// ad_event.control?1
+	dataSlice := strings.Split(cbqData, ";")
+	if len(dataSlice) != 1 {
+		return 0, fmt.Errorf("dataSlice incorrect. dataSlice: %v", dataSlice)
+	}
+
+	id, err := strconv.ParseInt(dataSlice[0], 10, 64)
+	if err != nil {
+		return 0, fmt.Errorf("error pasge PageForDisplay: %w", err)
+	}
+
+	return id, nil
+}
+
 func cbqAdEventView(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	userId := cbq.Message.Chat.ID
 	messageId := cbq.Message.MessageID
@@ -219,9 +274,6 @@ func cbqAdEventView(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 		// ),
 		// tgbotapi.NewInlineKeyboardRow(
 		// 	tgbotapi.NewInlineKeyboardButtonData("Взаимный пиар.", "ad_event.view.mutual"),
-		// ),
-		// tgbotapi.NewInlineKeyboardRow(
-		// 	tgbotapi.NewInlineKeyboardButtonData("Кастомное.", "ad_event.create.castom"),
 		// ),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Назад", "ad_event"),
@@ -298,7 +350,6 @@ func cbqAdEventViewSelect(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(data)
 
 	// Проврека данных.
 	if _, ok := b.adEventCreatingCache[userId]; !ok {
@@ -378,7 +429,7 @@ func createTextAndKeyboardForAdEventView(b *BotTelegram, userId int64, data *mod
 				tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
 			),
 		)
-		
+
 		return text, keyboard, nil
 	}
 
@@ -391,7 +442,7 @@ func createTextAndKeyboardForAdEventView(b *BotTelegram, userId int64, data *mod
 	bufButtonRow := make([]tgbotapi.InlineKeyboardButton, 0, lenRow)
 	for i, adEvent := range adEvents[data.PageForDisplay-1] {
 		buttonId := fmt.Sprintf("%d", i+1)
-		buttonData := fmt.Sprintf("adEventId%d", adEvent.Id)
+		buttonData := fmt.Sprintf("ad_event.control?%d", adEvent.Id)
 		button := tgbotapi.NewInlineKeyboardButtonData(buttonId, buttonData)
 		bufButtonRow = append(bufButtonRow, button)
 
@@ -440,4 +491,56 @@ func createPageRowForViewAdEvent(data *models.CbqDataForCbqAdEventViewSelect, ma
 	)
 
 	return tgbotapi.NewInlineKeyboardRow(buffButton...)
+}
+
+func cbqAdEventDelete(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
+	userId := cbq.Message.Chat.ID
+	messageId := cbq.Message.MessageID
+
+	// Получение данных cbq.
+	_, cbqData, err := parseCbq(cbq)
+	if err != nil {
+		return err
+	}
+
+	// Парсинг данных.
+	data, err := parseDataAdEventDelete(cbqData)
+	if err != nil {
+		return err
+	}
+
+	// Удаление события.
+	if err := b.db.AdEventDelete(data); err != nil {
+		return err
+	}
+
+	text := "❌ Событие удалено! ❌"
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
+		),
+	)
+	botMsg := tgbotapi.NewEditMessageTextAndMarkup(userId, messageId, text, keyboard)
+	botMsg.ParseMode = tgbotapi.ModeHTML
+	botMsg.DisableWebPagePreview = true
+	if err := b.sendMessage(userId, botMsg); err != nil {
+		return fmt.Errorf("error edit msg in cbqAdEventViewAnyAll: %w", err)
+	}
+
+	return nil
+}
+
+func parseDataAdEventDelete(cbqData string) (adEventId int64, err error) {
+	// ad_event.control?1
+	dataSlice := strings.Split(cbqData, ";")
+	if len(dataSlice) != 1 {
+		return 0, fmt.Errorf("dataSlice incorrect. dataSlice: %v", dataSlice)
+	}
+
+	id, err := strconv.ParseInt(dataSlice[0], 10, 64)
+	if err != nil {
+		return 0, fmt.Errorf("error pasge PageForDisplay: %w", err)
+	}
+
+	return id, nil
 }

@@ -16,7 +16,7 @@ func (b *BotTelegram) handlerAlerts() (err error) {
 	var cashAdEvents []models.AdEvent
 	for {
 		time.Sleep(20 * time.Second)
-		fmt.Println("START ALERT HANDLER")
+		
 		timeStart, _ := sdk.GetTimeRangeToday()
 		_, timeEnd := sdk.GetTimeRangeTomorrow()
 		cashAdEvents, err = b.db.GetRangeAdEvents(models.TypeAny, timeStart, timeEnd)

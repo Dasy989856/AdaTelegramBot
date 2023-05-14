@@ -116,6 +116,18 @@ func handlerCbqAdEvent(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 		if err := cbqAdEventViewSelect(b, cbq); err != nil {
 			return err
 		}
+	case "ad_event.control":
+		if err := cbqAdEventControl(b, cbq); err != nil {
+			return err
+		}
+	case "ad_event.delete":
+		if err := cbqAdEventDelete(b, cbq); err != nil {
+			return err
+		}
+	case "ad_event.update.subscriber":
+		if err := cbqAdEventControl(b, cbq); err != nil {
+			return err
+		}
 		// case "ad_event.edit.":
 		// 	if err := cbqAdEventEdit(b, cbq); err != nil {
 		// 		return err
