@@ -51,19 +51,13 @@ func cbqStatisticsBrief(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 			tgbotapi.NewInlineKeyboardButtonData("Завтра", "statistics.brief.select?"+sdk.ParseTimeToRangeDate(sdk.GetTimeRangeTomorrow())),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Предыдущая неделя", "statistics.brief.select?"+sdk.ParseTimeToRangeDate(sdk.GetTimeRangeLastWeek())),
 			tgbotapi.NewInlineKeyboardButtonData("Текущая неделя", "statistics.brief.select?"+sdk.ParseTimeToRangeDate(sdk.GetTimeRangeThisWeek())),
-			tgbotapi.NewInlineKeyboardButtonData("Следующая неделя", "statistics.brief.select?"+sdk.ParseTimeToRangeDate(sdk.GetTimeRangeNextWeek())),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Предыдущий месяц", "statistics.brief.select?"+sdk.ParseTimeToRangeDate(sdk.GetTimeRangeLastMonth())),
 			tgbotapi.NewInlineKeyboardButtonData("Текущий месяц", "statistics.brief.select?"+sdk.ParseTimeToRangeDate(sdk.GetTimeRangeThisMonth())),
-			tgbotapi.NewInlineKeyboardButtonData("Следующий месяц", "statistics.brief.select?"+sdk.ParseTimeToRangeDate(sdk.GetTimeRangeNextMonth())),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Предыдущий год", "statistics.brief.select?"+sdk.ParseTimeToRangeDate(sdk.GetTimeRangeLastYear())),
 			tgbotapi.NewInlineKeyboardButtonData("Текущий год", "statistics.brief.select?"+sdk.ParseTimeToRangeDate(sdk.GetTimeRangeThisYear())),
-			tgbotapi.NewInlineKeyboardButtonData("Следующий год", "statistics.brief.select?"+sdk.ParseTimeToRangeDate(sdk.GetTimeRangeNextYear())),
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Назад", "statistics"),

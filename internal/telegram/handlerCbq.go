@@ -141,9 +141,7 @@ func handlerCbqAdEvent(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 			return err
 		}
 	case "ad_event.update.subscriber":
-		if err := cbqAdEventControl(b, cbq); err != nil {
-			return err
-		}
+		b.sendRequestRestartMsg(cbq.Message.Chat.ID)
 	}
 	return nil
 }
