@@ -12,7 +12,7 @@ import (
 // Обработчик команд.
 func (b *BotTelegram) handlerCommand(msg *tgbotapi.Message) error {
 	userId := msg.Chat.ID
-	fmt.Printf("Info %s: userId=%d; CMD: %s;\n", time.Now().String(), userId, msg.Command())
+	fmt.Printf("Info %s: userId=%d; CMD=%s;\n", time.Now().Format("2006-01-02 15:04:05.999"), userId, msg.Command())
 	switch msg.Command() {
 	case "start":
 		if err := b.cmdStart(msg); err != nil {

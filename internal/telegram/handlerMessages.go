@@ -14,7 +14,7 @@ import (
 // Обработчик сообщений.
 func (b *BotTelegram) handlerMessage(msg *tgbotapi.Message) error {
 	userId := msg.Chat.ID
-	fmt.Printf("Info %s: userId=%d; MSG: %s;\n", time.Now().String(), userId, msg.Text)
+	fmt.Printf("Info %s: userId=%d; MSG=%s;\n", time.Now().Format("2006-01-02 15:04:05.999"), userId, msg.Text)
 	step, err := b.db.GetStepUser(userId)
 	if err != nil {
 		return err
