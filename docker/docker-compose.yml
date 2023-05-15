@@ -1,0 +1,48 @@
+---
+#FROM alpine:3.15.6
+# https://github.com/mfvanek/useful-sql-scripts/tree/master/running_pg_in_docker
+
+version: "2.4"
+
+services:
+
+  db:
+    image: ${DB_IMAGE}
+    container_name: db
+    # command:
+    #   - "postgres"
+    #   - "-c"
+    #   - "effective_cache_size=1GB"
+    #   - "-c"
+    #   - "work_mem=16MB"
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    volumes:
+      - vlm_db:/var/lib/postgresql/data
+    networks:
+        - net_ada_local
+    ports:
+      - "${DB_PORT}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+
+volumes:
+  vlm_db:
+
+networks:
+  net_ada_local:
+    driver: bridge
+    name: net_ada_local

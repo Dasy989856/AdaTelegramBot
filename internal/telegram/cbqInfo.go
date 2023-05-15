@@ -26,9 +26,6 @@ func cbqInfo(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	
 🚫 <b>Ограничения:</b> 
   - В связи с анонимностью Telegram, время событий отображается по  МСК 'UTC +3'
-
-🛠 <b>Разработчик бота:</b> 
-  - @Dasy_g
 `
 
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(

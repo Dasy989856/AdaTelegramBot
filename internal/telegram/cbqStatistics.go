@@ -22,9 +22,6 @@ func cbqStatistics(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 		// 	tgbotapi.NewInlineKeyboardButtonData("Полная статистика", "statistics.full"),
 		// ),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Назад", "start"),
-		),
-		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
 		),
 	)
