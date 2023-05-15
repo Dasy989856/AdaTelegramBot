@@ -10,13 +10,14 @@ import (
 func createStaticsBriefText(d *models.DataForStatistics) string {
 	return fmt.Sprintf(`
 	<b>      📈 Статистика</b>
-<b>Количество проданных реклам:</b> %d
-<b>Количество купленных реклам:</b> %d
-<b>Количество взаимных пиаров:</b> %d
-<b>Прибыль:</b> %d рублей
-<b>Траты:</b> %d рублей
-<b>Чистая прибыль:</b> %d рублей
-`, d.CountAdEventSale, d.CountAdEventBuy, d.CountAdEventMutaul, d.Profit, d.Losses, d.Profit-d.Losses)
+<b>Продано реклам:</b> %d
+<b>Куплено реклам:</b> %d
+<b>Кол-во взаимных пиаров:</b> %d
+<b>Кол-во бартера:</b> %d
+<b>Прибыль:</b> %d
+<b>Траты:</b> %d
+<b>Чистая прибыль:</b> %d
+`, d.CountAdEventSale, d.CountAdEventBuy, d.CountAdEventMutaul, d.CountAdEventBarter, d.Profit, d.Losses, d.Profit-d.Losses)
 }
 
 // Создание текст-описания ad события.
@@ -24,27 +25,38 @@ func createTextAdEventDescription(a *models.AdEvent) (descriptionAdEvent string)
 	switch a.Type {
 	case models.TypeSale:
 		descriptionAdEvent = fmt.Sprintf(`
+		- <b>Тип:</b> <u>продажа рекламы</u>
 		- <b>Покупатель:</b> %s
 		- <b>Канал покупателя:</b> %s
-		- <b>Цена продажи:</b> %d
-		- <b>Дата размещения рекламы:</b> %s
-		- <b>Дата удаления рекламы:</b> %s
+		- <b>Стоимость:</b> %d
+		- <b>Дата размещения:</b> %s
+		- <b>Дата удаления:</b> %s
 		`, a.Partner, a.Channel, a.Price, a.DatePosting, a.DateDelete)
 	case models.TypeBuy:
 		descriptionAdEvent = fmt.Sprintf(`
+		- <b>Тип:</b> <u>покупка рекламы</u>
 		- <b>Продавец:</b> %s
 		- <b>Канал продавца:</b> %s
-		- <b>Цена покупки:</b> %d
-		- <b>Дата размещения рекламы:</b> %s
+		- <b>Стоимость:</b> %d
+		- <b>Дата размещения:</b> %s
 		`, a.Partner, a.Channel, a.Price, a.DatePosting)
 	case models.TypeMutual:
 		descriptionAdEvent = fmt.Sprintf(`
-		- <b>Партнер по взаимному пиару:</b> %s
-		- <b>Канал партнера по взаимному пиару:</b> %s
-		- <b>Цена взаимного пиара:</b> %d
-		- <b>Дата размещения рекламы:</b> %s
-		- <b>Дата удаления рекламы:</b> %s
+		- <b>Тип:</b> <u>взаимный пиар</u>
+		- <b>Партнер:</b> %s
+		- <b>Канал партнера:</b> %s
+		- <b>Стоимость:</b> %d
+		- <b>Дата размещения:</b> %s
+		- <b>Дата удаления:</b> %s
 		`, a.Partner, a.Channel, a.Price, a.DatePosting, a.DateDelete)
+	case models.TypeBarter:
+		descriptionAdEvent = fmt.Sprintf(`
+		- <b>Тип:</b> <u>бартер</u>
+		- <b>Партнер:</b> %s
+		- <b>Канал/магазин партнера:</b> %s
+		- <b>Стоимость:</b> %d
+		- <b>Дата размещения:</b> %s
+		`, a.Partner, a.Channel, a.Price, a.DatePosting)
 	}
 
 	return descriptionAdEvent

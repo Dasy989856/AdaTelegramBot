@@ -76,7 +76,7 @@ func adEventPartner(b *BotTelegram, msg *tgbotapi.Message) error {
 	userId := msg.Chat.ID
 
 	if !models.RegxUrlType1.MatchString(msg.Text) && !models.RegxUrlType2.MatchString(msg.Text) {
-		botMsg := tgbotapi.NewMessage(userId, `Вы ввели некорректную ссылку на пользователя, попробуйте снова.
+		botMsg := tgbotapi.NewMessage(userId, `Вы отправили некорректную ссылку на пользователя, попробуйте снова.
 		<b>Пример:</b> @AdaTelegramBot или https://t.me/AdaTelegramBot`)
 		botMsg.ParseMode = tgbotapi.ModeHTML
 		if err := b.sendMessage(userId, botMsg); err != nil {
@@ -106,19 +106,25 @@ func adEventPartner(b *BotTelegram, msg *tgbotapi.Message) error {
 
 	switch adEvent.Type {
 	case models.TypeSale:
-		botMsg := tgbotapi.NewMessage(userId, "Теперь требуется отправить мне ссылку на рекламируемый Вами канал.")
+		botMsg := tgbotapi.NewMessage(userId, "✍️ Теперь требуется отправить ссылку на рекламируемый Вами канал.")
 		botMsg.ParseMode = tgbotapi.ModeHTML
 		if err := b.sendMessage(userId, botMsg); err != nil {
 			return err
 		}
 	case models.TypeBuy:
-		botMsg := tgbotapi.NewMessage(userId, "Теперь требуется отправить мне ссылку на канал, в котором выйдет Ваша реклама.")
+		botMsg := tgbotapi.NewMessage(userId, "✍️ Теперь требуется отправить ссылку на канал, в котором выйдет Ваша реклама.")
 		botMsg.ParseMode = tgbotapi.ModeHTML
 		if err := b.sendMessage(userId, botMsg); err != nil {
 			return err
 		}
 	case models.TypeMutual:
-		botMsg := tgbotapi.NewMessage(userId, "Теперь требуется отправить мне ссылку на канал, с которым будет взаимный пиар.")
+		botMsg := tgbotapi.NewMessage(userId, "✍️ Теперь требуется отправить ссылку на канал, с которым будет взаимный пиар.")
+		botMsg.ParseMode = tgbotapi.ModeHTML
+		if err := b.sendMessage(userId, botMsg); err != nil {
+			return err
+		}
+	case models.TypeBarter:
+		botMsg := tgbotapi.NewMessage(userId, "✍️ Теперь требуется отправить ссылку на канал/магазин партнера по бартеру.")
 		botMsg.ParseMode = tgbotapi.ModeHTML
 		if err := b.sendMessage(userId, botMsg); err != nil {
 			return err
@@ -127,7 +133,7 @@ func adEventPartner(b *BotTelegram, msg *tgbotapi.Message) error {
 		if err := b.sendRequestRestartMsg(userId); err != nil {
 			return err
 		}
-		return fmt.Errorf("unknow type adEvent")
+		return fmt.Errorf("unknow type adEvent. typeEvent: %s", adEvent.Type)
 	}
 
 	return nil
@@ -137,7 +143,7 @@ func adEventChanel(b *BotTelegram, msg *tgbotapi.Message) error {
 	userId := msg.Chat.ID
 
 	if !models.RegxUrlType1.MatchString(msg.Text) && !models.RegxUrlType2.MatchString(msg.Text) {
-		botMsg := tgbotapi.NewMessage(userId, `Вы ввели некорректную ссылку на канал, попробуйте снова.
+		botMsg := tgbotapi.NewMessage(userId, `Вы отправили некорректную ссылку на канал, попробуйте снова.
 		<b>Пример:</b> @AdaTelegramBot или https://t.me/AdaTelegramBot`)
 		botMsg.ParseMode = tgbotapi.ModeHTML
 		if err := b.sendMessage(userId, botMsg); err != nil {
@@ -167,24 +173,29 @@ func adEventChanel(b *BotTelegram, msg *tgbotapi.Message) error {
 
 	switch adEvent.Type {
 	case models.TypeSale:
-		botMsg := tgbotapi.NewMessage(userId, "Теперь требуется отправить стоимость рекламного поста.")
+		botMsg := tgbotapi.NewMessage(userId, "✍️ Теперь требуется отправить стоимость рекламного поста.")
 		botMsg.ParseMode = tgbotapi.ModeHTML
 		if err := b.sendMessage(userId, botMsg); err != nil {
 			return err
 		}
 	case models.TypeBuy:
-		botMsg := tgbotapi.NewMessage(userId, "Теперь требуется отправить стоимость рекламного поста.")
+		botMsg := tgbotapi.NewMessage(userId, "✍️ Теперь требуется отправить стоимость рекламного поста.")
 		botMsg.ParseMode = tgbotapi.ModeHTML
 		if err := b.sendMessage(userId, botMsg); err != nil {
 			return err
 		}
 	case models.TypeMutual:
-		botMsg := tgbotapi.NewMessage(userId, `Теперь требуется отправить стоимость поста взаимного пиара.
+		botMsg := tgbotapi.NewMessage(userId, `✍️ Теперь требуется отправить стоимость поста взаимного пиара.
 		<b>Пример:</b> 0 (Если взаимный пиар был без доплаты)
 		Можно указать <b>'-сумма'</b> если была доплата с Вашей стороны.
 		Можно указать <b>'+сумма'</b> если доплатили Вам.`)
-		// botMsg := tgbotapi.NewMessage(userId, `Теперь требуется отправить дату размещения поста взаимного пиара.
-		// <b>Пример:</b> `+sdk.ParseTimeToDate(time.Now()))
+		botMsg.ParseMode = tgbotapi.ModeHTML
+		if err := b.sendMessage(userId, botMsg); err != nil {
+			return err
+		}
+	case models.TypeBarter:
+		botMsg := tgbotapi.NewMessage(userId, `✍️ Теперь требуется отправить прибыль с бартера.
+		<b>Пример:</b> 0 (Если считать прибыль не требуется)`)
 		botMsg.ParseMode = tgbotapi.ModeHTML
 		if err := b.sendMessage(userId, botMsg); err != nil {
 			return err
@@ -203,7 +214,7 @@ func adEventPrice(b *BotTelegram, msg *tgbotapi.Message) error {
 	userId := msg.Chat.ID
 
 	if !models.RegxPrice.MatchString(msg.Text) {
-		botMsg := tgbotapi.NewMessage(userId, `Вы ввели некорректную стоимость, попробуйте снова.
+		botMsg := tgbotapi.NewMessage(userId, `Вы отправили некорректную стоимость, попробуйте снова.
 		<b>Пример:</b> 1000`)
 		botMsg.ParseMode = tgbotapi.ModeHTML
 		if err := b.sendMessage(userId, botMsg); err != nil {
@@ -237,21 +248,28 @@ func adEventPrice(b *BotTelegram, msg *tgbotapi.Message) error {
 	}
 	switch adEvent.Type {
 	case models.TypeSale:
-		botMsg := tgbotapi.NewMessage(userId, `Теперь требуется отправить дату и время размещения рекламного поста.
+		botMsg := tgbotapi.NewMessage(userId, `✍️ Теперь требуется отправить дату и время размещения рекламного поста.
 		`+exampleDate)
 		botMsg.ParseMode = tgbotapi.ModeHTML
 		if err := b.sendMessage(userId, botMsg); err != nil {
 			return err
 		}
 	case models.TypeBuy:
-		botMsg := tgbotapi.NewMessage(userId, `Теперь требуется отправить дату и время размещения рекламного поста.
+		botMsg := tgbotapi.NewMessage(userId, `✍️ Теперь требуется отправить дату и время размещения рекламного поста.
 		`+exampleDate)
 		botMsg.ParseMode = tgbotapi.ModeHTML
 		if err := b.sendMessage(userId, botMsg); err != nil {
 			return err
 		}
 	case models.TypeMutual:
-		botMsg := tgbotapi.NewMessage(userId, `Теперь требуется отправить дату и время размещения поста взаимного пиара.
+		botMsg := tgbotapi.NewMessage(userId, `✍️ Теперь требуется отправить дату и время размещения поста взаимного пиара.
+		`+exampleDate)
+		botMsg.ParseMode = tgbotapi.ModeHTML
+		if err := b.sendMessage(userId, botMsg); err != nil {
+			return err
+		}
+	case models.TypeBarter:
+		botMsg := tgbotapi.NewMessage(userId, `✍️ Теперь требуется отправить дату и время размещения бартера.
 		`+exampleDate)
 		botMsg.ParseMode = tgbotapi.ModeHTML
 		if err := b.sendMessage(userId, botMsg); err != nil {
@@ -275,7 +293,7 @@ func adEventDatePosting(b *BotTelegram, msg *tgbotapi.Message) error {
 		return err
 	}
 	if !models.RegxAdEventDate.MatchString(msg.Text) {
-		botMsg := tgbotapi.NewMessage(userId, `Вы ввели некорректную дату, попробуйте снова.
+		botMsg := tgbotapi.NewMessage(userId, `Вы отправили некорректную дату, попробуйте снова.
 		`+exampleDate)
 		botMsg.ParseMode = tgbotapi.ModeHTML
 		if err := b.sendMessage(userId, botMsg); err != nil {
@@ -300,7 +318,7 @@ func adEventDatePosting(b *BotTelegram, msg *tgbotapi.Message) error {
 	switch adEvent.Type {
 	case models.TypeSale:
 		b.db.SetStepUser(userId, "ad_event.create.date_delete")
-		botMsg := tgbotapi.NewMessage(userId, `Теперь требуется отправить дату и время удаления рекламного поста.
+		botMsg := tgbotapi.NewMessage(userId, `✍️ Теперь требуется отправить дату и время удаления рекламного поста.
 		`+exampleDate)
 		botMsg.ParseMode = tgbotapi.ModeHTML
 		if err := b.sendMessage(userId, botMsg); err != nil {
@@ -313,10 +331,15 @@ func adEventDatePosting(b *BotTelegram, msg *tgbotapi.Message) error {
 		}
 	case models.TypeMutual:
 		b.db.SetStepUser(userId, "ad_event.create.date_delete")
-		botMsg := tgbotapi.NewMessage(userId, `Теперь требуется отправить дату и время удаления поста взаимного пиара.
+		botMsg := tgbotapi.NewMessage(userId, `✍️ Теперь требуется отправить дату и время удаления поста взаимного пиара.
 		`+exampleDate)
 		botMsg.ParseMode = tgbotapi.ModeHTML
 		if err := b.sendMessage(userId, botMsg); err != nil {
+			return err
+		}
+	case models.TypeBarter:
+		// Отправка завершающего создания ad события сообщения.
+		if err := adEventCreateLastMessage(b, userId, adEvent); err != nil {
 			return err
 		}
 	default:

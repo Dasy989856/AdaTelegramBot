@@ -4,6 +4,7 @@ import (
 	"AdaTelegramBot/internal/models"
 	"database/sql"
 	"fmt"
+	"math"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -186,7 +187,18 @@ func (t *TelegramBotDB) GetRangeDataForStatistics(userId int64, typeAdEvent mode
 			d.Losses += adEvent.Price
 		case models.TypeMutual:
 			d.CountAdEventMutaul++
-			d.Profit += adEvent.Price
+			if adEvent.Price > 0 {
+				d.Profit += adEvent.Price
+			} else {
+				d.Losses += int64(math.Abs(float64(adEvent.Price)))
+			}
+		case models.TypeBarter:
+			d.CountAdEventBarter++
+			if adEvent.Price > 0 {
+				d.Profit += adEvent.Price
+			} else {
+				d.Losses += int64(math.Abs(float64(adEvent.Price)))
+			}
 		}
 	}
 
@@ -255,7 +267,7 @@ func parseDateDataBaseToTime(timeString string) (time.Time, error) {
 		return time.Time{}, fmt.Errorf("error create defaultTimeZoneInDataBase: %w", err)
 	}
 	t = t.In(defaultTimeZoneInDataBase)
-	
+
 	t, err = time.ParseInLocation(layout, timeString, defaultTimeZoneInDataBase)
 	if err != nil {
 		return t, fmt.Errorf("error parsing date: %w", err)

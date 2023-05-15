@@ -245,16 +245,6 @@ func fullDataAdEvent(ae *models.AdEvent) bool {
 		return false
 	}
 
-	if ae.DatePosting == "" {
-		log.Println("not found ae.DatePosting event")
-		return false
-	}
-
-	if ae.Type != models.TypeBuy && ae.DateDelete == "" {
-		log.Println("not found ae.DateDelete event")
-		return false
-	}
-
 	if ae.Partner == "" {
 		log.Println("not found ae.Partner event")
 		return false
@@ -262,6 +252,11 @@ func fullDataAdEvent(ae *models.AdEvent) bool {
 
 	if ae.Channel == "" {
 		log.Println("not found ae.Channel event")
+		return false
+	}
+
+	if ae.DatePosting == "" {
+		log.Println("not found ae.DatePosting event")
 		return false
 	}
 

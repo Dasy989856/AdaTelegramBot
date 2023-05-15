@@ -42,7 +42,7 @@ func cbqAdEventCreate(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	userId := cbq.Message.Chat.ID
 	messageId := cbq.Message.MessageID
 
-	text := "<b>Выберите тип события:</b>"
+	text := "<b>✍️ Выберите тип события:</b>"
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Продажа рекламы", "ad_event.create.sale"),
@@ -53,9 +53,9 @@ func cbqAdEventCreate(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Взаимный пиар", "ad_event.create.mutual"),
 		),
-		// tgbotapi.NewInlineKeyboardRow(
-		// 	tgbotapi.NewInlineKeyboardButtonData("Кастомное.", "ad_event.create.custom"),
-		// ),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Бартер", "ad_event.create.barter"),
+		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Назад", "ad_event"),
 		),
@@ -87,7 +87,7 @@ func cbqAdEventCreateSale(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 
 	b.db.SetStepUser(userId, "ad_event.create.partner")
 
-	text := `Теперь требуется отправить мне ссылку на покупателя.
+	text := `✍️ Теперь требуется отправить ссылку на покупателя.
 	<b>Пример:</b> @AdaTelegramBot или https://t.me/AdaTelegramBot`
 	botMsg := tgbotapi.NewEditMessageText(userId, messageId, text)
 	botMsg.ParseMode = tgbotapi.ModeHTML
@@ -113,7 +113,7 @@ func cbqAdEventCreateBuy(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 
 	b.db.SetStepUser(userId, "ad_event.create.partner")
 
-	text := `Теперь требуется отправить мне ссылку на продавца.
+	text := `✍️ Теперь требуется отправить ссылку на продавца.
 	<b>Пример:</b> @AdaTelegramBot или https://t.me/AdaTelegramBot`
 	botMsg := tgbotapi.NewEditMessageText(userId, messageId, text)
 	botMsg.ParseMode = tgbotapi.ModeHTML
@@ -140,13 +140,40 @@ func cbqAdEventCreateMutual(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 
 	b.db.SetStepUser(userId, "ad_event.create.partner")
 
-	text := `Теперь требуется отправить мне ссылку на пратнера по взаимному пиару.
+	text := `✍️ Теперь требуется отправить ссылку на пратнера по взаимному пиару.
 	<b>Пример:</b> @AdaTelegramBot или https://t.me/AdaTelegramBot`
 	botMsg := tgbotapi.NewEditMessageText(userId, messageId, text)
 	botMsg.ParseMode = tgbotapi.ModeHTML
 
 	if err := b.sendMessage(userId, botMsg); err != nil {
 		return fmt.Errorf("error edit msg in cbqAdEventCreateMutual: %w", err)
+	}
+
+	return nil
+}
+
+func cbqAdEventCreateBarter(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
+	userId := cbq.Message.Chat.ID
+	messageId := cbq.Message.MessageID
+
+	// Создание кэша ad события.
+	adEvent := models.AdEvent{
+		UserId:    userId,
+		CreatedAt: time.Now().Format("2006-01-02 15:04:05.999"),
+		Ready:     true,
+		Type:      models.TypeBarter,
+	}
+	b.adEventCreatingCache[userId] = &adEvent
+
+	b.db.SetStepUser(userId, "ad_event.create.partner")
+
+	text := `✍️ Теперь требуется отправить ссылку на пратнера по бартеру.
+	<b>Пример:</b> @AdaTelegramBot или https://t.me/AdaTelegramBot`
+	botMsg := tgbotapi.NewEditMessageText(userId, messageId, text)
+	botMsg.ParseMode = tgbotapi.ModeHTML
+
+	if err := b.sendMessage(userId, botMsg); err != nil {
+		return fmt.Errorf("error edit msg in cbqAdEventCreateBarter: %w", err)
 	}
 
 	return nil
@@ -185,7 +212,7 @@ func cbqAdEventCreateEnd(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	}
 
 	// Отправка сообщения.
-	text := "<b>🎊 Отлично! Событие добавлено! 🥳.</b>"
+	text := "<b>🎊 Отлично! Событие добавлено!</b>"
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),

@@ -101,6 +101,10 @@ func handlerCbqAdEvent(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 		if err := cbqAdEventCreateMutual(b, cbq); err != nil {
 			return err
 		}
+	case "ad_event.create.barter":
+		if err := cbqAdEventCreateBarter(b, cbq); err != nil {
+			return err
+		}
 	case "ad_event.create.end":
 		if err := cbqAdEventCreateEnd(b, cbq); err != nil {
 			return err
