@@ -1,7 +1,3 @@
----
-#FROM alpine:3.15.6
-# https://github.com/mfvanek/useful-sql-scripts/tree/master/running_pg_in_docker
-
 version: "2.4"
 
 services:

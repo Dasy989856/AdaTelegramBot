@@ -267,11 +267,3 @@ func fullDataAdEvent(ae *models.AdEvent) bool {
 
 	return true
 }
-
-// Парсинг time.Time в диапозон времени для кнопок.
-func parseTimeToRangeDateForButtonDayAndMonth(timeStart, timeEnd time.Time) (rangeDate string) {
-	return timeStart.Format("02.01.0 ") + "-" + timeEnd.Format(" 02.01.06")
-}
-func parseTimeToDateForButtonYear(timeStart, timeEnd time.Time) (rangeDate string) {
-	return timeStart.Format("2006")
-}

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -30,8 +31,8 @@ func parseCbq(cbq *tgbotapi.CallbackQuery) (path []string, data string, err erro
 }
 
 func (b *BotTelegram) handlerCbq(cbq *tgbotapi.CallbackQuery) error {
-	fmt.Println("CBQ: " + cbq.Data)
 	userId := cbq.Message.Chat.ID
+	fmt.Printf("Info %s: userId=%d; CBQ: %s;\n", time.Now().String(), userId, cbq.Data)
 	path, _, err := parseCbq(cbq)
 	if err != nil {
 		return err

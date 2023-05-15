@@ -3,6 +3,7 @@ package telegram
 import (
 	"fmt"
 	"log"
+	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/spf13/viper"
@@ -11,6 +12,7 @@ import (
 // Обработчик команд.
 func (b *BotTelegram) handlerCommand(msg *tgbotapi.Message) error {
 	userId := msg.Chat.ID
+	fmt.Printf("Info %s: userId=%d; CMD: %s;\n", time.Now().String(), userId, msg.Command())
 	switch msg.Command() {
 	case "start":
 		if err := b.cmdStart(msg); err != nil {

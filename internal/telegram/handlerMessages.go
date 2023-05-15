@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -13,6 +14,7 @@ import (
 // Обработчик сообщений.
 func (b *BotTelegram) handlerMessage(msg *tgbotapi.Message) error {
 	userId := msg.Chat.ID
+	fmt.Printf("Info %s: userId=%d; MSG: %s;\n", time.Now().String(), userId, msg.Text)
 	step, err := b.db.GetStepUser(userId)
 	if err != nil {
 		return err
