@@ -9,6 +9,85 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
+var (
+	// Страница 1
+	keyboard1 = tgbotapi.NewInlineKeyboardMarkup(
+		// tgbotapi.NewInlineKeyboardRow(
+		// 	tgbotapi.NewInlineKeyboardButtonData("Вчера", "statistics.brief.select?"+sdk.ParseTimesToRangeDate(sdk.GetTimeRangeThisYear())),
+		// 	tgbotapi.NewInlineKeyboardButtonData("Сегодня", "statistics"),
+		// 	tgbotapi.NewInlineKeyboardButtonData("Год", "statistics"),
+		// ),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("День", "statistics.brief.select?"+sdk.ParseTimesToRangeDate(sdk.GetTimeRangeThisYear())),
+			tgbotapi.NewInlineKeyboardButtonData("Месяц", "statistics"),
+			tgbotapi.NewInlineKeyboardButtonData("Год", "statistics"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Ввести вручную", "statistics"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Назад", "statistics"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
+		),
+	)
+
+	keyboard2 = tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Вреча", "statistics.brief"),
+			tgbotapi.NewInlineKeyboardButtonData("Сегодня", "statistics.brief"),
+			tgbotapi.NewInlineKeyboardButtonData("Завтра", "statistics.brief"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("1", "statistics.brief"),
+			tgbotapi.NewInlineKeyboardButtonData("2", "statistics.brief"),
+			tgbotapi.NewInlineKeyboardButtonData("3", "statistics.brief"),
+			tgbotapi.NewInlineKeyboardButtonData("4", "statistics.brief"),
+			tgbotapi.NewInlineKeyboardButtonData("5", "statistics.brief"),
+			tgbotapi.NewInlineKeyboardButtonData("6", "statistics.brief"),
+			tgbotapi.NewInlineKeyboardButtonData("7", "statistics.brief"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("8", "statistics.brief"),
+			tgbotapi.NewInlineKeyboardButtonData("9", "statistics.brief"),
+			tgbotapi.NewInlineKeyboardButtonData("10", "statistics.brief"),
+			tgbotapi.NewInlineKeyboardButtonData("11", "statistics.brief"),
+			tgbotapi.NewInlineKeyboardButtonData("12", "statistics.brief"),
+			tgbotapi.NewInlineKeyboardButtonData("13", "statistics.brief"),
+			tgbotapi.NewInlineKeyboardButtonData("14", "statistics.brief"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Назад", "start"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
+		),
+	)
+
+	keyboard3 = tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Текщая неделя", "statistics.brief"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("1.05 - 7.05", "statistics.brief"),
+			tgbotapi.NewInlineKeyboardButtonData("8.05 - 14.05", "statistics.brief"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("15.05 - 21.05", "statistics.brief"),
+			tgbotapi.NewInlineKeyboardButtonData("22.05 - 28.05", "statistics.brief"),
+			tgbotapi.NewInlineKeyboardButtonData("29.05 - 31.05", "statistics.brief"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Назад", "start"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
+		),
+	)
+	
+)
+
 func cbqStatistics(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	userId := cbq.Message.Chat.ID
 	messageId := cbq.Message.MessageID
@@ -63,6 +142,7 @@ func cbqStatisticsBrief(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 			tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
 		),
 	)
+
 	botMsg := tgbotapi.NewEditMessageTextAndMarkup(userId, messageId, text, keyboard)
 	botMsg.ParseMode = tgbotapi.ModeHTML
 

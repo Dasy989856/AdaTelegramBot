@@ -646,7 +646,7 @@ func cbqAdEventDelete(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	}
 
 	// Парсинг данных.
-	adEventId, err := parseCbqDataGetAdEventId(cbqData)
+	adEventId, err := cbqParseDataGetAdEventId(cbqData)
 	if err != nil {
 		return err
 	}
@@ -687,7 +687,7 @@ func cbqAdEventDeleteEnd(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	}
 
 	// Парсинг данных.
-	data, err := parseCbqDataGetAdEventId(cbqData)
+	data, err := cbqParseDataGetAdEventId(cbqData)
 	if err != nil {
 		return err
 	}
@@ -726,7 +726,7 @@ func cbqAdEventControl(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	}
 
 	// Парсинг данных cbq.
-	adEventId, err := parseCbqDataGetAdEventId(cbqData)
+	adEventId, err := cbqParseDataGetAdEventId(cbqData)
 	if err != nil {
 		return err
 	}
@@ -768,7 +768,7 @@ func cbqAdEventUpdateArrivalOfSubscribers(b *BotTelegram, cbq *tgbotapi.Callback
 	}
 
 	// Парсинг данных cbq.
-	adEventId, err := parseCbqDataGetAdEventId(cbqData)
+	adEventId, err := cbqParseDataGetAdEventId(cbqData)
 	if err != nil {
 		return err
 	}
@@ -794,19 +794,4 @@ func cbqAdEventUpdateArrivalOfSubscribers(b *BotTelegram, cbq *tgbotapi.Callback
 	}
 
 	return nil
-}
-
-func parseCbqDataGetAdEventId(cbqData string) (adEventId int64, err error) {
-	// ad_event.control?1
-	dataSlice := strings.Split(cbqData, ";")
-	if len(dataSlice) != 1 {
-		return 0, fmt.Errorf("dataSlice incorrect. dataSlice: %v", dataSlice)
-	}
-
-	id, err := strconv.ParseInt(dataSlice[0], 10, 64)
-	if err != nil {
-		return 0, fmt.Errorf("error pasge AdEventId: %w", err)
-	}
-
-	return id, nil
 }
