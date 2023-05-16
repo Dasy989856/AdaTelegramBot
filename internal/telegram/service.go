@@ -16,6 +16,7 @@ type BotTelegram struct {
 	db                   models.TelegramBotDB
 	adEventsCache        map[int64][][]models.AdEvent // Хэш-таблица полученных из БД событий.
 	adEventCreatingCache map[int64]*models.AdEvent    // Хэш-таблица создаваемых ad событий.
+	cbqDataCache         map[int64]string             // Кэш для cbq.
 }
 
 // Создание телеграмм бота.

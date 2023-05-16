@@ -129,6 +129,10 @@ func handlerCbqAdEvent(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 		if err := cbqAdEventViewMutual(b, cbq); err != nil {
 			return err
 		}
+	case "ad_event.view.barter":
+		if err := cbqAdEventViewBarter(b, cbq); err != nil {
+			return err
+		}
 	case "ad_event.view.select":
 		if err := cbqAdEventViewSelect(b, cbq); err != nil {
 			return err
