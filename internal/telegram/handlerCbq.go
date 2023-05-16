@@ -32,7 +32,7 @@ func parseCbq(cbq *tgbotapi.CallbackQuery) (path []string, data string, err erro
 
 func (b *BotTelegram) handlerCbq(cbq *tgbotapi.CallbackQuery) error {
 	userId := cbq.Message.Chat.ID
-	fmt.Printf("Info %s: userId=%d; CBQ=%s;\n", time.Now().Format("2006-01-02 15:04:05.999"), userId, cbq.Data)
+	fmt.Printf("Info %s; user=%s; CBQ=%s;\n", time.Now().Format("2006-01-02 15:04:05.999"), cbq.From.UserName, cbq.Data)
 	path, _, err := parseCbq(cbq)
 	if err != nil {
 		return err

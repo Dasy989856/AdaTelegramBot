@@ -38,6 +38,8 @@ func cbqAdEvent(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	return nil
 }
 
+// CBQ AdEventCreate
+
 func cbqAdEventCreate(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	userId := cbq.Message.Chat.ID
 	messageId := cbq.Message.MessageID
@@ -228,6 +230,8 @@ func cbqAdEventCreateEnd(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	delete(b.adEventCreatingCache, userId)
 	return nil
 }
+
+// CBQ AdEventView
 
 func cbqAdEventView(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	userId := cbq.Message.Chat.ID
@@ -582,6 +586,8 @@ func createPageRowForViewAdEvent(data *models.CbqDataForCbqAdEventViewSelect, ma
 	return tgbotapi.NewInlineKeyboardRow(buffButton...)
 }
 
+// CBQ AdEventDelete
+
 func cbqAdEventDelete(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	userId := cbq.Message.Chat.ID
 	messageId := cbq.Message.MessageID
@@ -675,6 +681,8 @@ func parseDataAdEventDelete(cbqData string) (adEventId int64, err error) {
 	return id, nil
 }
 
+// CBQ AdEventControl
+
 func cbqAdEventControl(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	userId := cbq.Message.Chat.ID
 	messageId := cbq.Message.MessageID
@@ -729,3 +737,6 @@ func parseDataAdEventControl(cbqData string) (adEventId int64, err error) {
 
 	return id, nil
 }
+
+
+// CBQ AdEventUpdate

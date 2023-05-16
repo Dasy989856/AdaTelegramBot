@@ -13,7 +13,7 @@ func createStaticsBriefText(d *models.DataForStatistics) string {
 <b>Продано реклам:</b> %d
 <b>Куплено реклам:</b> %d
 <b>Кол-во взаимных пиаров:</b> %d
-<b>Кол-во бартера:</b> %d
+<b>Кол-во бартеров:</b> %d
 <b>Прибыль:</b> %d
 <b>Траты:</b> %d
 <b>Чистая прибыль:</b> %d
@@ -64,6 +64,30 @@ func createTextAdEventDescription(a *models.AdEvent) (descriptionAdEvent string)
 
 // Создание текста оповещения для размещения рекламы.
 func createTextAlertForAdEventPosting(a *models.AdEvent, minutesLeftAlert int64) (descriptionAdEvent string) {
+	switch a.Type {
+	case models.TypeSale:
+		descriptionAdEvent = fmt.Sprintf(`
+		Через %s Вы должны разместить рекламу. Подробнее:
+		`+createTextAdEventDescription(a), getTextTime(minutesLeftAlert))
+	case models.TypeBuy:
+		descriptionAdEvent = fmt.Sprintf(`
+		Через %s Ваша реклама будет размещена. Подробнее:
+		`+createTextAdEventDescription(a), getTextTime(minutesLeftAlert))
+	case models.TypeMutual:
+		descriptionAdEvent = fmt.Sprintf(`
+		Через %s у Вас начнется взаимный пиар. Подробнее:
+		`+createTextAdEventDescription(a), getTextTime(minutesLeftAlert))
+	case models.TypeMutual:
+		descriptionAdEvent = fmt.Sprintf(`
+		Через %s Вы должны разместить бартер. Подробнее:
+		`+createTextAdEventDescription(a), getTextTime(minutesLeftAlert))
+	}
+
+	return descriptionAdEvent
+}
+
+// Создание текста оповещения для размещения рекламы.
+func createTextAlertForAdEventPostingOld(a *models.AdEvent, minutesLeftAlert int64) (descriptionAdEvent string) {
 	switch a.Type {
 	case models.TypeSale:
 		descriptionAdEvent = fmt.Sprintf(`
