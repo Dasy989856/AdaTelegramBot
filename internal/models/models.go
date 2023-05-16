@@ -34,6 +34,8 @@ var (
 	RegxUrlType2 = regexp.MustCompile(`^@[a-zA-Z0-9_]+$`)
 	// Example: 1000
 	RegxPrice = regexp.MustCompile(`[0-9]+`)
+	// Example: 1000
+	RegxArrivalOfSubscribers = regexp.MustCompile(`[0-9]+`)
 	// Example: 1
 	RegxId = regexp.MustCompile(`[0-9]+`)
 )
@@ -110,7 +112,7 @@ type TelegramBotDB interface {
 	// Удаление ad события.
 	AdEventDelete(eventId int64) error
 	// Обновление информации о приходе подписчиков.
-	UpdateSubscribesInAdEvent(eventId, subscribers int64) error
+	AdEventUpdateArrivalOfSubscribers(eventId, subscribers int64) error
 	// Установка шага пользователя.
 	SetStepUser(userId int64, step string) error
 	// Получение текущего шага пользователя.

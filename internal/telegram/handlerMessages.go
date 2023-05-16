@@ -52,7 +52,12 @@ func (b *BotTelegram) handlerMessage(msg *tgbotapi.Message) error {
 			b.sendRequestRestartMsg(userId)
 			return err
 		}
-
+	case "ad_event.update.arrival_of_subscribers":
+		if err := adEventUpdateArrivalOfSubscribers(b, msg); err != nil {
+			log.Println("error in adEventUpdateArrivalOfSubscribers: ", err)
+			b.sendRequestRestartMsg(userId)
+			return err
+		}
 	default:
 		botMsg := tgbotapi.NewMessage(userId, "Не получается обработать сообщение... 😔")
 		botMsg.ParseMode = tgbotapi.ModeHTML
@@ -448,5 +453,48 @@ func adEventCreateLastMessage(b *BotTelegram, userId int64, adEvent *models.AdEv
 	if err := b.sendMessage(userId, botMsg); err != nil {
 		return err
 	}
+	return nil
+}
+
+func adEventUpdateArrivalOfSubscribers(b *BotTelegram, msg *tgbotapi.Message) error {
+	userId := msg.Chat.ID
+
+	if !models.RegxArrivalOfSubscribers.MatchString(msg.Text) {
+		botMsg := tgbotapi.NewMessage(userId, `Вы отправили некорректный приход подписчиков, попробуйте снова.
+		<b>Пример:</b> 1000`)
+		botMsg.ParseMode = tgbotapi.ModeHTML
+		if err := b.sendMessage(userId, botMsg); err != nil {
+			return err
+		}
+		return nil
+	}
+
+	adEvent, err := b.getAdEventCreatingCache(userId)
+	if err != nil {
+		return err
+	}
+
+	arrivalOfSubscribers, err := strconv.ParseInt(msg.Text, 0, 64)
+	if err != nil {
+		return err
+	}
+	
+	if err := b.db.AdEventUpdateArrivalOfSubscribers(adEvent.Id, arrivalOfSubscribers); err != nil {
+		return err
+	}
+
+	botMsg := tgbotapi.NewMessage(userId, "🎉 <b>Приход подписчиков обновлен!</b>")
+	botMsg.ParseMode = tgbotapi.ModeHTML
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
+		),
+	)
+	botMsg.ReplyMarkup = keyboard
+
+	if err := b.sendMessage(userId, botMsg); err != nil {
+		return err
+	}
+
 	return nil
 }

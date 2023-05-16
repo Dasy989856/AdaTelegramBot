@@ -43,18 +43,18 @@ func cbqStatisticsBrief(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	text := "<b>🕐 Выберите период:</b>"
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Вчера", "statistics.brief.select?"+sdk.ParseTimeToRangeDate(sdk.GetTimeRangeYesterday())),
-			tgbotapi.NewInlineKeyboardButtonData("Сегодня", "statistics.brief.select?"+sdk.ParseTimeToRangeDate(sdk.GetTimeRangeToday())),
-			tgbotapi.NewInlineKeyboardButtonData("Завтра", "statistics.brief.select?"+sdk.ParseTimeToRangeDate(sdk.GetTimeRangeTomorrow())),
+			tgbotapi.NewInlineKeyboardButtonData("Вчера", "statistics.brief.select?"+sdk.ParseTimesToRangeDate(sdk.GetTimeRangeYesterday())),
+			tgbotapi.NewInlineKeyboardButtonData("Сегодня", "statistics.brief.select?"+sdk.ParseTimesToRangeDate(sdk.GetTimeRangeToday())),
+			tgbotapi.NewInlineKeyboardButtonData("Завтра", "statistics.brief.select?"+sdk.ParseTimesToRangeDate(sdk.GetTimeRangeTomorrow())),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Текущая неделя", "statistics.brief.select?"+sdk.ParseTimeToRangeDate(sdk.GetTimeRangeThisWeek())),
+			tgbotapi.NewInlineKeyboardButtonData("Текущая неделя", "statistics.brief.select?"+sdk.ParseTimesToRangeDate(sdk.GetTimeRangeThisWeek())),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Текущий месяц", "statistics.brief.select?"+sdk.ParseTimeToRangeDate(sdk.GetTimeRangeThisMonth())),
+			tgbotapi.NewInlineKeyboardButtonData("Текущий месяц", "statistics.brief.select?"+sdk.ParseTimesToRangeDate(sdk.GetTimeRangeThisMonth())),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Текущий год", "statistics.brief.select?"+sdk.ParseTimeToRangeDate(sdk.GetTimeRangeThisYear())),
+			tgbotapi.NewInlineKeyboardButtonData("Текущий год", "statistics.brief.select?"+sdk.ParseTimesToRangeDate(sdk.GetTimeRangeThisYear())),
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Назад", "statistics"),

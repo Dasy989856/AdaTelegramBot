@@ -39,8 +39,38 @@ func ParseTimeToUserDate(t time.Time) (string, error) {
 }
 
 // Парсинг time.Time в диапозон времени.
-func ParseTimeToRangeDate(timeStart, timeEnd time.Time) (rangeDate string) {
-	return timeStart.Format("02.01.2006 15:04") + ";" + timeEnd.Format("02.01.2006 15:04")
+func ParseTimesToRangeDate(timeStart, timeEnd time.Time) (rangeDate string) {
+	return timeStart.Format("02.01.2006 15:04") + " - " + timeEnd.Format("02.01.2006 15:04")
+}
+
+// Парсинг time.Time в диапозон дней.
+func ParseTimeToDay(timeStart, timeEnd time.Time) (rangeDate string) {
+	return timeStart.Format("02")
+}
+
+// Парсинг time.Time в диапозон дней.
+func ParseTimesToRangeDays(timeStart, timeEnd time.Time) (rangeDate string) {
+	return timeStart.Format("02.01") + " - " + timeEnd.Format("02.01")
+}
+
+// Парсинг time.Time в диапозон месяцев.
+func ParseTimeToMonth(t time.Time) (month string) {
+	return t.Month().String()
+}
+
+// Парсинг time.Time в диапозон месяцев.
+func ParseTimesToRangeMonth(timeStart, timeEnd time.Time) (rangeDate string) {
+	return timeStart.Format("01.06") + " - " + timeEnd.Format("01.06")
+}
+
+// Парсинг time.Time в год.
+func ParseTimeToYear(t time.Time) (year string) {
+	return t.Format("2006")
+}
+
+// Парсинг time.Time в диапозон годов.
+func ParseTimesToRangeYear(timeStart, timeEnd time.Time) (rangeDate string) {
+	return timeStart.Format("2006") + " - " + timeEnd.Format("2006")
 }
 
 // Возвращает метки времени, начало и конец вчерашнего дня.

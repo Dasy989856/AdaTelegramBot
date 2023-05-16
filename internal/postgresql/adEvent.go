@@ -253,7 +253,7 @@ func (t *TelegramBotDB) AdEventCreation(event *models.AdEvent) (eventId int64, e
 }
 
 // Добавление информации о приходе подписчиков.
-func (t *TelegramBotDB) UpdateSubscribesInAdEvent(eventId, subscribers int64) (err error) {
+func (t *TelegramBotDB) AdEventUpdateArrivalOfSubscribers(eventId, subscribers int64) (err error) {
 	tx := t.db.MustBegin()
 	defer func() {
 		if err != nil {
@@ -262,6 +262,8 @@ func (t *TelegramBotDB) UpdateSubscribesInAdEvent(eventId, subscribers int64) (e
 			tx.Commit()
 		}
 	}()
+
+	fmt.Println(eventId, subscribers)
 
 	sql := fmt.Sprintf(`UPDATE public.%s SET arrival_of_subscribers=$1
 	WHERE id=$2;`, adEventsTable)

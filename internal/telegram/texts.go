@@ -30,16 +30,22 @@ func createTextAdEventDescription(a *models.AdEvent) (descriptionAdEvent string)
 		- <b>Канал покупателя:</b> %s
 		- <b>Стоимость:</b> %d
 		- <b>Дата размещения:</b> %s
-		- <b>Дата удаления:</b> %s
-		`, a.Partner, a.Channel, a.Price, a.DatePosting, a.DateDelete)
+		- <b>Дата удаления:</b> %s`, a.Partner, a.Channel, a.Price, a.DatePosting, a.DateDelete)
+		if a.ArrivalOfSubscribers != 0 {
+			descriptionAdEvent = descriptionAdEvent + fmt.Sprintf(`
+			-<b>Приход подписчиков:</b> %d`, a.ArrivalOfSubscribers)
+		}
 	case models.TypeBuy:
 		descriptionAdEvent = fmt.Sprintf(`
 		- <b>Тип:</b> <u>покупка рекламы</u>
 		- <b>Продавец:</b> %s
 		- <b>Канал продавца:</b> %s
 		- <b>Стоимость:</b> %d
-		- <b>Дата размещения:</b> %s
-		`, a.Partner, a.Channel, a.Price, a.DatePosting)
+		- <b>Дата размещения:</b> %s`, a.Partner, a.Channel, a.Price, a.DatePosting)
+		if a.ArrivalOfSubscribers != 0 {
+			descriptionAdEvent = descriptionAdEvent + fmt.Sprintf(`
+			-<b>Приход подписчиков:</b> %d`, a.ArrivalOfSubscribers)
+		}
 	case models.TypeMutual:
 		descriptionAdEvent = fmt.Sprintf(`
 		- <b>Тип:</b> <u>взаимный пиар</u>
@@ -47,16 +53,22 @@ func createTextAdEventDescription(a *models.AdEvent) (descriptionAdEvent string)
 		- <b>Канал партнера:</b> %s
 		- <b>Стоимость:</b> %d
 		- <b>Дата размещения:</b> %s
-		- <b>Дата удаления:</b> %s
-		`, a.Partner, a.Channel, a.Price, a.DatePosting, a.DateDelete)
+		- <b>Дата удаления:</b> %s`, a.Partner, a.Channel, a.Price, a.DatePosting, a.DateDelete)
+		if a.ArrivalOfSubscribers != 0 {
+			descriptionAdEvent = descriptionAdEvent + fmt.Sprintf(`
+			-<b>Приход подписчиков:</b> %d`, a.ArrivalOfSubscribers)
+		}
 	case models.TypeBarter:
 		descriptionAdEvent = fmt.Sprintf(`
 		- <b>Тип:</b> <u>бартер</u>
 		- <b>Партнер:</b> %s
 		- <b>Канал/магазин партнера:</b> %s
 		- <b>Стоимость:</b> %d
-		- <b>Дата размещения:</b> %s
-		`, a.Partner, a.Channel, a.Price, a.DatePosting)
+		- <b>Дата размещения:</b> %s`, a.Partner, a.Channel, a.Price, a.DatePosting)
+		if a.ArrivalOfSubscribers != 0 {
+			descriptionAdEvent = descriptionAdEvent + fmt.Sprintf(`
+			-<b>Приход подписчиков:</b> %d`, a.ArrivalOfSubscribers)
+		}
 	}
 
 	return descriptionAdEvent
@@ -122,6 +134,30 @@ func createTextAlertForAdEventPostingOld(a *models.AdEvent, minutesLeftAlert int
 
 // Создание текста оповещения для удаления рекламы.
 func createTextAlertForAdEventDelete(a *models.AdEvent, minutesLeftAlert int64) (descriptionAdEvent string) {
+	switch a.Type {
+	case models.TypeSale:
+		descriptionAdEvent = fmt.Sprintf(`
+		Через %s Вы должны удалить рекламу. Подробнее:
+		`+createTextAdEventDescription(a), getTextTime(minutesLeftAlert))
+	case models.TypeBuy:
+		descriptionAdEvent = fmt.Sprintf(`
+		Через %s Ваша реклама будет удалена. Подробнее:
+		`+createTextAdEventDescription(a), getTextTime(minutesLeftAlert))
+	case models.TypeMutual:
+		descriptionAdEvent = fmt.Sprintf(`
+		Через %s у Вас закончится взаимный пиар. Подробнее:
+		`+createTextAdEventDescription(a), getTextTime(minutesLeftAlert))
+	case models.TypeBarter:
+		descriptionAdEvent = fmt.Sprintf(`
+		Через %s у Вас закончится бартер. Подробнее:
+		`+createTextAdEventDescription(a), getTextTime(minutesLeftAlert))
+	}
+
+	return descriptionAdEvent
+}
+
+// Создание текста оповещения для удаления рекламы.
+func createTextAlertForAdEventDeleteOld(a *models.AdEvent, minutesLeftAlert int64) (descriptionAdEvent string) {
 	switch a.Type {
 	case models.TypeSale:
 		descriptionAdEvent = fmt.Sprintf(`
