@@ -9,7 +9,6 @@ import (
 	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/spf13/viper"
 )
 
 func cbqAdEvent(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
@@ -18,7 +17,7 @@ func cbqAdEvent(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 
 	text := "<b>📓 Управление событиями:</b>"
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
-		tgbotapi.NewInlineKeyboardRow(
+		tgbotapi.NewInlineKeyboardRow( 
 			tgbotapi.NewInlineKeyboardButtonData("Создать событие", "ad_event.create"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
@@ -477,7 +476,7 @@ func cbqAdEventViewBarter(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 func cbqAdEventViewSelect(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	userId := cbq.Message.Chat.ID
 	messageId := cbq.Message.MessageID
-	lenRow := viper.GetInt("ada_bot.len_dinamic_row")
+	lenRow := 3
 
 	// Получение данных cbq.
 	_, cbqData, err := parseCbq(cbq)
@@ -552,7 +551,7 @@ func parseDataAdEventView(cbqData string) (data *models.CbqDataForCbqAdEventView
 }
 
 func createTextAndKeyboardForAdEventView(b *BotTelegram, userId int64, data *models.CbqDataForCbqAdEventViewSelect) (string, tgbotapi.InlineKeyboardMarkup, error) {
-	lenRow := viper.GetInt("ada_bot.len_dinamic_row")
+	lenRow := 3
 
 	adEvents, err := b.getAdEventsCache(userId)
 	if err != nil {
@@ -787,7 +786,6 @@ func cbqAdEventUpdateArrivalOfSubscribers(b *BotTelegram, cbq *tgbotapi.Callback
 
 	text := `✍️ Требуется отправить приход подписчиков:
 	<b>Пример:</b> 1000`
-
 
 	if err := b.sendMessage(userId, tgbotapi.NewEditMessageText(userId, messageId, text)); err != nil {
 		return fmt.Errorf("error edit msg in cbqAdEventUpdateArrivalOfSubscribers: %w", err)
