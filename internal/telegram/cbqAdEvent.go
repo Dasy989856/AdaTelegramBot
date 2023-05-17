@@ -731,17 +731,37 @@ func cbqAdEventControl(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 		return err
 	}
 
-	text := "Выберите действие:"
+	text := "📝 Выберите действие:"
 
 	deleteButtonData := fmt.Sprintf("ad_event.delete?%d", adEventId)
-	subscriberButtonData := fmt.Sprintf("ad_event.update.arrival_of_subscribers?%d", adEventId)
+	updatePartnerButtonData := fmt.Sprintf("ad_event.update.partner?%d", adEventId)
+	updateChannelButtonData := fmt.Sprintf("ad_event.update.channel?%d", adEventId)
+	updatePriceButtonData := fmt.Sprintf("ad_event.update.price?%d", adEventId)
+	datePostingButtonData := fmt.Sprintf("ad_event.update.date_posting?%d", adEventId)
+	dateDeleteButtonData := fmt.Sprintf("ad_event.update.date_delete?%d", adEventId)
+	arrivalOfSubscribersButtonData := fmt.Sprintf("ad_event.update.arrival_of_subscribers?%d", adEventId)
 
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Удалить", deleteButtonData),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Внести приход подписчиков", subscriberButtonData),
+			tgbotapi.NewInlineKeyboardButtonData("Изменить ссылку на партнера", updatePartnerButtonData),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Изменить ссылку на канал партнера", updateChannelButtonData),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Изменить стоимость", updatePriceButtonData),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Изменить дату и время размещения рекламы", datePostingButtonData),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Изменить дату и время удаления рекламы", dateDeleteButtonData),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Внести приход подписчиков", arrivalOfSubscribersButtonData),
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
@@ -756,6 +776,211 @@ func cbqAdEventControl(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 }
 
 // CBQ AdEventUpdate
+
+func cbqAdEventUpdatePartner(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
+	userId := cbq.Message.Chat.ID
+	messageId := cbq.Message.MessageID
+
+	// Получение данных cbq.
+	_, cbqData, err := parseCbq(cbq)
+	if err != nil {
+		return err
+	}
+
+	// Парсинг данных cbq.
+	adEventId, err := cbqParseDataGetAdEventId(cbqData)
+	if err != nil {
+		return err
+	}
+
+	// Добавление события в кэш.
+	adEvent, err := b.db.GetAdEvent(adEventId)
+	if err != nil {
+		return err
+	}
+	b.adEventCreatingCache[userId] = adEvent
+
+	// Установка шага.
+	if err := b.db.SetStepUser(userId, "ad_event.update.partner"); err != nil {
+		return err
+	}
+
+	text := `✍️ Требуется отправить новую ссылку на партнера:
+	<b>Пример:</b> @AdaTelegramBot или https://t.me/AdaTelegramBot`
+	botMsg := tgbotapi.NewEditMessageText(userId, messageId, text)
+	botMsg.ParseMode = tgbotapi.ModeHTML
+
+	if err := b.sendMessage(userId, botMsg); err != nil {
+		return fmt.Errorf("error edit msg in cbqAdEventUpdatePartner: %w", err)
+	}
+
+	return nil
+}
+
+func cbqAdEventUpdateChannel(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
+	userId := cbq.Message.Chat.ID
+	messageId := cbq.Message.MessageID
+
+	// Получение данных cbq.
+	_, cbqData, err := parseCbq(cbq)
+	if err != nil {
+		return err
+	}
+
+	// Парсинг данных cbq.
+	adEventId, err := cbqParseDataGetAdEventId(cbqData)
+	if err != nil {
+		return err
+	}
+
+	// Добавление события в кэш.
+	adEvent, err := b.db.GetAdEvent(adEventId)
+	if err != nil {
+		return err
+	}
+	b.adEventCreatingCache[userId] = adEvent
+
+	// Установка шага.
+	if err := b.db.SetStepUser(userId, "ad_event.update.channel"); err != nil {
+		return err
+	}
+
+	text := `✍️ Требуется отправить новую ссылку на канал:
+	<b>Пример:</b> @AdaTelegramBot или https://t.me/AdaTelegramBot`
+	botMsg := tgbotapi.NewEditMessageText(userId, messageId, text)
+	botMsg.ParseMode = tgbotapi.ModeHTML
+
+	if err := b.sendMessage(userId, botMsg); err != nil {
+		return fmt.Errorf("error edit msg in cbqAdEventUpdatePartner: %w", err)
+	}
+
+	return nil
+}
+
+func cbqAdEventUpdatePrice(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
+	userId := cbq.Message.Chat.ID
+	messageId := cbq.Message.MessageID
+
+	// Получение данных cbq.
+	_, cbqData, err := parseCbq(cbq)
+	if err != nil {
+		return err
+	}
+
+	// Парсинг данных cbq.
+	adEventId, err := cbqParseDataGetAdEventId(cbqData)
+	if err != nil {
+		return err
+	}
+
+	// Добавление события в кэш.
+	adEvent, err := b.db.GetAdEvent(adEventId)
+	if err != nil {
+		return err
+	}
+	b.adEventCreatingCache[userId] = adEvent
+
+	// Установка шага.
+	if err := b.db.SetStepUser(userId, "ad_event.update.price"); err != nil {
+		return err
+	}
+
+	text := `✍️ Требуется отправить новую стоимость:
+	<b>Пример:</b> 1000`
+	botMsg := tgbotapi.NewEditMessageText(userId, messageId, text)
+	botMsg.ParseMode = tgbotapi.ModeHTML
+
+	if err := b.sendMessage(userId, botMsg); err != nil {
+		return fmt.Errorf("error edit msg in cbqAdEventUpdatePartner: %w", err)
+	}
+
+	return nil
+}
+
+func cbqAdEventUpdateDatePosting(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
+	userId := cbq.Message.Chat.ID
+	messageId := cbq.Message.MessageID
+
+	// Получение данных cbq.
+	_, cbqData, err := parseCbq(cbq)
+	if err != nil {
+		return err
+	}
+
+	// Парсинг данных cbq.
+	adEventId, err := cbqParseDataGetAdEventId(cbqData)
+	if err != nil {
+		return err
+	}
+
+	// Добавление события в кэш.
+	adEvent, err := b.db.GetAdEvent(adEventId)
+	if err != nil {
+		return err
+	}
+	b.adEventCreatingCache[userId] = adEvent
+
+	// Установка шага.
+	if err := b.db.SetStepUser(userId, "ad_event.update.date_posting"); err != nil {
+		return err
+	}
+
+	exampleDate, err := getTextExampleDate()
+	if err != nil {
+		return err
+	}
+	text := `✍️ Теперь требуется отправить дату и время размещения рекламного поста.` + exampleDate
+	botMsg := tgbotapi.NewEditMessageText(userId, messageId, text)
+	botMsg.ParseMode = tgbotapi.ModeHTML
+
+	if err := b.sendMessage(userId, botMsg); err != nil {
+		return fmt.Errorf("error edit msg in cbqAdEventUpdatePartner: %w", err)
+	}
+	return nil
+}
+
+func cbqAdEventUpdateDateDelete(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
+	userId := cbq.Message.Chat.ID
+	messageId := cbq.Message.MessageID
+
+	// Получение данных cbq.
+	_, cbqData, err := parseCbq(cbq)
+	if err != nil {
+		return err
+	}
+
+	// Парсинг данных cbq.
+	adEventId, err := cbqParseDataGetAdEventId(cbqData)
+	if err != nil {
+		return err
+	}
+
+	// Добавление события в кэш.
+	adEvent, err := b.db.GetAdEvent(adEventId)
+	if err != nil {
+		return err
+	}
+	b.adEventCreatingCache[userId] = adEvent
+
+	// Установка шага.
+	if err := b.db.SetStepUser(userId, "ad_event.update.date_delete"); err != nil {
+		return err
+	}
+
+	exampleDate, err := getTextExampleDate()
+	if err != nil {
+		return err
+	}
+	text := `✍️ Теперь требуется отправить дату и время удаления рекламного поста.` + exampleDate
+	botMsg := tgbotapi.NewEditMessageText(userId, messageId, text)
+	botMsg.ParseMode = tgbotapi.ModeHTML
+
+	if err := b.sendMessage(userId, botMsg); err != nil {
+		return fmt.Errorf("error edit msg in cbqAdEventUpdatePartner: %w", err)
+	}
+
+	return nil
+}
 
 func cbqAdEventUpdateArrivalOfSubscribers(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	userId := cbq.Message.Chat.ID
@@ -787,10 +1012,11 @@ func cbqAdEventUpdateArrivalOfSubscribers(b *BotTelegram, cbq *tgbotapi.Callback
 
 	text := `✍️ Требуется отправить приход подписчиков:
 	<b>Пример:</b> 1000`
+	botMsg := tgbotapi.NewEditMessageText(userId, messageId, text)
+	botMsg.ParseMode = tgbotapi.ModeHTML
 
-
-	if err := b.sendMessage(userId, tgbotapi.NewEditMessageText(userId, messageId, text)); err != nil {
-		return fmt.Errorf("error edit msg in cbqAdEventUpdateArrivalOfSubscribers: %w", err)
+	if err := b.sendMessage(userId, botMsg); err != nil {
+		return fmt.Errorf("error edit msg in cbqAdEventUpdatePartner: %w", err)
 	}
 
 	return nil

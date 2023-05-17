@@ -252,8 +252,8 @@ func (t *TelegramBotDB) AdEventCreation(event *models.AdEvent) (eventId int64, e
 	return eventId, nil
 }
 
-// Добавление информации о приходе подписчиков.
-func (t *TelegramBotDB) AdEventUpdateArrivalOfSubscribers(eventId, subscribers int64) (err error) {
+// Обновление данные ad события.
+func (t *TelegramBotDB) AdEventUpdate(aE *models.AdEvent) (err error) {
 	tx := t.db.MustBegin()
 	defer func() {
 		if err != nil {
@@ -263,12 +263,78 @@ func (t *TelegramBotDB) AdEventUpdateArrivalOfSubscribers(eventId, subscribers i
 		}
 	}()
 
-	fmt.Println(eventId, subscribers)
+	if aE.Type != "" {
+		query := fmt.Sprintf(`UPDATE public.%s SET "type"=$1
+			WHERE id=$2;`, adEventsTable)
+		if _, err := tx.Exec(query, aE.Type, aE.Id); err != nil {
+			return fmt.Errorf("error update type. eventId%d: %w", aE.Id, err)
+		}
+	}
 
-	sql := fmt.Sprintf(`UPDATE public.%s SET arrival_of_subscribers=$1
-	WHERE id=$2;`, adEventsTable)
-	if _, err := tx.Exec(sql, subscribers, eventId); err != nil {
-		return fmt.Errorf("error update arrival_of_subscribers eventId%d: %w", eventId, err)
+	if aE.Partner != "" {
+		query := fmt.Sprintf(`UPDATE public.%s SET partner=$1
+			WHERE id=$2;`, adEventsTable)
+		if _, err := tx.Exec(query, aE.Partner, aE.Id); err != nil {
+			return fmt.Errorf("error update partner. eventId%d: %w", aE.Id, err)
+		}
+	}
+
+	if aE.Channel != "" {
+		query := fmt.Sprintf(`UPDATE public.%s SET channel=$1
+			WHERE id=$2;`, adEventsTable)
+		if _, err := tx.Exec(query, aE.Channel, aE.Id); err != nil {
+			return fmt.Errorf("error update channel. eventId%d: %w", aE.Id, err)
+		}
+	}
+
+	if aE.Price != 0 {
+		query := fmt.Sprintf(`UPDATE public.%s SET price=$1
+			WHERE id=$2;`, adEventsTable)
+		if _, err := tx.Exec(query, aE.Price, aE.Id); err != nil {
+			return fmt.Errorf("error update price. eventId%d: %w", aE.Id, err)
+		}
+	}
+
+	if aE.DatePosting != "" {
+		timeDatePosting, err := sdk.ParseUserDateToTime(aE.DatePosting)
+		if err != nil {
+			return err
+		}
+		aE.DatePosting, err = parseTimeToDateDataBase(timeDatePosting)
+		if err != nil {
+			return err
+		}
+
+		query := fmt.Sprintf(`UPDATE public.%s SET date_posting=$1
+			WHERE id=$2;`, adEventsTable)
+		if _, err := tx.Exec(query, aE.DatePosting, aE.Id); err != nil {
+			return fmt.Errorf("error update date_posting. eventId%d: %w", aE.Id, err)
+		}
+	}
+
+	if aE.DateDelete != "" {
+		timeDateDelete, err := sdk.ParseUserDateToTime(aE.DateDelete)
+		if err != nil {
+			return err
+		}
+		aE.DateDelete, err = parseTimeToDateDataBase(timeDateDelete)
+		if err != nil {
+			return err
+		}
+
+		query := fmt.Sprintf(`UPDATE public.%s SET date_delete=$1
+			WHERE id=$2;`, adEventsTable)
+		if _, err := tx.Exec(query, aE.DateDelete, aE.Id); err != nil {
+			return fmt.Errorf("error update date_delete. eventId%d: %w", aE.Id, err)
+		}
+	}
+
+	if aE.ArrivalOfSubscribers != 0 {
+		query := fmt.Sprintf(`UPDATE public.%s SET arrival_of_subscribers=$1
+		WHERE id=$2;`, adEventsTable)
+		if _, err := tx.Exec(query, aE.ArrivalOfSubscribers, aE.Id); err != nil {
+			return fmt.Errorf("error update arrival_of_subscribers. eventId%d: %w", aE.Id, err)
+		}
 	}
 
 	return nil

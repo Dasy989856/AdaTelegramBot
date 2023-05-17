@@ -85,6 +85,11 @@ type DataForStatistics struct {
 	Losses             int64 // Убытки.
 }
 
+// Сессия пользователя.
+type Session struct {
+	
+}
+
 // БД для телеграмм бота.
 type TelegramBotDB interface {
 	// Закрытие БД.
@@ -112,7 +117,7 @@ type TelegramBotDB interface {
 	// Удаление ad события.
 	AdEventDelete(eventId int64) error
 	// Обновление информации о приходе подписчиков.
-	AdEventUpdateArrivalOfSubscribers(eventId, subscribers int64) error
+	AdEventUpdate(adEvent *AdEvent) error
 	// Установка шага пользователя.
 	SetStepUser(userId int64, step string) error
 	// Получение текущего шага пользователя.

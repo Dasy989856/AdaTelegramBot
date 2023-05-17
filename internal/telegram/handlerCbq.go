@@ -149,6 +149,26 @@ func handlerCbqAdEvent(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 		if err := cbqAdEventDeleteEnd(b, cbq); err != nil {
 			return err
 		}
+	case "ad_event.update.partner":
+		if err := cbqAdEventUpdatePartner(b, cbq); err != nil {
+			return err
+		}
+	case "ad_event.update.channel":
+		if err := cbqAdEventUpdateChannel(b, cbq); err != nil {
+			return err
+		}
+	case "ad_event.update.price":
+		if err := cbqAdEventUpdatePrice(b, cbq); err != nil {
+			return err
+		}
+	case "ad_event.update.date_posting":
+		if err := cbqAdEventUpdateDatePosting(b, cbq); err != nil {
+			return err
+		}
+	case "ad_event.update.date_delete":
+		if err := cbqAdEventUpdateDateDelete(b, cbq); err != nil {
+			return err
+		}
 	case "ad_event.update.arrival_of_subscribers":
 		if err := cbqAdEventUpdateArrivalOfSubscribers(b, cbq); err != nil {
 			return err

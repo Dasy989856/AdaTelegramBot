@@ -39,7 +39,7 @@ func NewBotTelegram(db models.TelegramBotDB) (*BotTelegram, error) {
 }
 
 // Инициализация канала событий.
-func (b *BotTelegram) InitUpdatesChanel() tgbotapi.UpdatesChannel {
+func (b *BotTelegram) InitUpdatesChannel() tgbotapi.UpdatesChannel {
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 30
 	return b.bot.GetUpdatesChan(u)
@@ -89,13 +89,13 @@ func (b *BotTelegram) handlerUpdates(updates tgbotapi.UpdatesChannel) error {
 		}
 	}
 
-	return fmt.Errorf("updates chanel closed")
+	return fmt.Errorf("updates channel closed")
 }
 
 // Запуск апдейтера.
 func (b *BotTelegram) StartBotUpdater() error {
 	log.Printf("Authorized on account %s", b.bot.Self.UserName)
-	updates := b.InitUpdatesChanel()
+	updates := b.InitUpdatesChannel()
 	go b.handlerAlerts()
 	if err := b.handlerUpdates(updates); err != nil {
 		return err
