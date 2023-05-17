@@ -156,41 +156,6 @@ func createTextAlertForAdEventDelete(a *models.AdEvent, minutesLeftAlert int64) 
 	return descriptionAdEvent
 }
 
-// Создание текста оповещения для удаления рекламы.
-func createTextAlertForAdEventDeleteOld(a *models.AdEvent, minutesLeftAlert int64) (descriptionAdEvent string) {
-	switch a.Type {
-	case models.TypeSale:
-		descriptionAdEvent = fmt.Sprintf(`
-		Через %s Вы должны удалить рекламу. Подробнее:
-		- <b>Покупатель:</b> %s
-		- <b>Канал покупателя:</b> %s
-		- <b>Цена продажи:</b> %d
-		- <b>Дата размещения рекламы:</b> %s
-		- <b>Дата удаления рекламы:</b> %s
-		`, getTextTime(minutesLeftAlert), a.Partner, a.Channel, a.Price, a.DatePosting, a.DateDelete)
-	case models.TypeBuy:
-		descriptionAdEvent = fmt.Sprintf(`
-		Через %s Ваша реклама будет удалена. Подробнее:
-		- <b>Продавец:</b> %s
-		- <b>Канал продавца:</b> %s
-		- <b>Цена покупки:</b> %d
-		- <b>Дата размещения рекламы:</b> %s
-		- <b>Дата удаления рекламы:</b> %s
-		`, getTextTime(minutesLeftAlert), a.Partner, a.Channel, a.Price, a.DatePosting, a.DateDelete)
-	case models.TypeMutual:
-		descriptionAdEvent = fmt.Sprintf(`
-		Через %s у Вас закончится взаимный пиар. Подробнее:
-		- <b>Партнер по взаимному пиару:</b> %s
-		- <b>Канал партнера по взаимному пиару:</b> %s
-		- <b>Цена взаимного пиара:</b> %d
-		- <b>Дата размещения рекламы:</b> %s
-		- <b>Дата удаления рекламы:</b> %s
-		`, getTextTime(minutesLeftAlert), a.Partner, a.Channel, a.Price, a.DatePosting, a.DateDelete)
-	}
-
-	return descriptionAdEvent
-}
-
 // Получение правильного текста в зависимости от времени.
 func getTextTime(minutes int64) string {
 	var textTime string
