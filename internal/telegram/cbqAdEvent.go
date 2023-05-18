@@ -788,8 +788,17 @@ func cbqAdEventUpdatePartner(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error 
 
 	text := `✍️ Требуется отправить новую ссылку на партнера:
 	<b>Пример:</b> @AdaTelegramBot или https://t.me/AdaTelegramBot`
-	botMsg := tgbotapi.NewEditMessageText(userId, messageId, text)
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Назад", fmt.Sprintf("ad_event.control?%d", adEvent.Id)),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
+		),
+	)
+	botMsg := tgbotapi.NewEditMessageTextAndMarkup(userId, messageId, text, keyboard)
 	botMsg.ParseMode = tgbotapi.ModeHTML
+	
 
 	if err := b.sendMessage(userId, botMsg); err != nil {
 		return fmt.Errorf("error edit msg in cbqAdEventUpdatePartner: %w", err)
@@ -828,7 +837,15 @@ func cbqAdEventUpdateChannel(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error 
 
 	text := `✍️ Требуется отправить новую ссылку на канал:
 	<b>Пример:</b> @AdaTelegramBot или https://t.me/AdaTelegramBot`
-	botMsg := tgbotapi.NewEditMessageText(userId, messageId, text)
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Назад", fmt.Sprintf("ad_event.control?%d", adEvent.Id)),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
+		),
+	)
+	botMsg := tgbotapi.NewEditMessageTextAndMarkup(userId, messageId, text, keyboard)
 	botMsg.ParseMode = tgbotapi.ModeHTML
 
 	if err := b.sendMessage(userId, botMsg); err != nil {
@@ -868,7 +885,15 @@ func cbqAdEventUpdatePrice(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 
 	text := `✍️ Требуется отправить новую стоимость:
 	<b>Пример:</b> 1000`
-	botMsg := tgbotapi.NewEditMessageText(userId, messageId, text)
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Назад", fmt.Sprintf("ad_event.control?%d", adEvent.Id)),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
+		),
+	)
+	botMsg := tgbotapi.NewEditMessageTextAndMarkup(userId, messageId, text, keyboard)
 	botMsg.ParseMode = tgbotapi.ModeHTML
 
 	if err := b.sendMessage(userId, botMsg); err != nil {
@@ -911,7 +936,15 @@ func cbqAdEventUpdateDatePosting(b *BotTelegram, cbq *tgbotapi.CallbackQuery) er
 		return err
 	}
 	text := `✍️ Теперь требуется отправить дату и время размещения рекламного поста.` + exampleDate
-	botMsg := tgbotapi.NewEditMessageText(userId, messageId, text)
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Назад", fmt.Sprintf("ad_event.control?%d", adEvent.Id)),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
+		),
+	)
+	botMsg := tgbotapi.NewEditMessageTextAndMarkup(userId, messageId, text, keyboard)
 	botMsg.ParseMode = tgbotapi.ModeHTML
 
 	if err := b.sendMessage(userId, botMsg); err != nil {
@@ -953,9 +986,16 @@ func cbqAdEventUpdateDateDelete(b *BotTelegram, cbq *tgbotapi.CallbackQuery) err
 		return err
 	}
 	text := `✍️ Теперь требуется отправить дату и время удаления рекламного поста.` + exampleDate
-	botMsg := tgbotapi.NewEditMessageText(userId, messageId, text)
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Назад", fmt.Sprintf("ad_event.control?%d", adEvent.Id)),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
+		),
+	)
+	botMsg := tgbotapi.NewEditMessageTextAndMarkup(userId, messageId, text, keyboard)
 	botMsg.ParseMode = tgbotapi.ModeHTML
-
 	if err := b.sendMessage(userId, botMsg); err != nil {
 		return fmt.Errorf("error edit msg in cbqAdEventUpdatePartner: %w", err)
 	}
@@ -993,7 +1033,15 @@ func cbqAdEventUpdateArrivalOfSubscribers(b *BotTelegram, cbq *tgbotapi.Callback
 
 	text := `✍️ Требуется отправить приход подписчиков:
 	<b>Пример:</b> 1000`
-	botMsg := tgbotapi.NewEditMessageText(userId, messageId, text)
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Назад", fmt.Sprintf("ad_event.control?%d", adEvent.Id)),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
+		),
+	)
+	botMsg := tgbotapi.NewEditMessageTextAndMarkup(userId, messageId, text, keyboard)
 	botMsg.ParseMode = tgbotapi.ModeHTML
 
 	if err := b.sendMessage(userId, botMsg); err != nil {
