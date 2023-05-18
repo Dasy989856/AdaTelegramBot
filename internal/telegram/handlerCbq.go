@@ -38,6 +38,9 @@ func (b *BotTelegram) handlerCbq(cbq *tgbotapi.CallbackQuery) error {
 		return err
 	}
 
+	// Инициализация сессии.
+	b.initSessions(userId)
+
 	switch path[0] {
 	case "start":
 		if err := b.cmdStart(cbq.Message); err != nil {
@@ -81,10 +84,6 @@ func handlerCbqAdEvent(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	}
 
 	switch strings.Join(path, ".") {
-	case "ad_event":
-		if err := cbqAdEvent(b, cbq); err != nil {
-			return err
-		}
 	case "ad_event.create":
 		if err := cbqAdEventCreate(b, cbq); err != nil {
 			return err

@@ -11,32 +11,6 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-func cbqAdEvent(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
-	userId := cbq.Message.Chat.ID
-	messageId := cbq.Message.MessageID
-
-	text := "<b>📓 Управление событиями:</b>"
-	keyboard := tgbotapi.NewInlineKeyboardMarkup(
-		tgbotapi.NewInlineKeyboardRow( 
-			tgbotapi.NewInlineKeyboardButtonData("Создать событие", "ad_event.create"),
-		),
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Просмотреть события", "ad_event.view"),
-		),
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
-		),
-	)
-	botMsg := tgbotapi.NewEditMessageTextAndMarkup(userId, messageId, text, keyboard)
-	botMsg.ParseMode = tgbotapi.ModeHTML
-
-	if err := b.sendMessage(userId, botMsg); err != nil {
-		return fmt.Errorf("error edit msg in cbqAdEventMenu: %w", err)
-	}
-
-	return nil
-}
-
 // CBQ AdEventCreate
 
 func cbqAdEventCreate(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
@@ -56,9 +30,6 @@ func cbqAdEventCreate(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Бартер", "ad_event.create.barter"),
-		),
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Назад", "ad_event"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
@@ -238,9 +209,9 @@ func cbqAdEventView(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 
 	text := "Выберите тип событий:"
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Все типы", "ad_event.view.any"),
-		),
+		// tgbotapi.NewInlineKeyboardRow(
+		// 	tgbotapi.NewInlineKeyboardButtonData("Все типы", "ad_event.view.any"),
+		// ),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Проданная реклама", "ad_event.view.sale"),
 		),
@@ -252,9 +223,6 @@ func cbqAdEventView(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Бартер", "ad_event.view.barter"),
-		),
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Назад", "ad_event"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
@@ -484,6 +452,9 @@ func cbqAdEventViewSelect(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 		return err
 	}
 
+	// TODO Сохранение в кэш выборки ( удалить как появится сохранение в БД)
+	b.sessions[userId].Cache["cbqAdEventViewSelectData"] = cbqData
+
 	// Парсинг данных.
 	data, err := parseDataAdEventView(cbqData)
 	if err != nil {
@@ -632,6 +603,76 @@ func createPageRowForViewAdEvent(data *models.CbqDataForCbqAdEventViewSelect, ma
 	return tgbotapi.NewInlineKeyboardRow(buffButton...)
 }
 
+// CBQ AdEventControl
+
+func cbqAdEventControl(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
+	userId := cbq.Message.Chat.ID
+	messageId := cbq.Message.MessageID
+
+	// Получение данных cbq.
+	_, cbqData, err := parseCbq(cbq)
+	if err != nil {
+		return err
+	}
+
+	// Парсинг данных cbq.
+	adEventId, err := cbqParseDataGetAdEventId(cbqData)
+	if err != nil {
+		return err
+	}
+
+	text := "📝 Выберите действие:"
+
+	deleteButtonData := fmt.Sprintf("ad_event.delete?%d", adEventId)
+	updatePartnerButtonData := fmt.Sprintf("ad_event.update.partner?%d", adEventId)
+	updateChannelButtonData := fmt.Sprintf("ad_event.update.channel?%d", adEventId)
+	updatePriceButtonData := fmt.Sprintf("ad_event.update.price?%d", adEventId)
+	datePostingButtonData := fmt.Sprintf("ad_event.update.date_posting?%d", adEventId)
+	dateDeleteButtonData := fmt.Sprintf("ad_event.update.date_delete?%d", adEventId)
+	arrivalOfSubscribersButtonData := fmt.Sprintf("ad_event.update.arrival_of_subscribers?%d", adEventId)
+
+	cbqAdEventViewSelectData, ok := b.sessions[userId].Cache["cbqAdEventViewSelectData"].(string)
+	if !ok {
+		return fmt.Errorf("error get cbqAdEventViewSelectData from cache")
+	}
+
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Удалить", deleteButtonData),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Изменить ссылку на партнера", updatePartnerButtonData),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Изменить ссылку на канал партнера", updateChannelButtonData),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Изменить стоимость", updatePriceButtonData),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Изменить дату и время размещения рекламы", datePostingButtonData),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Изменить дату и время удаления рекламы", dateDeleteButtonData),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Внести приход подписчиков", arrivalOfSubscribersButtonData),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Назад", "ad_event.view.select?"+cbqAdEventViewSelectData),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
+		),
+	)
+
+	if err := b.sendMessage(userId, tgbotapi.NewEditMessageTextAndMarkup(userId, messageId, text, keyboard)); err != nil {
+		return fmt.Errorf("error edit msg in cbqAdEventView: %w", err)
+	}
+
+	return nil
+}
+
 // CBQ AdEventDelete
 
 func cbqAdEventDelete(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
@@ -662,7 +703,10 @@ func cbqAdEventDelete(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 			tgbotapi.NewInlineKeyboardButtonData("Да", "ad_event.delete.end?"+strconv.Itoa(int(adEventId))),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Отменить", "start"),
+			tgbotapi.NewInlineKeyboardButtonData("Назад", fmt.Sprintf("ad_event.control?%d", adEventId)),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
 		),
 	)
 
@@ -686,13 +730,13 @@ func cbqAdEventDeleteEnd(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	}
 
 	// Парсинг данных.
-	data, err := cbqParseDataGetAdEventId(cbqData)
+	adEventId, err := cbqParseDataGetAdEventId(cbqData)
 	if err != nil {
 		return err
 	}
 
 	// Удаление события.
-	if err := b.db.AdEventDelete(data); err != nil {
+	if err := b.db.AdEventDelete(adEventId); err != nil {
 		return err
 	}
 
@@ -707,68 +751,6 @@ func cbqAdEventDeleteEnd(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	botMsg.DisableWebPagePreview = true
 	if err := b.sendMessage(userId, botMsg); err != nil {
 		return fmt.Errorf("error edit msg in cbqAdEventViewAnyAll: %w", err)
-	}
-
-	return nil
-}
-
-// CBQ AdEventControl
-
-func cbqAdEventControl(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
-	userId := cbq.Message.Chat.ID
-	messageId := cbq.Message.MessageID
-
-	// Получение данных cbq.
-	_, cbqData, err := parseCbq(cbq)
-	if err != nil {
-		return err
-	}
-
-	// Парсинг данных cbq.
-	adEventId, err := cbqParseDataGetAdEventId(cbqData)
-	if err != nil {
-		return err
-	}
-
-	text := "📝 Выберите действие:"
-
-	deleteButtonData := fmt.Sprintf("ad_event.delete?%d", adEventId)
-	updatePartnerButtonData := fmt.Sprintf("ad_event.update.partner?%d", adEventId)
-	updateChannelButtonData := fmt.Sprintf("ad_event.update.channel?%d", adEventId)
-	updatePriceButtonData := fmt.Sprintf("ad_event.update.price?%d", adEventId)
-	datePostingButtonData := fmt.Sprintf("ad_event.update.date_posting?%d", adEventId)
-	dateDeleteButtonData := fmt.Sprintf("ad_event.update.date_delete?%d", adEventId)
-	arrivalOfSubscribersButtonData := fmt.Sprintf("ad_event.update.arrival_of_subscribers?%d", adEventId)
-
-	keyboard := tgbotapi.NewInlineKeyboardMarkup(
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Удалить", deleteButtonData),
-		),
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Изменить ссылку на партнера", updatePartnerButtonData),
-		),
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Изменить ссылку на канал партнера", updateChannelButtonData),
-		),
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Изменить стоимость", updatePriceButtonData),
-		),
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Изменить дату и время размещения рекламы", datePostingButtonData),
-		),
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Изменить дату и время удаления рекламы", dateDeleteButtonData),
-		),
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Внести приход подписчиков", arrivalOfSubscribersButtonData),
-		),
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
-		),
-	)
-
-	if err := b.sendMessage(userId, tgbotapi.NewEditMessageTextAndMarkup(userId, messageId, text, keyboard)); err != nil {
-		return fmt.Errorf("error edit msg in cbqAdEventView: %w", err)
 	}
 
 	return nil

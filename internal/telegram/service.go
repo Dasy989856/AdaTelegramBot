@@ -14,9 +14,9 @@ import (
 type BotTelegram struct {
 	bot                  *tgbotapi.BotAPI
 	db                   models.TelegramBotDB
-	adEventsCache        map[int64][][]models.AdEvent     // Хэш-таблица полученных из БД событий.
-	adEventCreatingCache map[int64]*models.AdEvent        // Хэш-таблица создаваемых ad событий.
-	userDataCache        map[int64]map[string]interface{} // Кэш пользователя.
+	sessions             map[int64]*models.Session
+	adEventsCache        map[int64][][]models.AdEvent // Хэш-таблица полученных из БД событий.
+	adEventCreatingCache map[int64]*models.AdEvent    // Хэш-таблица создаваемых ad событий.
 }
 
 // Создание телеграмм бота.
@@ -31,9 +31,9 @@ func NewBotTelegram(db models.TelegramBotDB) (*BotTelegram, error) {
 	tgBot := BotTelegram{
 		bot:                  bot,
 		db:                   db,
+		sessions:             make(map[int64]*models.Session),
 		adEventsCache:        make(map[int64][][]models.AdEvent),
 		adEventCreatingCache: make(map[int64]*models.AdEvent),
-		userDataCache:        make(map[int64]map[string]interface{}),
 	}
 
 	return &tgBot, nil
@@ -49,7 +49,6 @@ func (b *BotTelegram) InitUpdatesChannel() tgbotapi.UpdatesChannel {
 // Обработчики сообщений.
 func (b *BotTelegram) handlerUpdates(updates tgbotapi.UpdatesChannel) error {
 	for update := range updates {
-
 		// Обработка команд.
 		if update.Message != nil && update.Message.IsCommand() {
 			// Добавление сообщения пользователя в БД.
@@ -263,4 +262,14 @@ func fullDataAdEvent(ae *models.AdEvent) bool {
 	}
 
 	return true
+}
+
+// Иницализация сессии
+func (b *BotTelegram) initSessions(userId int64) {
+	_, ok := b.sessions[userId]
+	if !ok {
+		b.sessions[userId] = &models.Session{
+			Cache: make(map[string]interface{}),
+		}
+	}
 }

@@ -49,7 +49,7 @@ func (b *BotTelegram) cmdStart(msg *tgbotapi.Message) error {
 		return err
 	}
 
-	// Отправка рекламы.
+	// Отправка adMsg.
 	if viper.GetBool("ada_bot.ad_message") {
 		if err := b.sendAdMessage(userId); err != nil {
 			return err
@@ -60,18 +60,9 @@ func (b *BotTelegram) cmdStart(msg *tgbotapi.Message) error {
 		}
 	}
 
-	// TODO Отправка информации.
-	// if viper.GetBool("ada_bot.info_message") {
-	// 	if err := b.sendAdMessage(userId); err != nil {
-	// 		return err
-	// 	}
-	// } else {
-	// 	if err := b.db.UpdateAdMessageId(userId, 0); err != nil {
-	// 		return err
-	// 	}
-	// }
+	// TODO Отправка infoMsg.
 
-	// Отправка меню /start.
+	// Отправка startMsg.
 	if err := b.sendStartMessage(userId); err != nil {
 		return err
 	}
@@ -95,11 +86,11 @@ func (b *BotTelegram) sendStartMessage(userId int64) error {
 	text := `📓 <b>Возможности телеграмм бота:</b>`
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Управление событиями", "ad_event"),
+			tgbotapi.NewInlineKeyboardButtonData("Создать событие", "ad_event.create"),
 		),
-		// tgbotapi.NewInlineKeyboardRow(
-		// 	tgbotapi.NewInlineKeyboardButtonData("Биржа рекламных интеграций.", "exchange"),
-		// ),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Просмотреть события", "ad_event.view"),
+		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Статистика", "statistics"),
 		),
