@@ -513,6 +513,9 @@ func adEventUpdatePartner(b *BotTelegram, msg *tgbotapi.Message) error {
 	botMsg.ParseMode = tgbotapi.ModeHTML
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Назад", fmt.Sprintf("ad_event.control?%d", adEvent.Id)),
+		),
+		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
 		),
 	)
@@ -551,6 +554,9 @@ func adEventUpdateChannel(b *BotTelegram, msg *tgbotapi.Message) error {
 	botMsg := tgbotapi.NewMessage(userId, "🎉 <b>Ссылка на канал обновлена!</b>")
 	botMsg.ParseMode = tgbotapi.ModeHTML
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Назад", fmt.Sprintf("ad_event.control?%d", adEvent.Id)),
+		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
 		),
@@ -597,6 +603,9 @@ func adEventUpdatePrice(b *BotTelegram, msg *tgbotapi.Message) error {
 	botMsg.ParseMode = tgbotapi.ModeHTML
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Назад", fmt.Sprintf("ad_event.control?%d", adEvent.Id)),
+		),
+		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
 		),
 	)
@@ -639,6 +648,9 @@ func adEventUpdateDatePosting(b *BotTelegram, msg *tgbotapi.Message) error {
 	botMsg := tgbotapi.NewMessage(userId, "🎉 <b>Дата и время размещения рекламы обновлены!</b>")
 	botMsg.ParseMode = tgbotapi.ModeHTML
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Назад", fmt.Sprintf("ad_event.control?%d", adEvent.Id)),
+		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
 		),
@@ -683,6 +695,9 @@ func adEventUpdateDateDelete(b *BotTelegram, msg *tgbotapi.Message) error {
 	botMsg.ParseMode = tgbotapi.ModeHTML
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Назад", fmt.Sprintf("ad_event.control?%d", adEvent.Id)),
+		),
+		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
 		),
 	)
@@ -726,6 +741,9 @@ func adEventUpdateArrivalOfSubscribers(b *BotTelegram, msg *tgbotapi.Message) er
 	botMsg := tgbotapi.NewMessage(userId, "🎉 <b>Приход подписчиков обновлен!</b>")
 	botMsg.ParseMode = tgbotapi.ModeHTML
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Назад", fmt.Sprintf("ad_event.control?%d", adEvent.Id)),
+		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
 		),

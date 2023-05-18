@@ -46,10 +46,10 @@ func (t *TelegramBotDB) GetRangeAdEvents(typeAdEvent models.TypeAdEvent, startTi
 			tx.Commit()
 		}
 	}()
-	//  SELECT id, created_at, user_id, "type", partner, channel, price,
-	// 	date_posting, date_delete, arrival_of_subscribers
-	// 	FROM public.ad_events WHERE "type"='sale' AND ((date_posting BETWEEN '2023-05-13 00:00:00 +0300' AND '23:59:59.999999999 +0300')
-	// 	OR (date_delete BETWEEN '2023-05-13 00:00:00 +0300' AND '23:59:59.999999999 +0300'));
+	// SELECT id, created_at, user_id, "type", partner, channel, price,
+	// date_posting, date_delete, arrival_of_subscribers
+	// FROM public.ad_events WHERE "type"='sale' AND ((date_posting BETWEEN '2022-05-13 00:00:00 +0300' AND '2024-05-13 00:00:00 +0300')
+	// OR (date_delete BETWEEN '2022-05-13 00:00:00 +0300' AND '2024-05-13 00:00:00 +0300')) ORDER BY date_posting ASC;
 
 	listAdEvent = make([]models.AdEvent, 0, 50)
 	startDate, err := parseTimeToDateDataBase(startTime)
@@ -64,8 +64,8 @@ func (t *TelegramBotDB) GetRangeAdEvents(typeAdEvent models.TypeAdEvent, startTi
 	if typeAdEvent == models.TypeAny {
 		query := fmt.Sprintf(`SELECT id, created_at, user_id, "type", partner, channel, price,
 		date_posting, date_delete, arrival_of_subscribers
-		FROM public.%s WHERE (date_posting BETWEEN $1 AND $2)
-		OR (date_delete BETWEEN $2 AND $1);`, adEventsTable)
+		FROM public.%s WHERE ((date_posting BETWEEN $1 AND $2)
+		OR (date_delete BETWEEN $2 AND $1)) ORDER BY date_posting ASC;`, adEventsTable)
 
 		rows, err = tx.Query(query, startDate, endDate)
 		if err != nil {
@@ -75,7 +75,7 @@ func (t *TelegramBotDB) GetRangeAdEvents(typeAdEvent models.TypeAdEvent, startTi
 		query := fmt.Sprintf(`SELECT id, created_at, user_id, "type", partner, channel, price,
 		date_posting, date_delete, arrival_of_subscribers
 		FROM public.%s WHERE "type"=$3 AND ((date_posting BETWEEN $1 AND $2)
-		OR (date_delete BETWEEN $1 AND $2));`, adEventsTable)
+		OR (date_delete BETWEEN $1 AND $2)) ORDER BY date_posting ASC;`, adEventsTable)
 
 		rows, err = tx.Query(query, startDate, endDate, typeAdEvent)
 		if err != nil {
@@ -113,7 +113,7 @@ func (t *TelegramBotDB) GetAdEventsOfUser(userId int64, typeAdEvent models.TypeA
 	if typeAdEvent == models.TypeAny {
 		query := fmt.Sprintf(`SELECT id, created_at, user_id, "type", partner, channel, price,
 		date_posting, date_delete, arrival_of_subscribers
-		FROM public.%s WHERE user_id=$1;`, adEventsTable)
+		FROM public.%s WHERE user_id=$1 ORDER BY date_posting ASC;`, adEventsTable)
 
 		rows, err = tx.Query(query, userId)
 		if err != nil {
@@ -122,7 +122,7 @@ func (t *TelegramBotDB) GetAdEventsOfUser(userId int64, typeAdEvent models.TypeA
 	} else {
 		query := fmt.Sprintf(`SELECT id, created_at, user_id, "type", partner, channel, price,
 		date_posting, date_delete, arrival_of_subscribers
-		FROM public.%s WHERE user_id=$1 AND "type"=$2;`, adEventsTable)
+		FROM public.%s WHERE user_id=$1 AND "type"=$2 ORDER BY date_posting ASC;`, adEventsTable)
 
 		rows, err = tx.Query(query, userId, typeAdEvent)
 		if err != nil {
@@ -160,7 +160,7 @@ func (t *TelegramBotDB) GetRangeAdEventsOfUser(userId int64, typeAdEvent models.
 	//  SELECT id, created_at, user_id, "type", partner, channel, price,
 	// 	date_posting, date_delete, arrival_of_subscribers
 	// 	FROM public.ad_events WHERE user_id=959606248 AND ((date_posting BETWEEN '2021-01-01' AND '2023-12-31')
-	// 	OR (date_delete BETWEEN '2021-01-01' AND '2023-12-31'))
+	// 	OR (date_delete BETWEEN '2021-01-01' AND '2023-12-31')) ORDER BY date_posting ASC
 
 	listAdEvent = make([]models.AdEvent, 0, 50)
 	startDate, err := parseTimeToDateDataBase(startTime)
@@ -176,7 +176,7 @@ func (t *TelegramBotDB) GetRangeAdEventsOfUser(userId int64, typeAdEvent models.
 		query := fmt.Sprintf(`SELECT id, created_at, user_id, "type", partner, channel, price,
 		date_posting, date_delete, arrival_of_subscribers
 		FROM public.%s WHERE user_id=$1 AND ((date_posting BETWEEN $2 AND $3)
-		OR (date_delete BETWEEN $2 AND $3));`, adEventsTable)
+		OR (date_delete BETWEEN $2 AND $3)) ORDER BY date_posting ASC;`, adEventsTable)
 
 		rows, err = tx.Query(query, userId, startDate, endDate)
 		if err != nil {
@@ -186,7 +186,7 @@ func (t *TelegramBotDB) GetRangeAdEventsOfUser(userId int64, typeAdEvent models.
 		query := fmt.Sprintf(`SELECT id, created_at, user_id, "type", partner, channel, price,
 		date_posting, date_delete, arrival_of_subscribers
 		FROM public.%s WHERE user_id=$1 AND "type"=$4 AND ((date_posting BETWEEN $2 AND $3)
-		OR (date_delete BETWEEN $2 AND $3));`, adEventsTable)
+		OR (date_delete BETWEEN $2 AND $3)) ORDER BY date_posting ASC;`, adEventsTable)
 
 		rows, err = tx.Query(query, userId, startDate, endDate, typeAdEvent)
 		if err != nil {

@@ -87,7 +87,10 @@ type DataForStatistics struct {
 
 // Сессия пользователя.
 type Session struct {
-	
+	DomainPath string // Наименование основной цепочки.
+	Step       int64  // Шаг в цепочке.
+	StateMsg   string // Состояние ожидающих данных в Msg.
+	Cache      map[string]interface{}
 }
 
 // БД для телеграмм бота.
