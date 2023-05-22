@@ -9,7 +9,7 @@ import (
 // Парсинг даты в time.Time
 func ParseUserDateToTime(timeString string) (time.Time, error) {
 	var t time.Time
-	layout := "02.01.2006 15:04"
+	layout := "02.01.06 15:04"
 
 	// Парсинг даты в зависимости от локализации пользователя.
 	// Получаем часовой пояс пользователя
@@ -35,12 +35,12 @@ func ParseTimeToUserDate(t time.Time) (string, error) {
 	}
 	t = t.In(defaultTimeZone)
 
-	return t.Format("02.01.2006 15:04"), nil
+	return t.Format("02.01.06 15:04"), nil
 }
 
 // Парсинг time.Time в диапозон времени.
 func ParseTimesToRangeDate(timeStart, timeEnd time.Time) (rangeDate string) {
-	return timeStart.Format("02.01.2006 15:04") + ";" + timeEnd.Format("02.01.2006 15:04")
+	return timeStart.Format("02.01.06 15:04") + ";" + timeEnd.Format("02.01.06 15:04")
 }
 
 // Парсинг time.Time в диапозон дней.
@@ -65,12 +65,12 @@ func ParseTimesToRangeMonth(timeStart, timeEnd time.Time) (rangeDate string) {
 
 // Парсинг time.Time в год.
 func ParseTimeToYear(t time.Time) (year string) {
-	return t.Format("2006")
+	return t.Format("06")
 }
 
 // Парсинг time.Time в диапозон годов.
 func ParseTimesToRangeYear(timeStart, timeEnd time.Time) (rangeDate string) {
-	return timeStart.Format("2006") + ";" + timeEnd.Format("2006")
+	return timeStart.Format("06") + ";" + timeEnd.Format("06")
 }
 
 // Возвращает метки времени, начало и конец вчерашнего дня.

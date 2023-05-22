@@ -220,7 +220,7 @@ func (t *TelegramBotDB) AdEventCreation(event *models.AdEvent) (eventId int64, e
 		}
 	}()
 	if event.DateDelete == "" {
-		event.DateDelete = "02.01.2006 15:04"
+		event.DateDelete = "02.01.06 15:04"
 	}
 
 	// Изменение формата времени.
