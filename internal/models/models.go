@@ -26,8 +26,8 @@ type User struct {
 // Ошибки.
 var (
 	ErrUserNotFound = fmt.Errorf("user not found")
-	// Example: "22.08.2022 16:30"
-	RegxAdEventDate = regexp.MustCompile(`^(0[1-9]|[12][0-9]|3[01]).(0[1-9]|1[0-2]).(\d{4}) ([0-1]?[0-9]|2[0-3]):[0-5][0-9]$`)
+	// Example: "22.08.22 16:30"
+	RegxAdEventDate = regexp.MustCompile(`^(0[1-9]|[12][0-9]|3[01]).(0[1-9]|1[0-2]).(\d{2}) ([0-1]?[0-9]|2[0-3]):[0-5][0-9]$`)
 	// Example: "https://t.me/nikname", "https://www.instagram.com/nikname.store/"
 	RegxUrlType1 = regexp.MustCompile(`^https://[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)+(/[a-zA-Z0-9-]*)*`)
 	// Example: "@nikname"
