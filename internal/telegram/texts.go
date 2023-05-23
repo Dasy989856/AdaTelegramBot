@@ -64,7 +64,8 @@ func createTextAdEventDescription(a *models.AdEvent) (descriptionAdEvent string)
 		- <b>Партнер:</b> %s
 		- <b>Канал/магазин партнера:</b> %s
 		- <b>Стоимость:</b> %d
-		- <b>Дата размещения:</b> %s`, a.Partner, a.Channel, a.Price, a.DatePosting)
+		- <b>Дата размещения:</b> %s
+		- <b>Дата удаления:</b> %s`, a.Partner, a.Channel, a.Price, a.DatePosting, a.DateDelete)
 		if a.ArrivalOfSubscribers != 0 {
 			descriptionAdEvent = descriptionAdEvent + fmt.Sprintf(`
 			-<b>Приход подписчиков:</b> %d`, a.ArrivalOfSubscribers)
@@ -98,59 +99,21 @@ func createTextAlertForAdEventPosting(a *models.AdEvent, minutesLeftAlert int64)
 	return descriptionAdEvent
 }
 
-// Создание текста оповещения для размещения рекламы.
-func createTextAlertForAdEventPostingOld(a *models.AdEvent, minutesLeftAlert int64) (descriptionAdEvent string) {
-	switch a.Type {
-	case models.TypeSale:
-		descriptionAdEvent = fmt.Sprintf(`
-		Через %s Вы должны разместить рекламу. Подробнее:
-		- <b>Покупатель:</b> %s
-		- <b>Канал покупателя:</b> %s
-		- <b>Цена продажи:</b> %d
-		- <b>Дата размещения рекламы:</b> %s
-		- <b>Дата удаления рекламы:</b> %s
-		`, getTextTime(minutesLeftAlert), a.Partner, a.Channel, a.Price, a.DatePosting, a.DateDelete)
-	case models.TypeBuy:
-		descriptionAdEvent = fmt.Sprintf(`
-		Через %s Ваша реклама будет размещена. Подробнее:
-		- <b>Продавец:</b> %s
-		- <b>Канал продавца:</b> %s
-		- <b>Цена покупки:</b> %d
-		- <b>Дата размещения рекламы:</b> %s
-		`, getTextTime(minutesLeftAlert), a.Partner, a.Channel, a.Price, a.DatePosting)
-	case models.TypeMutual:
-		descriptionAdEvent = fmt.Sprintf(`
-		Через %s у Вас начнется взаимный пиар. Подробнее:
-		- <b>Партнер по взаимному пиару:</b> %s
-		- <b>Канал партнера по взаимному пиару:</b> %s
-		- <b>Цена взаимного пиара:</b> %d
-		- <b>Дата размещения рекламы:</b> %s
-		- <b>Дата удаления рекламы:</b> %s
-		`, getTextTime(minutesLeftAlert), a.Partner, a.Channel, a.Price, a.DatePosting, a.DateDelete)
-	}
-
-	return descriptionAdEvent
-}
-
 // Создание текста оповещения для удаления рекламы.
 func createTextAlertForAdEventDelete(a *models.AdEvent, minutesLeftAlert int64) (descriptionAdEvent string) {
 	switch a.Type {
 	case models.TypeSale:
 		descriptionAdEvent = fmt.Sprintf(`
-		Через %s Вы должны удалить рекламу. Подробнее:
-		`+createTextAdEventDescription(a), getTextTime(minutesLeftAlert))
+		Через %s Вы должны удалить рекламу. Подробнее:`+createTextAdEventDescription(a), getTextTime(minutesLeftAlert))
 	case models.TypeBuy:
 		descriptionAdEvent = fmt.Sprintf(`
-		Через %s Ваша реклама будет удалена. Подробнее:
-		`+createTextAdEventDescription(a), getTextTime(minutesLeftAlert))
+		Через %s Ваша реклама будет удалена. Подробнее:`+createTextAdEventDescription(a), getTextTime(minutesLeftAlert))
 	case models.TypeMutual:
 		descriptionAdEvent = fmt.Sprintf(`
-		Через %s у Вас закончится взаимный пиар. Подробнее:
-		`+createTextAdEventDescription(a), getTextTime(minutesLeftAlert))
+		Через %s у Вас закончится взаимный пиар. Подробнее:`+createTextAdEventDescription(a), getTextTime(minutesLeftAlert))
 	case models.TypeBarter:
 		descriptionAdEvent = fmt.Sprintf(`
-		Через %s у Вас закончится бартер. Подробнее:
-		`+createTextAdEventDescription(a), getTextTime(minutesLeftAlert))
+		Через %s у Вас закончится бартер. Подробнее:`+createTextAdEventDescription(a), getTextTime(minutesLeftAlert))
 	}
 
 	return descriptionAdEvent
@@ -213,7 +176,7 @@ func textForGetPrice(t models.TypeAdEvent) (string, error) {
 		<b>Пример:</b> <code>1000</code>
 		Можно указать <code>-1000</code> если была доплата с Вашей стороны или <code>+1000</code> если доплатили Вам.`, nil
 	case models.TypeBarter:
-		return`✍️ Теперь требуется отправить прибыль с бартера.
+		return `✍️ Теперь требуется отправить прибыль с бартера.
 		<b>Пример:</b> <code>1000</code> Если считать прибыль не требуется <code>0</code>.`, nil
 	default:
 		return "", fmt.Errorf("unknow type adEvent")

@@ -59,7 +59,7 @@ func cbqAdEventCreateSale(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 
 	b.db.SetStepUser(userId, "ad_event.create.partner")
 
-	text := "✍️ Теперь требуется отправить ссылку на покупателя.\n"+getExampleUrl()
+	text := "✍️ Теперь требуется отправить ссылку на покупателя.\n" + getExampleUrl()
 	botMsg := tgbotapi.NewEditMessageText(userId, messageId, text)
 	botMsg.ParseMode = tgbotapi.ModeHTML
 	if err := b.sendMessage(userId, botMsg); err != nil {
@@ -84,7 +84,7 @@ func cbqAdEventCreateBuy(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 
 	b.db.SetStepUser(userId, "ad_event.create.partner")
 
-	text := "✍️ Теперь требуется отправить ссылку на продавца.\n"+getExampleUrl()
+	text := "✍️ Теперь требуется отправить ссылку на продавца.\n" + getExampleUrl()
 	botMsg := tgbotapi.NewEditMessageText(userId, messageId, text)
 	botMsg.ParseMode = tgbotapi.ModeHTML
 
@@ -110,7 +110,7 @@ func cbqAdEventCreateMutual(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 
 	b.db.SetStepUser(userId, "ad_event.create.partner")
 
-	text := "✍️ Теперь требуется отправить ссылку на пратнера по взаимному пиару.\n"+getExampleUrl()
+	text := "✍️ Теперь требуется отправить ссылку на пратнера по взаимному пиару.\n" + getExampleUrl()
 	botMsg := tgbotapi.NewEditMessageText(userId, messageId, text)
 	botMsg.ParseMode = tgbotapi.ModeHTML
 
@@ -136,7 +136,7 @@ func cbqAdEventCreateBarter(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 
 	b.db.SetStepUser(userId, "ad_event.create.partner")
 
-	text := "✍️ Теперь требуется отправить ссылку на пратнера по бартеру.\n"+getExampleUrl()
+	text := "✍️ Теперь требуется отправить ссылку на пратнера по бартеру.\n" + getExampleUrl()
 	botMsg := tgbotapi.NewEditMessageText(userId, messageId, text)
 	botMsg.ParseMode = tgbotapi.ModeHTML
 
@@ -362,23 +362,23 @@ func cbqAdEventViewMutual(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	text := "<b>🕐 Выберите период:</b>"
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Вчера", "ad_event.view.select?"+sdk.ParseTimesToRangeDate(sdk.GetTimeRangeYesterday())+";any;1"),
-			tgbotapi.NewInlineKeyboardButtonData("Сегодня", "ad_event.view.select?"+sdk.ParseTimesToRangeDate(sdk.GetTimeRangeToday())+";any;1"),
-			tgbotapi.NewInlineKeyboardButtonData("Завтра", "ad_event.view.select?"+sdk.ParseTimesToRangeDate(sdk.GetTimeRangeTomorrow())+";any;1"),
+			tgbotapi.NewInlineKeyboardButtonData("Вчера", "ad_event.view.select?"+sdk.ParseTimesToRangeDate(sdk.GetTimeRangeYesterday())+";mutual;1"),
+			tgbotapi.NewInlineKeyboardButtonData("Сегодня", "ad_event.view.select?"+sdk.ParseTimesToRangeDate(sdk.GetTimeRangeToday())+";mutual;1"),
+			tgbotapi.NewInlineKeyboardButtonData("Завтра", "ad_event.view.select?"+sdk.ParseTimesToRangeDate(sdk.GetTimeRangeTomorrow())+";mutual;1"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			// tgbotapi.NewInlineKeyboardButtonData("Предыдущая неделя", "ad_event.view.select?"+sdk.ParseTimeToRangeDate(sdk.GetTimeRangeLastWeek())+";any;1"),
-			tgbotapi.NewInlineKeyboardButtonData("Текущая неделя", "ad_event.view.select?"+sdk.ParseTimesToRangeDate(sdk.GetTimeRangeThisWeek())+";any;1"),
+			tgbotapi.NewInlineKeyboardButtonData("Текущая неделя", "ad_event.view.select?"+sdk.ParseTimesToRangeDate(sdk.GetTimeRangeThisWeek())+";mutual;1"),
 			// tgbotapi.NewInlineKeyboardButtonData("Следующая неделя", "ad_event.view.select?"+sdk.ParseTimeToRangeDate(sdk.GetTimeRangeNextWeek())+";any;1"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			// tgbotapi.NewInlineKeyboardButtonData("Предыдущий месяц", "ad_event.view.select?"+sdk.ParseTimeToRangeDate(sdk.GetTimeRangeLastMonth())+";any;1"),
-			tgbotapi.NewInlineKeyboardButtonData("Текущий месяц", "ad_event.view.select?"+sdk.ParseTimesToRangeDate(sdk.GetTimeRangeThisMonth())+";any;1"),
+			tgbotapi.NewInlineKeyboardButtonData("Текущий месяц", "ad_event.view.select?"+sdk.ParseTimesToRangeDate(sdk.GetTimeRangeThisMonth())+";mutual;1"),
 			// tgbotapi.NewInlineKeyboardButtonData("Следующий месяц", "ad_event.view.select?"+sdk.ParseTimeToRangeDate(sdk.GetTimeRangeNextMonth())+";any;1"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			// tgbotapi.NewInlineKeyboardButtonData("Предыдущий год", "ad_event.view.select?"+sdk.ParseTimeToRangeDate(sdk.GetTimeRangeLastYear())+";any;1"),
-			tgbotapi.NewInlineKeyboardButtonData("Текущий год", "ad_event.view.select?"+sdk.ParseTimesToRangeDate(sdk.GetTimeRangeThisYear())+";any;1"),
+			tgbotapi.NewInlineKeyboardButtonData("Текущий год", "ad_event.view.select?"+sdk.ParseTimesToRangeDate(sdk.GetTimeRangeThisYear())+";mutual;1"),
 			// tgbotapi.NewInlineKeyboardButtonData("Следующий год", "ad_event.view.select?"+sdk.ParseTimeToRangeDate(sdk.GetTimeRangeNextYear())+";any;1"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
@@ -692,8 +692,7 @@ func cbqAdEventDelete(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 		return err
 	}
 
-	text := "<b>⚠️ Вы точно хотите удалить событие?</b>"
-	text = text + createTextAdEventDescription(aE)
+	text := "<b>⚠️ Вы точно хотите удалить событие?</b>"+createTextAdEventDescription(aE)
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Да", "ad_event.delete.end?"+strconv.Itoa(int(adEventId))),
@@ -782,8 +781,7 @@ func cbqAdEventUpdatePartner(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error 
 		return err
 	}
 
-	text := `✍️ Требуется отправить новую ссылку на партнера:
-	<b>Пример:</b> @AdaTelegramBot или https://t.me/AdaTelegramBot`
+	text := "✍️ Требуется отправить новую ссылку на партнера./n"+getExampleUrl()
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Назад", fmt.Sprintf("ad_event.control?%d", adEvent.Id)),
@@ -794,7 +792,6 @@ func cbqAdEventUpdatePartner(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error 
 	)
 	botMsg := tgbotapi.NewEditMessageTextAndMarkup(userId, messageId, text, keyboard)
 	botMsg.ParseMode = tgbotapi.ModeHTML
-	
 
 	if err := b.sendMessage(userId, botMsg); err != nil {
 		return fmt.Errorf("error edit msg in cbqAdEventUpdatePartner: %w", err)
@@ -831,8 +828,7 @@ func cbqAdEventUpdateChannel(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error 
 		return err
 	}
 
-	text := `✍️ Требуется отправить новую ссылку на канал:
-	<b>Пример:</b> @AdaTelegramBot или https://t.me/AdaTelegramBot`
+	text := "✍️ Требуется отправить новую ссылку на канал./n"+getExampleUrl()
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Назад", fmt.Sprintf("ad_event.control?%d", adEvent.Id)),
@@ -929,7 +925,7 @@ func cbqAdEventUpdateDatePosting(b *BotTelegram, cbq *tgbotapi.CallbackQuery) er
 	if err != nil {
 		return err
 	}
-	text := `✍️ Теперь требуется отправить дату и время размещения рекламного поста.` + exampleDate
+	text := `✍️ Теперь требуется отправить дату и время размещения рекламы.` + exampleDate
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Назад", fmt.Sprintf("ad_event.control?%d", adEvent.Id)),
@@ -979,7 +975,7 @@ func cbqAdEventUpdateDateDelete(b *BotTelegram, cbq *tgbotapi.CallbackQuery) err
 	if err != nil {
 		return err
 	}
-	text := `✍️ Теперь требуется отправить дату и время удаления рекламного поста.` + exampleDate
+	text := `✍️ Теперь требуется отправить дату и время удаления рекламы.` + exampleDate
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Назад", fmt.Sprintf("ad_event.control?%d", adEvent.Id)),
