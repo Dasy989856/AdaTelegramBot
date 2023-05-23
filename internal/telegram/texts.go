@@ -193,5 +193,34 @@ func getTextExampleDate() (string, error) {
 
 	return fmt.Sprintf(`
 	В данный момент бот использует только время по МСК 'UTC+3'.
-	<b>Пример:</b> %s `, date), nil
+	<b>Пример:</b> <code>%s</code> `, date), nil
+}
+
+// Пример ссылки.
+func getExampleUrl() string {
+	return `<b>Пример:</b> <code>@AdaTelegramBot</code> или <code>https://t.me/AdaTelegramBot</code>`
+}
+
+// Текст получение стоимости события.
+func textForGetPrice(t models.TypeAdEvent) (string, error) {
+	switch t {
+	case models.TypeSale:
+		return "✍️ Теперь требуется отправить стоимость рекламного поста.\n<b>Пример:</b> <code>1000</code>", nil
+	case models.TypeBuy:
+		return "✍️ Теперь требуется отправить стоимость рекламного поста.\n<b>Пример:</b> <code>1000</code>", nil
+	case models.TypeMutual:
+		return `✍️ Теперь требуется отправить стоимость поста взаимного пиара.
+		<b>Пример:</b> <code>1000</code>
+		Можно указать <code>-1000</code> если была доплата с Вашей стороны или <code>+1000</code> если доплатили Вам.`, nil
+	case models.TypeBarter:
+		return`✍️ Теперь требуется отправить прибыль с бартера.
+		<b>Пример:</b> <code>1000</code> Если считать прибыль не требуется <code>0</code>.`, nil
+	default:
+		return "", fmt.Errorf("unknow type adEvent")
+	}
+}
+
+// Текст обновления стоимости события.
+func textForUpdatePrice() string {
+	return "✍️ Требуется отправить новую стоимость.\n<b>Пример:</b> <code>1000</code>"
 }

@@ -59,8 +59,7 @@ func cbqAdEventCreateSale(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 
 	b.db.SetStepUser(userId, "ad_event.create.partner")
 
-	text := `✍️ Теперь требуется отправить ссылку на покупателя.
-	<b>Пример:</b> @AdaTelegramBot или https://t.me/AdaTelegramBot`
+	text := "✍️ Теперь требуется отправить ссылку на покупателя.\n"+getExampleUrl()
 	botMsg := tgbotapi.NewEditMessageText(userId, messageId, text)
 	botMsg.ParseMode = tgbotapi.ModeHTML
 	if err := b.sendMessage(userId, botMsg); err != nil {
@@ -85,8 +84,7 @@ func cbqAdEventCreateBuy(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 
 	b.db.SetStepUser(userId, "ad_event.create.partner")
 
-	text := `✍️ Теперь требуется отправить ссылку на продавца.
-	<b>Пример:</b> @AdaTelegramBot или https://t.me/AdaTelegramBot`
+	text := "✍️ Теперь требуется отправить ссылку на продавца.\n"+getExampleUrl()
 	botMsg := tgbotapi.NewEditMessageText(userId, messageId, text)
 	botMsg.ParseMode = tgbotapi.ModeHTML
 
@@ -112,8 +110,7 @@ func cbqAdEventCreateMutual(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 
 	b.db.SetStepUser(userId, "ad_event.create.partner")
 
-	text := `✍️ Теперь требуется отправить ссылку на пратнера по взаимному пиару.
-	<b>Пример:</b> @AdaTelegramBot или https://t.me/AdaTelegramBot`
+	text := "✍️ Теперь требуется отправить ссылку на пратнера по взаимному пиару.\n"+getExampleUrl()
 	botMsg := tgbotapi.NewEditMessageText(userId, messageId, text)
 	botMsg.ParseMode = tgbotapi.ModeHTML
 
@@ -139,8 +136,7 @@ func cbqAdEventCreateBarter(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 
 	b.db.SetStepUser(userId, "ad_event.create.partner")
 
-	text := `✍️ Теперь требуется отправить ссылку на пратнера по бартеру.
-	<b>Пример:</b> @AdaTelegramBot или https://t.me/AdaTelegramBot`
+	text := "✍️ Теперь требуется отправить ссылку на пратнера по бартеру.\n"+getExampleUrl()
 	botMsg := tgbotapi.NewEditMessageText(userId, messageId, text)
 	botMsg.ParseMode = tgbotapi.ModeHTML
 
@@ -883,8 +879,6 @@ func cbqAdEventUpdatePrice(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 		return err
 	}
 
-	text := `✍️ Требуется отправить новую стоимость:
-	<b>Пример:</b> 1000`
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Назад", fmt.Sprintf("ad_event.control?%d", adEvent.Id)),
@@ -893,7 +887,7 @@ func cbqAdEventUpdatePrice(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 			tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
 		),
 	)
-	botMsg := tgbotapi.NewEditMessageTextAndMarkup(userId, messageId, text, keyboard)
+	botMsg := tgbotapi.NewEditMessageTextAndMarkup(userId, messageId, textForUpdatePrice(), keyboard)
 	botMsg.ParseMode = tgbotapi.ModeHTML
 
 	if err := b.sendMessage(userId, botMsg); err != nil {
