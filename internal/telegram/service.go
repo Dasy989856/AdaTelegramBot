@@ -231,6 +231,13 @@ func (b *BotTelegram) sendAlertMessage(userId int64, c tgbotapi.Chattable) error
 
 // Если ad событие полностью заполенно - возвращается true. Иначе false.
 func fullDataAdEvent(ae *models.AdEvent) bool {
+	if ae.Partner == "" {
+		ae.Partner ="-"
+	}
+	if ae.Channel == "" {
+		ae.Channel ="-"
+	}
+
 	if ae.UserId == 0 {
 		log.Println("not found ae.UserId event")
 		return false
@@ -243,16 +250,6 @@ func fullDataAdEvent(ae *models.AdEvent) bool {
 
 	if ae.CreatedAt == "" {
 		log.Println("not found ae.CreatedAt event")
-		return false
-	}
-
-	if ae.Partner == "" {
-		log.Println("not found ae.Partner event")
-		return false
-	}
-
-	if ae.Channel == "" {
-		log.Println("not found ae.Channel event")
 		return false
 	}
 

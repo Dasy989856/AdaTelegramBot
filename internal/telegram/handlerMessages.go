@@ -191,6 +191,14 @@ func adEventChannel(b *BotTelegram, msg *tgbotapi.Message) error {
 		return err
 	}
 	botMsg = tgbotapi.NewMessage(userId, text)
+	if adEvent.Type == models.TypeMutual || adEvent.Type == models.TypeBarter {
+		keyboard := tgbotapi.NewInlineKeyboardMarkup(
+			tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData("Пропустить", "ad_event.create.price.skip"),
+			),
+		)
+		botMsg.ReplyMarkup = keyboard
+	}
 	botMsg.ParseMode = tgbotapi.ModeHTML
 	if err := b.sendMessage(userId, botMsg); err != nil {
 		return err

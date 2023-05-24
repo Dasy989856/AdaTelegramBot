@@ -39,7 +39,7 @@ func cbqHelpFeature(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 
 	// Сборка сообщения.
 	text := `🤗 Вы можете предложить новый функционал которого Вам не хватает!
-	Для этого отправьте письмо на почту ✉️: <b>ada.telegram.bot@yandex.ru</b>`
+	✉️ Для этого отправьте письмо на почту: <b>ada.telegram.bot@yandex.ru</b>`
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Назад", "help"),

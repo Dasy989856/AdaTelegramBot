@@ -975,7 +975,7 @@ func cbqAdEventUpdateDateDelete(b *BotTelegram, cbq *tgbotapi.CallbackQuery) err
 	if err != nil {
 		return err
 	}
-	text := `✍️ Теперь требуется отправить дату и время удаления рекламы.` + exampleDate
+	text := `✍️ Теперь требуется отправить новую дату и время удаления рекламы.` + exampleDate
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Назад", fmt.Sprintf("ad_event.control?%d", adEvent.Id)),
