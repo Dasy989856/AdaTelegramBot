@@ -139,36 +139,15 @@ func adEventPartner(b *BotTelegram, msg *tgbotapi.Message) error {
 		return err
 	}
 
-	switch adEvent.Type {
-	case models.TypeSale:
-		botMsg := tgbotapi.NewMessage(userId, "✍️ Теперь требуется отправить ссылку на рекламируемый Вами канал.\n"+getExampleUrl())
-		botMsg.ParseMode = tgbotapi.ModeHTML
-		if err := b.sendMessage(userId, botMsg); err != nil {
-			return err
-		}
-	case models.TypeBuy:
-		botMsg := tgbotapi.NewMessage(userId, "✍️ Теперь требуется отправить ссылку на канал, в котором выйдет Ваша реклама.\n"+getExampleUrl())
-		botMsg.ParseMode = tgbotapi.ModeHTML
-		if err := b.sendMessage(userId, botMsg); err != nil {
-			return err
-		}
-	case models.TypeMutual:
-		botMsg := tgbotapi.NewMessage(userId, "✍️ Теперь требуется отправить ссылку на канал, с которым будет взаимный пиар.\n"+getExampleUrl())
-		botMsg.ParseMode = tgbotapi.ModeHTML
-		if err := b.sendMessage(userId, botMsg); err != nil {
-			return err
-		}
-	case models.TypeBarter:
-		botMsg := tgbotapi.NewMessage(userId, "✍️ Теперь требуется отправить ссылку на канал/магазин партнера по бартеру.\n"+getExampleUrl())
-		botMsg.ParseMode = tgbotapi.ModeHTML
-		if err := b.sendMessage(userId, botMsg); err != nil {
-			return err
-		}
-	default:
-		if err := b.sendRequestRestartMsg(userId); err != nil {
-			return err
-		}
-		return fmt.Errorf("unknow type adEvent. typeEvent: %s", adEvent.Type)
+	// Получение канала.
+	text, err := textForGetDateChannelUrl(adEvent.Type)
+	if err != nil {
+		return err
+	}
+	botMsg = tgbotapi.NewMessage(userId, text)
+	botMsg.ParseMode = tgbotapi.ModeHTML
+	if err := b.sendMessage(userId, botMsg); err != nil {
+		return err
 	}
 
 	return nil
@@ -206,6 +185,7 @@ func adEventChannel(b *BotTelegram, msg *tgbotapi.Message) error {
 		return err
 	}
 
+	// Получение стоимости.
 	text, err := textForGetPrice(adEvent.Type)
 	if err != nil {
 		return err
@@ -245,46 +225,20 @@ func adEventPrice(b *BotTelegram, msg *tgbotapi.Message) error {
 	adEvent.Price = price
 	b.db.SetStepUser(userId, "ad_event.create.date_posting")
 
-	botMsg := tgbotapi.NewMessage(userId, "🎉 <b>Цена добавлена!</b>")
+	botMsg := tgbotapi.NewMessage(userId, "🎉 <b>Стоимость добавлена!</b>")
 	botMsg.ParseMode = tgbotapi.ModeHTML
 	if err := b.sendMessage(userId, botMsg); err != nil {
 		return err
 	}
 
-	exampleDate, err := getTextExampleDate()
+	text, err := textForGetDatePosting(adEvent.Type)
 	if err != nil {
 		return err
 	}
-	switch adEvent.Type {
-	case models.TypeSale:
-		botMsg := tgbotapi.NewMessage(userId, `✍️ Теперь требуется отправить дату и время размещения рекламы.`+exampleDate)
-		botMsg.ParseMode = tgbotapi.ModeHTML
-		if err := b.sendMessage(userId, botMsg); err != nil {
-			return err
-		}
-	case models.TypeBuy:
-		botMsg := tgbotapi.NewMessage(userId, `✍️ Теперь требуется отправить дату и время размещения рекламы.`+exampleDate)
-		botMsg.ParseMode = tgbotapi.ModeHTML
-		if err := b.sendMessage(userId, botMsg); err != nil {
-			return err
-		}
-	case models.TypeMutual:
-		botMsg := tgbotapi.NewMessage(userId, `✍️ Теперь требуется отправить дату и время размещения поста.`+exampleDate)
-		botMsg.ParseMode = tgbotapi.ModeHTML
-		if err := b.sendMessage(userId, botMsg); err != nil {
-			return err
-		}
-	case models.TypeBarter:
-		botMsg := tgbotapi.NewMessage(userId, `✍️ Теперь требуется отправить дату и время размещения поста.`+exampleDate)
-		botMsg.ParseMode = tgbotapi.ModeHTML
-		if err := b.sendMessage(userId, botMsg); err != nil {
-			return err
-		}
-	default:
-		if err := b.sendRequestRestartMsg(userId); err != nil {
-			return err
-		}
-		return fmt.Errorf("unknow type adEvent")
+	botMsg = tgbotapi.NewMessage(userId, text)
+	botMsg.ParseMode = tgbotapi.ModeHTML
+	if err := b.sendMessage(userId, botMsg); err != nil {
+		return err
 	}
 
 	return nil
@@ -319,64 +273,22 @@ func adEventDatePosting(b *BotTelegram, msg *tgbotapi.Message) error {
 		return err
 	}
 
-	switch adEvent.Type {
-	case models.TypeSale:
-		b.db.SetStepUser(userId, "ad_event.create.date_delete")
-		botMsg := tgbotapi.NewMessage(userId, `✍️ Теперь требуется отправить дату и время удаления рекламы.`+exampleDate)
-		keyboard := tgbotapi.NewInlineKeyboardMarkup(
-			tgbotapi.NewInlineKeyboardRow(
-				tgbotapi.NewInlineKeyboardButtonData("Пропустить", "ad_event.create.date_delete.skip"),
-			),
-		)
-		botMsg.ReplyMarkup = keyboard
-		botMsg.ParseMode = tgbotapi.ModeHTML
-		if err := b.sendMessage(userId, botMsg); err != nil {
-			return err
-		}
-	case models.TypeBuy:
-		b.db.SetStepUser(userId, "ad_event.create.date_delete")
-		botMsg := tgbotapi.NewMessage(userId, `✍️ Теперь требуется отправить дату и время удаления рекламы.`+exampleDate)
-		keyboard := tgbotapi.NewInlineKeyboardMarkup(
-			tgbotapi.NewInlineKeyboardRow(
-				tgbotapi.NewInlineKeyboardButtonData("Пропустить", "ad_event.create.date_delete.skip"),
-			),
-		)
-		botMsg.ReplyMarkup = keyboard
-		botMsg.ParseMode = tgbotapi.ModeHTML
-		if err := b.sendMessage(userId, botMsg); err != nil {
-			return err
-		}
-	case models.TypeMutual:
-		b.db.SetStepUser(userId, "ad_event.create.date_delete")
-		botMsg := tgbotapi.NewMessage(userId, `✍️ Теперь требуется отправить дату и время удаления поста.`+exampleDate)
-		keyboard := tgbotapi.NewInlineKeyboardMarkup(
-			tgbotapi.NewInlineKeyboardRow(
-				tgbotapi.NewInlineKeyboardButtonData("Пропустить", "ad_event.create.date_delete.skip"),
-			),
-		)
-		botMsg.ReplyMarkup = keyboard
-		botMsg.ParseMode = tgbotapi.ModeHTML
-		if err := b.sendMessage(userId, botMsg); err != nil {
-			return err
-		}
-	case models.TypeBarter:
-		b.db.SetStepUser(userId, "ad_event.create.date_delete")
-		botMsg := tgbotapi.NewMessage(userId, `✍️ Теперь требуется отправить дату и время удаления поста.`+exampleDate)
-		keyboard := tgbotapi.NewInlineKeyboardMarkup(
-			tgbotapi.NewInlineKeyboardRow(
-				tgbotapi.NewInlineKeyboardButtonData("Пропустить", "ad_event.create.date_delete.skip"),
-			),
-		)
-		botMsg.ReplyMarkup = keyboard
-		botMsg.ParseMode = tgbotapi.ModeHTML
-		if err := b.sendMessage(userId, botMsg); err != nil {
-			return err
-		}
-	default:
-		if err := b.sendRequestRestartMsg(userId); err != nil {
-			return err
-		}
-		return fmt.Errorf("unknow type adEvent")
+	// Отправка сообщения об получении даты удаления.
+	text, err := textForGetDateDelete(adEvent.Type)
+	if err != nil {
+		return err
+	}
+	b.db.SetStepUser(userId, "ad_event.create.date_delete")
+	botMsg = tgbotapi.NewMessage(userId, text)
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Пропустить", "ad_event.create.date_delete.skip"),
+		),
+	)
+	botMsg.ReplyMarkup = keyboard
+	botMsg.ParseMode = tgbotapi.ModeHTML
+	if err := b.sendMessage(userId, botMsg); err != nil {
+		return err
 	}
 
 	return nil
@@ -426,31 +338,15 @@ func adEventDateDelete(b *BotTelegram, msg *tgbotapi.Message) error {
 		return nil
 	}
 
-	// Ответ.
-	switch adEvent.Type {
-	case models.TypeSale:
-		botMsg := tgbotapi.NewMessage(userId, `🎉 <b>Дата и время удаления рекламы добавлены!</b>`)
-		botMsg.ParseMode = tgbotapi.ModeHTML
-		if err := b.sendMessage(userId, botMsg); err != nil {
-			return err
-		}
-	case models.TypeBuy:
-		botMsg := tgbotapi.NewMessage(userId, `🎉 <b>Дата и время удаления рекламы добавлены!</b>`)
-		botMsg.ParseMode = tgbotapi.ModeHTML
-		if err := b.sendMessage(userId, botMsg); err != nil {
-			return err
-		}
-	case models.TypeMutual:
-		botMsg := tgbotapi.NewMessage(userId, `🎉 <b>Дата и время удаления поста добавлены!</b>`)
-		botMsg.ParseMode = tgbotapi.ModeHTML
-		if err := b.sendMessage(userId, botMsg); err != nil {
-			return err
-		}
-	default:
-		if err := b.sendRequestRestartMsg(userId); err != nil {
-			return err
-		}
-		return fmt.Errorf("unknow type adEvent")
+	// Сообщение об успешном добавлении.
+	text, err := textForSuccessfullyAddDeleteDate(adEvent.Type)
+	if err != nil {
+		return err
+	}
+	botMsg := tgbotapi.NewMessage(userId, text)
+	botMsg.ParseMode = tgbotapi.ModeHTML
+	if err := b.sendMessage(userId, botMsg); err != nil {
+		return err
 	}
 
 	// Отправка завершающего создания ad события сообщения.

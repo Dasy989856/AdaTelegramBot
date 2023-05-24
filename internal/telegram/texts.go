@@ -25,7 +25,7 @@ func createTextAdEventDescription(a *models.AdEvent) (descriptionAdEvent string)
 	if a.DateDelete == "02.01.06 15:04" {
 		a.DateDelete = "-"
 	}
-	
+
 	switch a.Type {
 	case models.TypeSale:
 		descriptionAdEvent = fmt.Sprintf(`
@@ -192,4 +192,78 @@ func textForGetPrice(t models.TypeAdEvent) (string, error) {
 // Текст обновления стоимости события.
 func textForUpdatePrice() string {
 	return "✍️ Требуется отправить новую стоимость.\n<b>Пример:</b> <code>1000</code>"
+}
+
+// Текст получения url канала.
+func textForGetDateChannelUrl(t models.TypeAdEvent) (string, error) {
+	switch t {
+	case models.TypeSale:
+		return "✍️ Теперь требуется отправить ссылку на рекламируемый Вами канал.\n"+getExampleUrl(), nil
+	case models.TypeBuy:
+		return "✍️ Теперь требуется отправить ссылку на канал, в котором выйдет Ваша реклама.\n"+getExampleUrl(), nil
+	case models.TypeMutual:
+		return "✍️ Теперь требуется отправить ссылку на канал, с которым будет взаимный пиар.\n"+getExampleUrl(), nil
+	case models.TypeBarter:
+		return "✍️ Теперь требуется отправить ссылку на канал/магазин партнера по бартеру.\n"+getExampleUrl(), nil
+	default:
+		return "", fmt.Errorf("unknow type adEvent. typeEvent: %s", t)
+	}
+}
+
+// Текст получения даты размещения.
+func textForGetDatePosting(t models.TypeAdEvent) (string, error) {
+	exampleDate, err := getTextExampleDate()
+	if err != nil {
+		return "", err
+	}
+
+	switch t {
+	case models.TypeSale:
+		return "✍️ Теперь требуется отправить дату и время размещения рекламы." + exampleDate, nil
+	case models.TypeBuy:
+		return "✍️ Теперь требуется отправить дату и время размещения рекламы." + exampleDate, nil
+	case models.TypeMutual:
+		return "✍️ Теперь требуется отправить дату и время размещения поста." + exampleDate, nil
+	case models.TypeBarter:
+		return "✍️ Теперь требуется отправить дату и время размещения поста." + exampleDate, nil
+	default:
+		return "", fmt.Errorf("unknow type adEvent. typeEvent: %s", t)
+	}
+}
+
+// Текст получения даты удаления.
+func textForGetDateDelete(t models.TypeAdEvent) (string, error) {
+	exampleDate, err := getTextExampleDate()
+	if err != nil {
+		return "", err
+	}
+
+	switch t {
+	case models.TypeSale:
+		return "✍️ Теперь требуется отправить дату и время удаления рекламы." + exampleDate, nil
+	case models.TypeBuy:
+		return "✍️ Теперь требуется отправить дату и время удаления рекламы." + exampleDate, nil
+	case models.TypeMutual:
+		return "✍️ Теперь требуется отправить дату и время удаления поста." + exampleDate, nil
+	case models.TypeBarter:
+		return "✍️ Теперь требуется отправить дату и время удаления поста." + exampleDate, nil
+	default:
+		return "", fmt.Errorf("unknow type adEvent. typeEvent: %s", t)
+	}
+}
+
+// Тест успешного добавления даты и времени удаления.
+func textForSuccessfullyAddDeleteDate(t models.TypeAdEvent) (string, error) {
+	switch t {
+	case models.TypeSale:
+		return "🎉 <b>Дата и время удаления рекламы добавлены!</b>", nil
+	case models.TypeBuy:
+		return "🎉 <b>Дата и время удаления рекламы добавлены!</b>", nil
+	case models.TypeMutual:
+		return "🎉 <b>Дата и время удаления поста добавлены!</b>", nil
+	case models.TypeBarter:
+		return "🎉 <b>Дата и время удаления поста добавлены!</b>", nil
+	default:
+		return "", fmt.Errorf("unknow type adEvent. typeEvent: %s", t)
+	}
 }
