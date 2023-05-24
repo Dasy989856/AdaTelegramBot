@@ -64,7 +64,7 @@ func cbqHelpError(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 
 	// Сборка сообщения.
 	text := `⚠️ Просьба расписать проблему как можно подробнее в письме, прикладывая соответствующие материалы (видео, фото, скриншоты).
-	✉️ Письмо требуется отправить на почту ✉️: <b>ada.help@yandex.ru</b>`
+	✉️ Письмо требуется отправить на почту: <b>ada.help@yandex.ru</b>`
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Назад", "help"),

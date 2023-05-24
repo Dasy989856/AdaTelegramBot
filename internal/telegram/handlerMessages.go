@@ -275,7 +275,7 @@ func adEventPrice(b *BotTelegram, msg *tgbotapi.Message) error {
 			return err
 		}
 	case models.TypeBarter:
-		botMsg := tgbotapi.NewMessage(userId, `✍️ Теперь требуется отправить дату и время размещения бартера.`+exampleDate)
+		botMsg := tgbotapi.NewMessage(userId, `✍️ Теперь требуется отправить дату и время размещения поста.`+exampleDate)
 		botMsg.ParseMode = tgbotapi.ModeHTML
 		if err := b.sendMessage(userId, botMsg); err != nil {
 			return err
@@ -323,18 +323,38 @@ func adEventDatePosting(b *BotTelegram, msg *tgbotapi.Message) error {
 	case models.TypeSale:
 		b.db.SetStepUser(userId, "ad_event.create.date_delete")
 		botMsg := tgbotapi.NewMessage(userId, `✍️ Теперь требуется отправить дату и время удаления рекламы.`+exampleDate)
+		keyboard := tgbotapi.NewInlineKeyboardMarkup(
+			tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData("Пропустить", "ad_event.create.date_delete.skip"),
+			),
+		)
+		botMsg.ReplyMarkup = keyboard
 		botMsg.ParseMode = tgbotapi.ModeHTML
 		if err := b.sendMessage(userId, botMsg); err != nil {
 			return err
 		}
 	case models.TypeBuy:
-		// Отправка завершающего создания ad события сообщения.
-		if err := adEventCreateLastMessage(b, userId, adEvent); err != nil {
+		b.db.SetStepUser(userId, "ad_event.create.date_delete")
+		botMsg := tgbotapi.NewMessage(userId, `✍️ Теперь требуется отправить дату и время удаления рекламы.`+exampleDate)
+		keyboard := tgbotapi.NewInlineKeyboardMarkup(
+			tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData("Пропустить", "ad_event.create.date_delete.skip"),
+			),
+		)
+		botMsg.ReplyMarkup = keyboard
+		botMsg.ParseMode = tgbotapi.ModeHTML
+		if err := b.sendMessage(userId, botMsg); err != nil {
 			return err
 		}
 	case models.TypeMutual:
 		b.db.SetStepUser(userId, "ad_event.create.date_delete")
 		botMsg := tgbotapi.NewMessage(userId, `✍️ Теперь требуется отправить дату и время удаления поста.`+exampleDate)
+		keyboard := tgbotapi.NewInlineKeyboardMarkup(
+			tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData("Пропустить", "ad_event.create.date_delete.skip"),
+			),
+		)
+		botMsg.ReplyMarkup = keyboard
 		botMsg.ParseMode = tgbotapi.ModeHTML
 		if err := b.sendMessage(userId, botMsg); err != nil {
 			return err
@@ -342,6 +362,12 @@ func adEventDatePosting(b *BotTelegram, msg *tgbotapi.Message) error {
 	case models.TypeBarter:
 		b.db.SetStepUser(userId, "ad_event.create.date_delete")
 		botMsg := tgbotapi.NewMessage(userId, `✍️ Теперь требуется отправить дату и время удаления поста.`+exampleDate)
+		keyboard := tgbotapi.NewInlineKeyboardMarkup(
+			tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData("Пропустить", "ad_event.create.date_delete.skip"),
+			),
+		)
+		botMsg.ReplyMarkup = keyboard
 		botMsg.ParseMode = tgbotapi.ModeHTML
 		if err := b.sendMessage(userId, botMsg); err != nil {
 			return err
@@ -428,16 +454,21 @@ func adEventDateDelete(b *BotTelegram, msg *tgbotapi.Message) error {
 	}
 
 	// Отправка завершающего создания ad события сообщения.
-	if err := adEventCreateLastMessage(b, userId, adEvent); err != nil {
+	if err := adEventCreateLastMessage(b, userId); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func adEventCreateLastMessage(b *BotTelegram, userId int64, adEvent *models.AdEvent) error {
+func adEventCreateLastMessage(b *BotTelegram, userId int64) error {
+	aE, err := b.getAdEventCreatingCache(userId)
+	if err != nil {
+		return err
+	}
+
 	text := "<b>✍️ Вы хотите создать данное событие?</b>"
-	text = text + createTextAdEventDescription(adEvent)
+	text = text + createTextAdEventDescription(aE)
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Да", "ad_event.create.end"),

@@ -9,7 +9,7 @@ import (
 
 func createStaticsBriefText(d *models.DataForStatistics) string {
 	return fmt.Sprintf(`
-	<b>      📈 Статистика</b>
+	<b>📈 Статистика</b>
 <b>Продано реклам:</b> %d
 <b>Куплено реклам:</b> %d
 <b>Кол-во взаимных пиаров:</b> %d
@@ -22,6 +22,10 @@ func createStaticsBriefText(d *models.DataForStatistics) string {
 
 // Создание текст-описания ad события.
 func createTextAdEventDescription(a *models.AdEvent) (descriptionAdEvent string) {
+	if a.DateDelete == "02.01.06 15:04" {
+		a.DateDelete = "-"
+	}
+	
 	switch a.Type {
 	case models.TypeSale:
 		descriptionAdEvent = fmt.Sprintf(`
@@ -71,6 +75,8 @@ func createTextAdEventDescription(a *models.AdEvent) (descriptionAdEvent string)
 			-<b>Приход подписчиков:</b> %d`, a.ArrivalOfSubscribers)
 		}
 	}
+
+	descriptionAdEvent = descriptionAdEvent + "\n"
 
 	return descriptionAdEvent
 }
@@ -174,7 +180,7 @@ func textForGetPrice(t models.TypeAdEvent) (string, error) {
 	case models.TypeMutual:
 		return `✍️ Теперь требуется отправить стоимость поста взаимного пиара.
 		<b>Пример:</b> <code>1000</code>
-		Можно указать <code>-1000</code> если была доплата с Вашей стороны или <code>+1000</code> если доплатили Вам.`, nil
+		Можно указать <code>-1000</code> если была доплата с Вашей стороны или <code>1000</code> если доплатили Вам.`, nil
 	case models.TypeBarter:
 		return `✍️ Теперь требуется отправить прибыль с бартера.
 		<b>Пример:</b> <code>1000</code> Если считать прибыль не требуется <code>0</code>.`, nil
