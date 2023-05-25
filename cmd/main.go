@@ -16,11 +16,7 @@ func main() {
 	}
 
 	// Подключение к БД.
-	db, err := postgresql.NewDB()
-	if err != nil {
-		log.Panic("LOGGER: ", err)
-		return
-	}
+	db := postgresql.NewDB()
 
 	// Инициализация телеграмм бота.
 	tgBot, err := telegram.NewBotTelegram(postgresql.NewTelegramBotDB(db))

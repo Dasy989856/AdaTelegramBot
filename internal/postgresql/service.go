@@ -4,6 +4,7 @@ import (
 	"AdaTelegramBot/internal/models"
 	"database/sql"
 	"fmt"
+	"log"
 	"math"
 	"time"
 
@@ -27,7 +28,8 @@ type Config struct {
 	ModeSSL  string
 }
 
-func NewDB() (*sqlx.DB, error) {
+// Бесконечный цикл с попыткой подключиться к БД.
+func NewDB() (db *sqlx.DB) {
 	cfg := Config{
 		Host:     viper.GetString("postgre_sql.host"),
 		Port:     viper.GetString("postgre_sql.port"),
@@ -38,16 +40,24 @@ func NewDB() (*sqlx.DB, error) {
 	}
 
 	// urlExample := "postgres://username:password@localhost:5432/database_name"
-	db, err := sqlx.Connect("postgres", fmt.Sprintf("user=%s password= %s host=%s port=%s dbname=%s sslmode=%s",
-		cfg.Username, cfg.Password, cfg.Host, cfg.Port, cfg.NameDB, cfg.ModeSSL))
-	if err != nil {
-		return nil, err
-	}
-	if err := db.Ping(); err != nil {
-		return nil, err
+	var connect bool
+	for !connect {
+		time.Sleep(3 * time.Second)
+		connectDB, err := sqlx.Connect("postgres", fmt.Sprintf("user=%s password= %s host=%s port=%s dbname=%s sslmode=%s",
+			cfg.Username, cfg.Password, cfg.Host, cfg.Port, cfg.NameDB, cfg.ModeSSL))
+		if err != nil {
+			log.Print("error connect DB: ", err)
+			continue
+		}
+		if err := connectDB.Ping(); err != nil {
+			log.Print("error ping DB: ", err)
+			continue
+		}
+		connect = true
+		db = connectDB
 	}
 
-	return db, nil
+	return db
 }
 
 type TelegramBotDB struct {
