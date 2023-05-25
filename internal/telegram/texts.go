@@ -174,9 +174,9 @@ func getExampleUrl() string {
 func textForGetPrice(t models.TypeAdEvent) (string, error) {
 	switch t {
 	case models.TypeSale:
-		return "✍️ Теперь требуется отправить стоимость рекламного поста.\n<b>Пример:</b> <code>1000</code>", nil
+		return "✍️ Теперь требуется отправить стоимость рекламы.\n<b>Пример:</b> <code>1000</code>", nil
 	case models.TypeBuy:
-		return "✍️ Теперь требуется отправить стоимость рекламного поста.\n<b>Пример:</b> <code>1000</code>", nil
+		return "✍️ Теперь требуется отправить стоимость рекламы.\n<b>Пример:</b> <code>1000</code>", nil
 	case models.TypeMutual:
 		return `✍️ Теперь требуется отправить стоимость поста взаимного пиара.
 		<b>Пример:</b> <code>1000</code>
