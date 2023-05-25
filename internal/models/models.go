@@ -23,8 +23,12 @@ type User struct {
 	DateLastAlert  string `json:"DateLastAlert" db:"date_last_alert"`   // Даты последнего оповещения пользователя.
 }
 
-// Ошибки.
 var (
+	MinTime = time.Date(1969, time.January, 1, 0, 0, 0, 0, time.UTC)      // Минимальная дата time.Time
+	MaxTime = time.Date(2068, time.December, 31, 23, 59, 59, 0, time.UTC) // Максимальная дата time.Time
+	MinDate = "01.01.69 00:00"                                            // 1969-01-01 00:00:00 +0300 MSK
+	MaxDate = "31.12.68 23:59"                                            // 2068-12-31 23:59:00 +0300 MSK
+
 	ErrUserNotFound = fmt.Errorf("user not found")
 	// Example: "22.08.22 16:30"
 	RegxAdEventDate = regexp.MustCompile(`^(0[1-9]|[12][0-9]|3[01]).(0[1-9]|1[0-2]).(\d{2}) ([0-1]?[0-9]|2[0-3]):[0-5][0-9]$`)
