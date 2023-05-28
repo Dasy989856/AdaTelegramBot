@@ -155,6 +155,10 @@ func adEventPartner(b *BotTelegram, msg *tgbotapi.Message) error {
 
 func adEventChannel(b *BotTelegram, msg *tgbotapi.Message) error {
 	userId := msg.Chat.ID
+	adEvent, err := b.getAdEventCreatingCache(userId)
+	if err != nil {
+		return err
+	}
 
 	if !models.RegxUrlType1.MatchString(msg.Text) && !models.RegxUrlType2.MatchString(msg.Text) {
 		botMsg := tgbotapi.NewMessage(userId, `Вы отправили некорректную ссылку на канал, попробуйте снова.
@@ -171,9 +175,13 @@ func adEventChannel(b *BotTelegram, msg *tgbotapi.Message) error {
 		msg.Text = "https://t.me/" + msg.Text[1:]
 	}
 
-	adEvent, err := b.getAdEventCreatingCache(userId)
-	if err != nil {
-		return err
+	// Если телеграм, получаем кол-во подписчиков канала.
+	if msg.Text[:13] == "https://t.me/" {
+		subChannel, err := getSubscriptionFromTelegramChannel(msg.Text)
+		if err != nil {
+			return err
+		}
+		adEvent.SubscribersOfChannel = subChannel
 	}
 
 	adEvent.Channel = msg.Text

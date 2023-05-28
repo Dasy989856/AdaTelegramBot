@@ -4,8 +4,11 @@ import (
 	"AdaTelegramBot/internal/models"
 	"fmt"
 	"log"
+	"net/http"
+	"strconv"
 	"time"
 
+	"github.com/PuerkitoBio/goquery"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/spf13/viper"
 )
@@ -232,10 +235,10 @@ func (b *BotTelegram) sendAlertMessage(userId int64, c tgbotapi.Chattable) error
 // Если ad событие полностью заполенно - возвращается true. Иначе false.
 func fullDataAdEvent(ae *models.AdEvent) bool {
 	if ae.Partner == "" {
-		ae.Partner ="-"
+		ae.Partner = "-"
 	}
 	if ae.Channel == "" {
-		ae.Channel ="-"
+		ae.Channel = "-"
 	}
 
 	if ae.UserId == 0 {
@@ -269,4 +272,57 @@ func (b *BotTelegram) initSessions(userId int64) {
 			Cache: make(map[string]interface{}),
 		}
 	}
+}
+
+// Получение кол-ва подписчиков телеграм канала.
+func getSubscriptionFromTelegramChannel(url string) (subscription int64, err error) {
+	res, err := http.Get(url)
+	if err != nil {
+		log.Println(err, map[string]interface{}{"url": url})
+		return 0, err
+	}
+	defer res.Body.Close()
+
+	doc, err := goquery.NewDocumentFromReader(res.Body)
+	if err != nil {
+		err := fmt.Errorf("error reading body. error: %v,", err)
+		return 0, err
+	}
+
+	subscribers, err := scanSubscribers(doc)
+	if err != nil {
+		return 0, err
+	}
+
+	return subscribers, nil
+}
+
+// Сканирования кол-ва подписчиков.
+func scanSubscribers(doc *goquery.Document) (int64, error) {
+	nameClass := doc.Find(".tgme_page_extra")
+	if nameClass == nil {
+		return 0, fmt.Errorf("nil nameClass")
+	}
+
+	dataHtml, err := nameClass.Html()
+	if err != nil {
+		log.Println("Error getting html in scanSubscribers:", err)
+		return 0, err
+	}
+	// fmt.Printf("\nDATA HTML: %v\n", dataHtml)
+
+	var subscribersString []rune
+	for _, r := range dataHtml {
+		if r >= '0' && r <= '9' {
+			subscribersString = append(subscribersString, r)
+		}
+	}
+
+	subscribers, err := strconv.ParseInt(string(subscribersString), 0, 64)
+	if err != nil {
+		log.Println("Error converting subscribersString to number:", err)
+		return 0, err
+	}
+
+	return subscribers, nil
 }

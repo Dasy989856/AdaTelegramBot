@@ -32,9 +32,10 @@ func createTextAdEventDescription(a *models.AdEvent) (descriptionAdEvent string)
 		- <b>Тип:</b> <u>продажа рекламы</u>
 		- <b>Покупатель:</b> %s
 		- <b>Канал покупателя:</b> %s
+		- <b>Кол-во подписчиков на канале покупателя:</b> %d
 		- <b>Стоимость:</b> %d
 		- <b>Дата размещения:</b> %s
-		- <b>Дата удаления:</b> %s`, a.Partner, a.Channel, a.Price, a.DatePosting, a.DateDelete)
+		- <b>Дата удаления:</b> %s`, a.Partner, a.Channel, a.SubscribersOfChannel, a.Price, a.DatePosting, a.DateDelete)
 		if a.ArrivalOfSubscribers != 0 {
 			descriptionAdEvent = descriptionAdEvent + fmt.Sprintf(`
 			-<b>Приход подписчиков:</b> %d`, a.ArrivalOfSubscribers)
@@ -44,8 +45,9 @@ func createTextAdEventDescription(a *models.AdEvent) (descriptionAdEvent string)
 		- <b>Тип:</b> <u>покупка рекламы</u>
 		- <b>Продавец:</b> %s
 		- <b>Канал продавца:</b> %s
+		- <b>Кол-во подписчиков на канале продавца:</b> %d
 		- <b>Стоимость:</b> %d
-		- <b>Дата размещения:</b> %s`, a.Partner, a.Channel, a.Price, a.DatePosting)
+		- <b>Дата размещения:</b> %s`, a.Partner, a.Channel, a.SubscribersOfChannel, a.Price, a.DatePosting)
 		if a.ArrivalOfSubscribers != 0 {
 			descriptionAdEvent = descriptionAdEvent + fmt.Sprintf(`
 			-<b>Приход подписчиков:</b> %d`, a.ArrivalOfSubscribers)
@@ -55,9 +57,10 @@ func createTextAdEventDescription(a *models.AdEvent) (descriptionAdEvent string)
 		- <b>Тип:</b> <u>взаимный пиар</u>
 		- <b>Партнер:</b> %s
 		- <b>Канал партнера:</b> %s
+		- <b>Кол-во подписчиков на канале партнера:</b> %d
 		- <b>Стоимость:</b> %d
 		- <b>Дата размещения:</b> %s
-		- <b>Дата удаления:</b> %s`, a.Partner, a.Channel, a.Price, a.DatePosting, a.DateDelete)
+		- <b>Дата удаления:</b> %s`, a.Partner, a.Channel, a.SubscribersOfChannel, a.Price, a.DatePosting, a.DateDelete)
 		if a.ArrivalOfSubscribers != 0 {
 			descriptionAdEvent = descriptionAdEvent + fmt.Sprintf(`
 			-<b>Приход подписчиков:</b> %d`, a.ArrivalOfSubscribers)
@@ -66,10 +69,11 @@ func createTextAdEventDescription(a *models.AdEvent) (descriptionAdEvent string)
 		descriptionAdEvent = fmt.Sprintf(`
 		- <b>Тип:</b> <u>бартер</u>
 		- <b>Партнер:</b> %s
-		- <b>Канал/магазин партнера:</b> %s
+		- <b>Канал партнера:</b> %s
+		- <b>Кол-во подписчиков на канале партнера:</b> %d
 		- <b>Стоимость:</b> %d
 		- <b>Дата размещения:</b> %s
-		- <b>Дата удаления:</b> %s`, a.Partner, a.Channel, a.Price, a.DatePosting, a.DateDelete)
+		- <b>Дата удаления:</b> %s`, a.Partner, a.Channel, a.SubscribersOfChannel, a.Price, a.DatePosting, a.DateDelete)
 		if a.ArrivalOfSubscribers != 0 {
 			descriptionAdEvent = descriptionAdEvent + fmt.Sprintf(`
 			-<b>Приход подписчиков:</b> %d`, a.ArrivalOfSubscribers)
@@ -198,13 +202,13 @@ func textForUpdatePrice() string {
 func textForGetDateChannelUrl(t models.TypeAdEvent) (string, error) {
 	switch t {
 	case models.TypeSale:
-		return "✍️ Теперь требуется отправить ссылку на рекламируемый Вами канал.\n"+getExampleUrl(), nil
+		return "✍️ Теперь требуется отправить ссылку на рекламируемый Вами канал.\n" + getExampleUrl(), nil
 	case models.TypeBuy:
-		return "✍️ Теперь требуется отправить ссылку на канал, в котором выйдет Ваша реклама.\n"+getExampleUrl(), nil
+		return "✍️ Теперь требуется отправить ссылку на канал, в котором выйдет Ваша реклама.\n" + getExampleUrl(), nil
 	case models.TypeMutual:
-		return "✍️ Теперь требуется отправить ссылку на канал, с которым будет взаимный пиар.\n"+getExampleUrl(), nil
+		return "✍️ Теперь требуется отправить ссылку на канал, с которым будет взаимный пиар.\n" + getExampleUrl(), nil
 	case models.TypeBarter:
-		return "✍️ Теперь требуется отправить ссылку на канал/магазин партнера по бартеру.\n"+getExampleUrl(), nil
+		return "✍️ Теперь требуется отправить ссылку на канал/магазин партнера по бартеру.\n" + getExampleUrl(), nil
 	default:
 		return "", fmt.Errorf("unknow type adEvent. typeEvent: %s", t)
 	}
