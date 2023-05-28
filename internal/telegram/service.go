@@ -256,8 +256,8 @@ func fullDataAdEvent(ae *models.AdEvent) bool {
 		return false
 	}
 
-	if ae.DatePosting == "" {
-		log.Println("not found ae.DatePosting event")
+	if ae.DateStart == "" {
+		log.Println("not found ae.DateStart event")
 		return false
 	}
 
@@ -321,7 +321,7 @@ func scanSubscribers(doc *goquery.Document) (int64, error) {
 	subscribers, err := strconv.ParseInt(string(subscribersString), 0, 64)
 	if err != nil {
 		log.Println("Error converting subscribersString to number:", err)
-		return 0, err
+		// return 0, err
 	}
 
 	return subscribers, nil

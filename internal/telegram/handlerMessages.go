@@ -40,9 +40,9 @@ func (b *BotTelegram) handlerMessage(msg *tgbotapi.Message) error {
 			b.sendRequestRestartMsg(userId)
 			return err
 		}
-	case "ad_event.create.date_posting":
-		if err := adEventDatePosting(b, msg); err != nil {
-			log.Println("error in adEventDatePosting: ", err)
+	case "ad_event.create.date_start":
+		if err := adEventDateStart(b, msg); err != nil {
+			log.Println("error in adEventDateStart: ", err)
 			b.sendRequestRestartMsg(userId)
 			return err
 		}
@@ -70,9 +70,9 @@ func (b *BotTelegram) handlerMessage(msg *tgbotapi.Message) error {
 			b.sendRequestRestartMsg(userId)
 			return err
 		}
-	case "ad_event.update.date_posting":
-		if err := adEventUpdateDatePosting(b, msg); err != nil {
-			log.Println("error in adEventUpdateDatePosting: ", err)
+	case "ad_event.update.date_start":
+		if err := adEventUpdateDateStart(b, msg); err != nil {
+			log.Println("error in adEventUpdateDateStart: ", err)
 			b.sendRequestRestartMsg(userId)
 			return err
 		}
@@ -239,7 +239,7 @@ func adEventPrice(b *BotTelegram, msg *tgbotapi.Message) error {
 	}
 
 	adEvent.Price = price
-	b.db.SetStepUser(userId, "ad_event.create.date_posting")
+	b.db.SetStepUser(userId, "ad_event.create.date_start")
 
 	botMsg := tgbotapi.NewMessage(userId, "🎉 <b>Стоимость добавлена!</b>")
 	botMsg.ParseMode = tgbotapi.ModeHTML
@@ -247,7 +247,7 @@ func adEventPrice(b *BotTelegram, msg *tgbotapi.Message) error {
 		return err
 	}
 
-	text, err := textForGetDatePosting(adEvent.Type)
+	text, err := textForGetDateStart(adEvent.Type)
 	if err != nil {
 		return err
 	}
@@ -260,7 +260,7 @@ func adEventPrice(b *BotTelegram, msg *tgbotapi.Message) error {
 	return nil
 }
 
-func adEventDatePosting(b *BotTelegram, msg *tgbotapi.Message) error {
+func adEventDateStart(b *BotTelegram, msg *tgbotapi.Message) error {
 	userId := msg.Chat.ID
 
 	exampleDate, err := getTextExampleDate()
@@ -281,7 +281,7 @@ func adEventDatePosting(b *BotTelegram, msg *tgbotapi.Message) error {
 	if err != nil {
 		return err
 	}
-	adEvent.DatePosting = msg.Text
+	adEvent.DateStart = msg.Text
 
 	botMsg := tgbotapi.NewMessage(userId, "🎉 <b>Дата и время размещения рекламы добавлены!</b>")
 	botMsg.ParseMode = tgbotapi.ModeHTML
@@ -335,9 +335,9 @@ func adEventDateDelete(b *BotTelegram, msg *tgbotapi.Message) error {
 	adEvent.DateDelete = msg.Text
 
 	// Сравнение даты размещения и удаления.
-	durationDatePosting, err := sdk.ParseUserDateToTime(adEvent.DatePosting)
+	durationDateStart, err := sdk.ParseUserDateToTime(adEvent.DateStart)
 	if err != nil {
-		return fmt.Errorf("error parse durationDatePosting: %w", err)
+		return fmt.Errorf("error parse durationDateStart: %w", err)
 	}
 
 	durationDateDelete, err := sdk.ParseUserDateToTime(adEvent.DateDelete)
@@ -345,7 +345,7 @@ func adEventDateDelete(b *BotTelegram, msg *tgbotapi.Message) error {
 		return fmt.Errorf("error parse durationDateDelete: %w", err)
 	}
 
-	if durationDateDelete.Sub(durationDatePosting) <= 0 {
+	if durationDateDelete.Sub(durationDateStart) <= 0 {
 		botMsg := tgbotapi.NewMessage(userId, "Вы ввели дату удаления поста меньше даты размещения поста, попробуйте снова.")
 		botMsg.ParseMode = tgbotapi.ModeHTML
 		if err := b.sendMessage(userId, botMsg); err != nil {
@@ -530,7 +530,7 @@ func adEventUpdatePrice(b *BotTelegram, msg *tgbotapi.Message) error {
 	return nil
 }
 
-func adEventUpdateDatePosting(b *BotTelegram, msg *tgbotapi.Message) error {
+func adEventUpdateDateStart(b *BotTelegram, msg *tgbotapi.Message) error {
 	userId := msg.Chat.ID
 
 	exampleDate, err := getTextExampleDate()
@@ -551,7 +551,7 @@ func adEventUpdateDatePosting(b *BotTelegram, msg *tgbotapi.Message) error {
 	if err != nil {
 		return err
 	}
-	adEvent.DatePosting = msg.Text
+	adEvent.DateStart = msg.Text
 
 	if err := b.db.AdEventUpdate(adEvent); err != nil {
 		return err

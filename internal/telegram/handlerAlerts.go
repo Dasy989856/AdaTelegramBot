@@ -16,7 +16,7 @@ func (b *BotTelegram) handlerAlerts() (err error) {
 	var cashAdEvents []models.AdEvent
 	for {
 		time.Sleep(20 * time.Second)
-		
+
 		timeStart, _ := sdk.GetTimeRangeToday()
 		_, timeEnd := sdk.GetTimeRangeTomorrow()
 		cashAdEvents, err = b.db.GetRangeAdEvents(models.TypeAny, timeStart, timeEnd)
@@ -47,18 +47,18 @@ func (b *BotTelegram) handlerAlerts() (err error) {
 
 // Оповещение о размещении рекламы.
 func aletrPosting(b *BotTelegram, aE *models.AdEvent) error {
-	timeDatePosting, err := sdk.ParseUserDateToTime(aE.DatePosting)
+	timeDateStart, err := sdk.ParseUserDateToTime(aE.DateStart)
 	if err != nil {
 		log.Println(fmt.Errorf("error parsing date in aletrPosting: %w", err))
 		return err
 	}
 
 	// Событие прошло.
-	if time.Since(timeDatePosting).Minutes() > 0 {
+	if time.Since(timeDateStart).Minutes() > 0 {
 		return nil
 	}
 
-	timeLeftAlert := int64(math.Abs(time.Since(timeDatePosting).Minutes()))
+	timeLeftAlert := int64(math.Abs(time.Since(timeDateStart).Minutes()))
 	if checkTimeAlert(aE.UserId, timeLeftAlert) {
 		text := createTextAlertForAdEventPosting(aE, timeLeftAlert)
 		botMsg := tgbotapi.NewMessage(aE.UserId, text)

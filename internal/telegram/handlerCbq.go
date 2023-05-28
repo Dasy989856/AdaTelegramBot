@@ -114,13 +114,13 @@ func handlerCbqAdEvent(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	case "ad_event.create.price.skip":
 		b.cleareMessage(userId, messageId)
 
-		b.db.SetStepUser(userId, "ad_event.create.date_posting")
+		b.db.SetStepUser(userId, "ad_event.create.date_start")
 		adEvent, err := b.getAdEventCreatingCache(userId)
 		if err != nil {
 			return err
 		}
 
-		text, err := textForGetDatePosting(adEvent.Type)
+		text, err := textForGetDateStart(adEvent.Type)
 		if err != nil {
 			return err
 		}
@@ -187,8 +187,8 @@ func handlerCbqAdEvent(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 		if err := cbqAdEventUpdatePrice(b, cbq); err != nil {
 			return err
 		}
-	case "ad_event.update.date_posting":
-		if err := cbqAdEventUpdateDatePosting(b, cbq); err != nil {
+	case "ad_event.update.date_start":
+		if err := cbqAdEventUpdateDateStart(b, cbq); err != nil {
 			return err
 		}
 	case "ad_event.update.date_delete":
