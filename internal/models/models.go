@@ -66,17 +66,33 @@ var (
 
 // Ad событие.
 type AdEvent struct {
-	Id                   int64       `json:"id" db:"id"`
-	CreatedAt            string      `json:"createdAt" db:"created_at"`                        // Дата создания события.
-	UserId               int64       `json:"userId" db:"user_id"`                              // Id пользователя.
-	Type                 TypeAdEvent `json:"type" db:"type"`                                   // Тип события. (sale, buy ...)
-	Partner              string      `json:"partner" db:"partner"`                             // Ссылка партнера.
-	Channel              string      `json:"channel" db:"channel"`                             // Ссылка на канал партнера.
-	SubscribersOfChannel int64       `json:"subscribersOfChannel" db:"subscribers_of_channel"` // Подписчики канала.
-	Price                int64       `json:"price" db:"price"`                                 // Цена.
-	DateStart            string      `json:"dateStart" db:"date_start"`                        // Дата начала события. "02.01.06 15:04"
-	DateEnd              string      `json:"dateEnd" db:"date_end"`                            // Дата завершения события. "02.01.06 15:04"
-	ArrivalOfSubscribers int64       `json:"arrivalOfSubscribers" db:"arrival_of_subscribers"` // Приход подписчиков.
+	Id        int64  `json:"id" db:"id"`
+	CreatedAt string `json:"createdAt" db:"created_at"` // Дата создания события.
+	UserId    int64  `json:"userId" db:"user_id"`       // Id пользователя.
+	// Тип события.
+	Type TypeAdEvent `json:"type" db:"type"`
+	// Ссылка партнера.
+	Partner string `json:"partner" db:"partner"`
+	// Ссылка на канал партнера.
+	Channel string `json:"channel" db:"channel"`
+	// Подписчики канала.
+	SubscribersOfChannel int64 `json:"subscribersOfChannel" db:"subscribers_of_channel"`
+	// Стоимость.
+	Price int64 `json:"price" db:"price"`
+	// Дата начала события. "02.01.06 15:04"
+	DateStart string `json:"dateStart" db:"date_start"`
+	// Дата завершения события. "02.01.06 15:04"
+	DateEnd string `json:"dateEnd" db:"date_end"`
+	// Приход подписчиков.
+	ArrivalOfSubscribers int64 `json:"arrivalOfSubscribers" db:"arrival_of_subscribers"`
+	// Кол-во подписчиков в начале события.
+	SubscribersInStart int64 `json:"subscribersInStart" db:"subscribers_in_start"`
+	// Кол-во подписчиков в конце события.
+	SubscribersInEnd int64 `json:"subscribersInEnd" db:"subscribers_in_end"`
+	// Кол-во подписчиков партнера в начале события.
+	PartnerChannelSubscribersInStart int64 `json:"partnerChannelSubscribersInStart" db:"partner_channel_subscribers_in_start"`
+	// Кол-во подписчиков партнера в конце события.
+	PartnerChannelSubscribersInEnd int64 `json:"partnerChannelSubscribersInEnd" db:"partner_channel_subscribers_in_end"`
 }
 
 // Данные для создания статистики.
@@ -129,8 +145,6 @@ type TelegramBotDB interface {
 	SetStepUser(userId int64, step string) error
 	// Получение текущего шага пользователя.
 	GetStepUser(userId int64) (step string, err error)
-	// Подучение id незавершенного ad события.
-	GetUnfinishedAdEventId(userId int64) (eventId int64, err error)
 
 	// Добавление messageId пользователя.
 	AddUserMessageId(userId int64, messageId int) error

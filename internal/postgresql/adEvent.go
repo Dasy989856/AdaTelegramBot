@@ -242,8 +242,8 @@ func (t *TelegramBotDB) AdEventCreation(event *models.AdEvent) (eventId int64, e
 		return 0, err
 	}
 
-	sql := fmt.Sprintf(`INSERT INTO public.%s (ready, user_id, "type", partner, channel, price, date_start, date_end)
-	values (true, $1, $2, $3, $4, $5, $6, $7) RETURNING id;`, adEventsTable)
+	sql := fmt.Sprintf(`INSERT INTO public.%s (user_id, "type", partner, channel, price, date_start, date_end)
+	values ($1, $2, $3, $4, $5, $6, $7) RETURNING id;`, adEventsTable)
 	if err := tx.QueryRow(sql, event.UserId, event.Type, event.Partner, event.Channel, event.Price,
 		event.DateStart, event.DateEnd).Scan(&eventId); err != nil {
 		return 0, fmt.Errorf("error creation event: %w", err)
@@ -359,25 +359,6 @@ func (t *TelegramBotDB) AdEventDelete(eventId int64) (err error) {
 	return nil
 }
 
-// Возвращает id незавершенного события.
-func (t *TelegramBotDB) GetUnfinishedAdEventId(userId int64) (adEventId int64, err error) {
-	tx := t.db.MustBegin()
-	defer func() {
-		if err != nil {
-			tx.Rollback()
-		} else {
-			tx.Commit()
-		}
-	}()
-
-	// SELECT id FROM public.ad_events WHERE ready=false and user_id=959606248;
-	sql := fmt.Sprintf(`SELECT id FROM public.%s WHERE ready=false AND user_id=$1;`, adEventsTable)
-	if err := tx.QueryRow(sql, userId).Scan(&adEventId); err != nil {
-		return 0, fmt.Errorf("error scan id event: %w", err)
-	}
-
-	return adEventId, nil
-}
 
 func editDateFromDataBaseToUserDate(dateStartFromDB, dateEndFromDB string) (userDateStart, userDateEnd string, err error) {
 	// User Date Posting
