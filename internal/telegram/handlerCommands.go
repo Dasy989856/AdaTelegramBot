@@ -39,6 +39,7 @@ func (b *BotTelegram) handlerCommand(msg *tgbotapi.Message) error {
 // Команда /start
 func (b *BotTelegram) cmdStart(msg *tgbotapi.Message) error {
 	userId := msg.Chat.ID
+
 	// Регистрация пользователя если его нет.
 	if err := b.db.DefaultUserCreation(userId, msg.Chat.UserName, msg.Chat.FirstName); err != nil {
 		return err
@@ -46,6 +47,11 @@ func (b *BotTelegram) cmdStart(msg *tgbotapi.Message) error {
 
 	// Очистка кэша пользователя.
 	if err := b.clearCacheOfUser(userId); err != nil {
+		return err
+	}
+
+	// Обновление даты последней активности.
+	if err := b.db.UpdateLastActive(userId); err != nil {
 		return err
 	}
 

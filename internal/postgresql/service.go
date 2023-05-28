@@ -276,7 +276,6 @@ func parseDateDataBaseToTime(timeString string) (time.Time, error) {
 	if err != nil {
 		return time.Time{}, fmt.Errorf("error create defaultTimeZoneInDataBase: %w", err)
 	}
-	t = t.In(defaultTimeZoneInDataBase)
 
 	t, err = time.ParseInLocation(layout, timeString, defaultTimeZoneInDataBase)
 	if err != nil {
@@ -295,4 +294,28 @@ func parseTimeToDateDataBase(t time.Time) (string, error) {
 	t = t.In(defaultTimeZoneInDataBase)
 
 	return t.Format("2006-01-02T15:04:05Z"), nil
+}
+
+func (t *TelegramBotDB) UpdateLastActive(userId int64) (err error) {
+	tx := t.db.MustBegin()
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		} else {
+			tx.Commit()
+		}
+	}()
+
+	dateLastActive, err := parseTimeToDateDataBase(time.Now())
+	if err != nil {
+		return err
+	}
+
+	sql := fmt.Sprintf(`UPDATE public.%s SET last_active=$1
+	WHERE id=$2;`, usersTable)
+	if _, err := tx.Exec(sql, dateLastActive, userId); err != nil {
+		return fmt.Errorf("error update last_active user %d: %w", userId, err)
+	}
+
+	return nil
 }

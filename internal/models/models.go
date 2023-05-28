@@ -155,11 +155,13 @@ type TelegramBotDB interface {
 	// Возвращает startmessageId. Это сообщение которое не удаляется а меняется на меню команды /start.
 	GetStartMessageId(userId int64) (messageId int, err error)
 	// Обновление startmessageId. Это сообщение которое не удаляется а меняется на меню команды /start.
-	UpdateStartMessageId(userId int64, messageId int) (err error)
+	UpdateStartMessageId(userId int64, messageId int) error
 	// Возвращает admessageId. Это сообщение которое не удаляется, купленная в боте реклама.
 	GetAdMessageId(userId int64) (messageId int, err error)
 	// Обновление AdmessageId. Это сообщение которое не удаляется, купленная в боте реклама.
-	UpdateAdMessageId(userId int64, messageId int) (err error)
+	UpdateAdMessageId(userId int64, messageId int) error
+	// Обновление даты последней активности пользователя.
+	UpdateLastActive(userId int64) error
 
 	// Получение данных пользователя для статистики.
 	GetRangeDataForStatistics(userId int64, typeAdEvent TypeAdEvent, startDate, endDate time.Time) (data *DataForStatistics, err error)
