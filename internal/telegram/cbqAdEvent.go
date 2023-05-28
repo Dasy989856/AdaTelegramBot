@@ -52,7 +52,6 @@ func cbqAdEventCreateSale(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	adEvent := models.AdEvent{
 		UserId:    userId,
 		CreatedAt: time.Now().Format("2006-01-02 15:04:05.999"),
-		Ready:     true,
 		Type:      models.TypeSale,
 	}
 	b.adEventCreatingCache[userId] = &adEvent
@@ -77,7 +76,6 @@ func cbqAdEventCreateBuy(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	adEvent := models.AdEvent{
 		UserId:    userId,
 		CreatedAt: time.Now().Format("2006-01-02 15:04:05.999"),
-		Ready:     true,
 		Type:      models.TypeBuy,
 	}
 	b.adEventCreatingCache[userId] = &adEvent
@@ -103,7 +101,6 @@ func cbqAdEventCreateMutual(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	adEvent := models.AdEvent{
 		UserId:    userId,
 		CreatedAt: time.Now().Format("2006-01-02 15:04:05.999"),
-		Ready:     true,
 		Type:      models.TypeMutual,
 	}
 	b.adEventCreatingCache[userId] = &adEvent
@@ -129,7 +126,6 @@ func cbqAdEventCreateBarter(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	adEvent := models.AdEvent{
 		UserId:    userId,
 		CreatedAt: time.Now().Format("2006-01-02 15:04:05.999"),
-		Ready:     true,
 		Type:      models.TypeBarter,
 	}
 	b.adEventCreatingCache[userId] = &adEvent

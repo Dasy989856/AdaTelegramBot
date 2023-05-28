@@ -68,11 +68,10 @@ var (
 type AdEvent struct {
 	Id                   int64       `json:"id" db:"id"`
 	CreatedAt            string      `json:"createdAt" db:"created_at"`                        // Дата создания события.
-	Ready                bool        `json:"ready" db:"ready"`                                 // Состояние события (Временно не используется)
 	UserId               int64       `json:"userId" db:"user_id"`                              // Id пользователя.
 	Type                 TypeAdEvent `json:"type" db:"type"`                                   // Тип события. (sale, buy ...)
-	Partner              string      `json:"partner" db:"partner"`                             // Ссылка партнера. (Продавец / Покупатель)
-	Channel              string      `json:"channel" db:"channel"`                             // Ссылка на канал. (Продавец / Покупатель)
+	Partner              string      `json:"partner" db:"partner"`                             // Ссылка партнера.
+	Channel              string      `json:"channel" db:"channel"`                             // Ссылка на канал партнера.
 	SubscribersOfChannel int64       `json:"subscribersOfChannel" db:"subscribers_of_channel"` // Подписчики канала.
 	Price                int64       `json:"price" db:"price"`                                 // Цена.
 	DateStart            string      `json:"dateStart" db:"date_start"`                        // Дата начала события. "02.01.06 15:04"
