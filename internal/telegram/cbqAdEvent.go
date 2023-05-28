@@ -627,7 +627,7 @@ func cbqAdEventControl(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	updateChannelButtonData := fmt.Sprintf("ad_event.update.channel?%d", adEventId)
 	updatePriceButtonData := fmt.Sprintf("ad_event.update.price?%d", adEventId)
 	dateStartButtonData := fmt.Sprintf("ad_event.update.date_start?%d", adEventId)
-	dateDeleteButtonData := fmt.Sprintf("ad_event.update.date_delete?%d", adEventId)
+	dateEndButtonData := fmt.Sprintf("ad_event.update.date_end?%d", adEventId)
 	arrivalOfSubscribersButtonData := fmt.Sprintf("ad_event.update.arrival_of_subscribers?%d", adEventId)
 
 	cbqAdEventViewSelectData, ok := b.sessions[userId].Cache["cbqAdEventViewSelectData"].(string)
@@ -652,7 +652,7 @@ func cbqAdEventControl(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 			tgbotapi.NewInlineKeyboardButtonData("Изменить дату и время размещения рекламы", dateStartButtonData),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Изменить дату и время удаления рекламы", dateDeleteButtonData),
+			tgbotapi.NewInlineKeyboardButtonData("Изменить дату и время удаления рекламы", dateEndButtonData),
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Внести приход подписчиков", arrivalOfSubscribersButtonData),
@@ -946,7 +946,7 @@ func cbqAdEventUpdateDateStart(b *BotTelegram, cbq *tgbotapi.CallbackQuery) erro
 	return nil
 }
 
-func cbqAdEventUpdateDateDelete(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
+func cbqAdEventUpdateDateEnd(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	userId := cbq.Message.Chat.ID
 	messageId := cbq.Message.MessageID
 
@@ -970,7 +970,7 @@ func cbqAdEventUpdateDateDelete(b *BotTelegram, cbq *tgbotapi.CallbackQuery) err
 	b.adEventCreatingCache[userId] = adEvent
 
 	// Установка шага.
-	if err := b.db.SetStepUser(userId, "ad_event.update.date_delete"); err != nil {
+	if err := b.db.SetStepUser(userId, "ad_event.update.date_end"); err != nil {
 		return err
 	}
 

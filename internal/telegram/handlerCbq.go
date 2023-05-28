@@ -129,7 +129,7 @@ func handlerCbqAdEvent(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 		if err := b.sendMessage(userId, botMsg); err != nil {
 			return err
 		}
-	case "ad_event.create.date_delete.skip":
+	case "ad_event.create.date_end.skip":
 		b.cleareMessage(userId, messageId)
 
 		if err := adEventCreateLastMessage(b, userId); err != nil {
@@ -191,8 +191,8 @@ func handlerCbqAdEvent(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 		if err := cbqAdEventUpdateDateStart(b, cbq); err != nil {
 			return err
 		}
-	case "ad_event.update.date_delete":
-		if err := cbqAdEventUpdateDateDelete(b, cbq); err != nil {
+	case "ad_event.update.date_end":
+		if err := cbqAdEventUpdateDateEnd(b, cbq); err != nil {
 			return err
 		}
 	case "ad_event.update.arrival_of_subscribers":

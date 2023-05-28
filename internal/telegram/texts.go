@@ -22,8 +22,8 @@ func createStaticsBriefText(d *models.DataForStatistics) string {
 
 // Создание текст-описания ad события.
 func createTextAdEventDescription(a *models.AdEvent) (descriptionAdEvent string) {
-	if a.DateDelete == "02.01.06 15:04" {
-		a.DateDelete = "-"
+	if a.DateEnd == "02.01.06 15:04" {
+		a.DateEnd = "-"
 	}
 
 	switch a.Type {
@@ -35,7 +35,7 @@ func createTextAdEventDescription(a *models.AdEvent) (descriptionAdEvent string)
 		- <b>Кол-во подписчиков на канале покупателя:</b> %d
 		- <b>Стоимость:</b> %d
 		- <b>Дата размещения:</b> %s
-		- <b>Дата удаления:</b> %s`, a.Partner, a.Channel, a.SubscribersOfChannel, a.Price, a.DateStart, a.DateDelete)
+		- <b>Дата удаления:</b> %s`, a.Partner, a.Channel, a.SubscribersOfChannel, a.Price, a.DateStart, a.DateEnd)
 		if a.ArrivalOfSubscribers != 0 {
 			descriptionAdEvent = descriptionAdEvent + fmt.Sprintf(`
 			-<b>Приход подписчиков:</b> %d`, a.ArrivalOfSubscribers)
@@ -60,7 +60,7 @@ func createTextAdEventDescription(a *models.AdEvent) (descriptionAdEvent string)
 		- <b>Кол-во подписчиков на канале партнера:</b> %d
 		- <b>Стоимость:</b> %d
 		- <b>Дата размещения:</b> %s
-		- <b>Дата удаления:</b> %s`, a.Partner, a.Channel, a.SubscribersOfChannel, a.Price, a.DateStart, a.DateDelete)
+		- <b>Дата удаления:</b> %s`, a.Partner, a.Channel, a.SubscribersOfChannel, a.Price, a.DateStart, a.DateEnd)
 		if a.ArrivalOfSubscribers != 0 {
 			descriptionAdEvent = descriptionAdEvent + fmt.Sprintf(`
 			-<b>Приход подписчиков:</b> %d`, a.ArrivalOfSubscribers)
@@ -73,7 +73,7 @@ func createTextAdEventDescription(a *models.AdEvent) (descriptionAdEvent string)
 		- <b>Кол-во подписчиков на канале партнера:</b> %d
 		- <b>Стоимость:</b> %d
 		- <b>Дата размещения:</b> %s
-		- <b>Дата удаления:</b> %s`, a.Partner, a.Channel, a.SubscribersOfChannel, a.Price, a.DateStart, a.DateDelete)
+		- <b>Дата удаления:</b> %s`, a.Partner, a.Channel, a.SubscribersOfChannel, a.Price, a.DateStart, a.DateEnd)
 		if a.ArrivalOfSubscribers != 0 {
 			descriptionAdEvent = descriptionAdEvent + fmt.Sprintf(`
 			-<b>Приход подписчиков:</b> %d`, a.ArrivalOfSubscribers)
@@ -236,7 +236,7 @@ func textForGetDateStart(t models.TypeAdEvent) (string, error) {
 }
 
 // Текст получения даты удаления.
-func textForGetDateDelete(t models.TypeAdEvent) (string, error) {
+func textForGetDateEnd(t models.TypeAdEvent) (string, error) {
 	exampleDate, err := getTextExampleDate()
 	if err != nil {
 		return "", err

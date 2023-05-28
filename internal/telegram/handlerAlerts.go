@@ -74,18 +74,18 @@ func aletrPosting(b *BotTelegram, aE *models.AdEvent) error {
 
 // Оповещение о удалении рекламы.
 func aletrDelete(b *BotTelegram, aE *models.AdEvent) error {
-	timeDateDelete, err := sdk.ParseUserDateToTime(aE.DateDelete)
+	timeDateEnd, err := sdk.ParseUserDateToTime(aE.DateEnd)
 	if err != nil {
 		log.Println(fmt.Errorf("error parsing date in aletrDelete: %w", err))
 		return err
 	}
 
 	// Событие прошло.
-	if time.Since(timeDateDelete).Minutes() > 0 {
+	if time.Since(timeDateEnd).Minutes() > 0 {
 		return nil
 	}
 
-	timeLeftAlert := int64(math.Abs(time.Since(timeDateDelete).Minutes()))
+	timeLeftAlert := int64(math.Abs(time.Since(timeDateEnd).Minutes()))
 	// Удаления  отображаются только за 1 час.
 	if timeLeftAlert > 60 {
 		return nil

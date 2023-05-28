@@ -46,9 +46,9 @@ func (b *BotTelegram) handlerMessage(msg *tgbotapi.Message) error {
 			b.sendRequestRestartMsg(userId)
 			return err
 		}
-	case "ad_event.create.date_delete":
-		if err := adEventDateDelete(b, msg); err != nil {
-			log.Println("error in adEventDateDelete: ", err)
+	case "ad_event.create.date_end":
+		if err := adEventDateEnd(b, msg); err != nil {
+			log.Println("error in adEventDateEnd: ", err)
 			b.sendRequestRestartMsg(userId)
 			return err
 		}
@@ -76,9 +76,9 @@ func (b *BotTelegram) handlerMessage(msg *tgbotapi.Message) error {
 			b.sendRequestRestartMsg(userId)
 			return err
 		}
-	case "ad_event.update.date_delete":
-		if err := adEventUpdateDateDelete(b, msg); err != nil {
-			log.Println("error in adEventUpdateDateDelete: ", err)
+	case "ad_event.update.date_end":
+		if err := adEventUpdateDateEnd(b, msg); err != nil {
+			log.Println("error in adEventUpdateDateEnd: ", err)
 			b.sendRequestRestartMsg(userId)
 			return err
 		}
@@ -290,15 +290,15 @@ func adEventDateStart(b *BotTelegram, msg *tgbotapi.Message) error {
 	}
 
 	// Отправка сообщения об получении даты удаления.
-	text, err := textForGetDateDelete(adEvent.Type)
+	text, err := textForGetDateEnd(adEvent.Type)
 	if err != nil {
 		return err
 	}
-	b.db.SetStepUser(userId, "ad_event.create.date_delete")
+	b.db.SetStepUser(userId, "ad_event.create.date_end")
 	botMsg = tgbotapi.NewMessage(userId, text)
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Пропустить", "ad_event.create.date_delete.skip"),
+			tgbotapi.NewInlineKeyboardButtonData("Пропустить", "ad_event.create.date_end.skip"),
 		),
 	)
 	botMsg.ReplyMarkup = keyboard
@@ -310,7 +310,7 @@ func adEventDateStart(b *BotTelegram, msg *tgbotapi.Message) error {
 	return nil
 }
 
-func adEventDateDelete(b *BotTelegram, msg *tgbotapi.Message) error {
+func adEventDateEnd(b *BotTelegram, msg *tgbotapi.Message) error {
 	userId := msg.Chat.ID
 
 	exampleDate, err := getTextExampleDate()
@@ -332,7 +332,7 @@ func adEventDateDelete(b *BotTelegram, msg *tgbotapi.Message) error {
 	if err != nil {
 		return err
 	}
-	adEvent.DateDelete = msg.Text
+	adEvent.DateEnd = msg.Text
 
 	// Сравнение даты размещения и удаления.
 	durationDateStart, err := sdk.ParseUserDateToTime(adEvent.DateStart)
@@ -340,12 +340,12 @@ func adEventDateDelete(b *BotTelegram, msg *tgbotapi.Message) error {
 		return fmt.Errorf("error parse durationDateStart: %w", err)
 	}
 
-	durationDateDelete, err := sdk.ParseUserDateToTime(adEvent.DateDelete)
+	durationDateEnd, err := sdk.ParseUserDateToTime(adEvent.DateEnd)
 	if err != nil {
-		return fmt.Errorf("error parse durationDateDelete: %w", err)
+		return fmt.Errorf("error parse durationDateEnd: %w", err)
 	}
 
-	if durationDateDelete.Sub(durationDateStart) <= 0 {
+	if durationDateEnd.Sub(durationDateStart) <= 0 {
 		botMsg := tgbotapi.NewMessage(userId, "Вы ввели дату удаления поста меньше даты размещения поста, попробуйте снова.")
 		botMsg.ParseMode = tgbotapi.ModeHTML
 		if err := b.sendMessage(userId, botMsg); err != nil {
@@ -576,7 +576,7 @@ func adEventUpdateDateStart(b *BotTelegram, msg *tgbotapi.Message) error {
 	return nil
 }
 
-func adEventUpdateDateDelete(b *BotTelegram, msg *tgbotapi.Message) error {
+func adEventUpdateDateEnd(b *BotTelegram, msg *tgbotapi.Message) error {
 	userId := msg.Chat.ID
 
 	exampleDate, err := getTextExampleDate()
@@ -597,7 +597,7 @@ func adEventUpdateDateDelete(b *BotTelegram, msg *tgbotapi.Message) error {
 	if err != nil {
 		return err
 	}
-	adEvent.DateDelete = msg.Text
+	adEvent.DateEnd = msg.Text
 
 	if err := b.db.AdEventUpdate(adEvent); err != nil {
 		return err
