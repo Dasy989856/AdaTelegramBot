@@ -39,6 +39,7 @@ func (b *BotTelegram) handlerCommand(msg *tgbotapi.Message) error {
 // Команда /start
 func (b *BotTelegram) cmdStart(msg *tgbotapi.Message) error {
 	userId := msg.Chat.ID
+	b.initSessions(userId)
 
 	// Регистрация пользователя если его нет.
 	if err := b.db.DefaultUserCreation(userId, msg.Chat.UserName, msg.Chat.FirstName); err != nil {
@@ -69,7 +70,7 @@ func (b *BotTelegram) cmdStart(msg *tgbotapi.Message) error {
 	// TODO Отправка infoMsg.
 
 	// Отправка startMsg.
-	if err := b.sendStartMessage(userId); err != nil {
+	if err := sendStartMessage(b, userId); err != nil {
 		return err
 	}
 
@@ -82,7 +83,7 @@ func (b *BotTelegram) cmdStart(msg *tgbotapi.Message) error {
 }
 
 // Отправка startMessage.
-func (b *BotTelegram) sendStartMessage(userId int64) error {
+func sendStartMessage(b *BotTelegram, userId int64) error {
 	// Установка шага пользователя.
 	if err := b.db.SetStepUser(userId, "start"); err != nil {
 		return err
@@ -111,7 +112,6 @@ func (b *BotTelegram) sendStartMessage(userId int64) error {
 	botMsg.ParseMode = tgbotapi.ModeHTML
 	botMsg.ReplyMarkup = keyboard
 
-	// Отправка botMsg startMessage.
 	newStartMessage, err := b.bot.Send(botMsg)
 	if err != nil {
 		return fmt.Errorf("error send new startMessage: %w", err)
@@ -177,6 +177,7 @@ func (b *BotTelegram) sendAdMessage(userId int64) error {
 }
 
 // Очистка кэшей пользователя.
+// TODO удалить существующий кэш пользователя.
 func (b *BotTelegram) clearCacheOfUser(userId int64) error {
 	delete(b.adEventCreatingCache, userId)
 	delete(b.adEventsCache, userId)

@@ -38,9 +38,6 @@ func (b *BotTelegram) handlerCbq(cbq *tgbotapi.CallbackQuery) error {
 		return err
 	}
 
-	// Инициализация сессии.
-	b.initSessions(userId)
-
 	switch path[0] {
 	case "start":
 		if err := b.cmdStart(cbq.Message); err != nil {

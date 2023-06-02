@@ -177,7 +177,7 @@ func adEventChannel(b *BotTelegram, msg *tgbotapi.Message) error {
 
 	// Если телеграм, получаем кол-во подписчиков канала.
 	if msg.Text[:13] == "https://t.me/" {
-		subChannel, err := getSubscriptionFromTelegramChannel(msg.Text)
+		subChannel, err := getCurrentSubscriptionFromTelegramChannel(msg.Text)
 		if err != nil {
 			return err
 		}
