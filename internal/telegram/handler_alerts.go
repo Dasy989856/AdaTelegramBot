@@ -126,13 +126,13 @@ func aletrDelete(b *BotTelegram, aE *models.AdEvent) error {
 		return nil
 	}
 
-	if checkTimeAlert(aE.UserId, timeLeft) {
+	if checkTimeAlert(aE.UserId, timeLeft) && aE.Type != models.TypeBuy && aE.Type != models.TypeBarter {
 		text := createTextAlertForAdEventDelete(aE, timeLeft)
 		botMsg := tgbotapi.NewMessage(aE.UserId, text)
 		botMsg.ParseMode = tgbotapi.ModeHTML
 		botMsg.DisableWebPagePreview = true
 		if err := b.sendAlertMessage(aE.UserId, botMsg); err != nil {
-			return fmt.Errorf("error edit msg in aletrDelete: %w", err)
+			return fmt.Errorf("aletrDelete: error sendAlertMessage: %w", err)
 		}
 	}
 
@@ -143,7 +143,7 @@ func aletrDelete(b *BotTelegram, aE *models.AdEvent) error {
 func checkTimeAlert(userId, timeLeft int64) bool {
 	// var timeAlerts []int64
 	// TODO Смотрим на какое время установил предупреждения полульзователь.
-	timeAlerts := []int64{1440, 60, 30, 10, 5}
+	timeAlerts := []int64{1440, 60, 30, 10}
 
 	for _, timeAlert := range timeAlerts {
 		if timeAlert == timeLeft {

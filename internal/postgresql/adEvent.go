@@ -26,7 +26,7 @@ func (t *TelegramBotDB) GetAdEvent(adEventId int64) (adEvent *models.AdEvent, er
 	var aE models.AdEvent
 	var dateStartFromDB, dateEndFromDB string
 	if err := tx.QueryRow(query, adEventId).Scan(&aE.Id, &aE.CreatedAt, &aE.UserId, &aE.Type, &aE.Partner, &aE.Channel, &aE.Price,
-		&dateStartFromDB, &dateEndFromDB, &aE.ArrivalOfSubscribers, aE.PartnerChannelSubscribersInStart,
+		&dateStartFromDB, &dateEndFromDB, &aE.ArrivalOfSubscribers, &aE.PartnerChannelSubscribersInStart,
 		&aE.PartnerChannelSubscribersInEnd); err != nil {
 		return nil, fmt.Errorf("error scan AdEvent in GetAdEvent: %w", err)
 	}
@@ -47,10 +47,6 @@ func (t *TelegramBotDB) GetRangeAdEvents(typeAdEvent models.TypeAdEvent, startTi
 			tx.Commit()
 		}
 	}()
-	// SELECT id, created_at, user_id, "type", partner, channel, price,
-	// date_start, date_end, arrival_of_subscribers
-	// FROM public.ad_events WHERE "type"='sale' AND ((date_start BETWEEN '2022-05-13 00:00:00 +0300' AND '2024-05-13 00:00:00 +0300')
-	// OR (date_end BETWEEN '2022-05-13 00:00:00 +0300' AND '2024-05-13 00:00:00 +0300')) ORDER BY date_start ASC;
 
 	listAdEvent = make([]models.AdEvent, 0, 50)
 	startDate, err := parseTimeToDateDataBase(startTime)
@@ -61,6 +57,7 @@ func (t *TelegramBotDB) GetRangeAdEvents(typeAdEvent models.TypeAdEvent, startTi
 	if err != nil {
 		return nil, err
 	}
+
 	var rows *sql.Rows
 	if typeAdEvent == models.TypeAny {
 		query := fmt.Sprintf(`SELECT id, created_at, user_id, "type", partner, channel, price, date_start, date_end,
@@ -70,7 +67,7 @@ func (t *TelegramBotDB) GetRangeAdEvents(typeAdEvent models.TypeAdEvent, startTi
 
 		rows, err = tx.Query(query, startDate, endDate)
 		if err != nil {
-			return nil, fmt.Errorf("error select ad_events TypeAny `%s`: %w", typeAdEvent, err)
+			return nil, fmt.Errorf("error select ad_events type `%s`: %w", typeAdEvent, err)
 		}
 	} else {
 		query := fmt.Sprintf(`SELECT id, created_at, user_id, "type", partner, channel, price, date_start, date_end,
@@ -80,7 +77,7 @@ func (t *TelegramBotDB) GetRangeAdEvents(typeAdEvent models.TypeAdEvent, startTi
 
 		rows, err = tx.Query(query, startDate, endDate, typeAdEvent)
 		if err != nil {
-			return nil, fmt.Errorf("error select ad_events TypeAny `%s`: %w", typeAdEvent, err)
+			return nil, fmt.Errorf("error select ad_events type `%s`: %w", typeAdEvent, err)
 		}
 	}
 
