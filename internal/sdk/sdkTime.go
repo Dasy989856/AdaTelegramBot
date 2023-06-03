@@ -122,33 +122,33 @@ func GetTimeRangeTomorrow() (start, end time.Time) {
 }
 
 // Возвращает метки времени, начало и конец предыдущей недели.
-func GetTimeRangeLastWeek() (start, end time.Time) {
-	// Получаем текущую метку времени
-	now := time.Now()
-	// Определяем первый день недели и часовой пояс
-	firstDay := time.Monday
+// TODO не проверено.
+// func GetTimeRangeLastWeek() (start, end time.Time) {
+// 	// Получаем текущую метку времени
+// 	now := time.Now()
+// 	// Определяем первый день недели
+// 	firstDay := time.Monday
 
-	// Вычисляем метку времени начала текущей недели
-	startOfWeek := time.Date(now.Year(), now.Month(), now.Day()-int(now.Weekday()-firstDay), 0, 0, 0, 0, now.Location())
+// 	// Вычисляем метку времени начала текущей недели
+// 	startOfWeek := time.Date(now.Year(), now.Month(), now.Day()-int(now.Weekday()-firstDay), 0, 0, 0, 0, now.Location())
 
-	// Вычисляем метку времени начала предыдущей недели
-	startOfLastWeek := startOfWeek.AddDate(0, 0, -7)
+// 	// Вычисляем метку времени начала предыдущей недели
+// 	startOfLastWeek := startOfWeek.AddDate(0, 0, -7)
 
-	// Вычисляем метку времени конца предыдущей недели
-	endOfLastWeek := startOfWeek.Add(-time.Nanosecond)
+// 	// Вычисляем метку времени конца предыдущей недели
+// 	endOfLastWeek := startOfWeek.Add(-time.Nanosecond)
 
-	return startOfLastWeek, endOfLastWeek
-}
+// 	return startOfLastWeek, endOfLastWeek
+// }
 
-// Возвращает метки времени, начало и конец текущей недели.
+// Возвращает метки времени, начало и конец текущей недели. Первый день недели понедельник.
 func GetTimeRangeThisWeek() (start, end time.Time) {
 	// Получаем текущую метку времени и часовой пояс
 	now := time.Now()
-	// Определяем первый день недели
-	firstDay := time.Monday
+	daysSinceMonday := (int(now.Weekday()) + 6) % 7 // 0 for Monday, 6 for Sunday
 
 	// Вычисляем метку времени начала текущей недели
-	startOfWeek := time.Date(now.Year(), now.Month(), now.Day()-int(now.Weekday()-firstDay), 0, 0, 0, 0, now.Location())
+	startOfWeek := time.Date(now.Year(), now.Month(), now.Day()-daysSinceMonday, 0, 0, 0, 0, now.Location())
 
 	// Вычисляем метку времени конца текущей недели
 	endOfWeek := startOfWeek.AddDate(0, 0, 7).Add(-time.Nanosecond)
@@ -157,20 +157,21 @@ func GetTimeRangeThisWeek() (start, end time.Time) {
 }
 
 // Возвращает метки времени, начало и конец следующей недели.
-func GetTimeRangeNextWeek() (start, end time.Time) {
-	// Получаем текущую метку времени и часовой пояс
-	now := time.Now()
-	// Определяем первый день недели
-	firstDay := time.Monday
+// TODO не проверено.
+// func GetTimeRangeNextWeek() (start, end time.Time) {
+// 	// Получаем текущую метку времени и часовой пояс
+// 	now := time.Now()
+// 	// Определяем первый день недели
+// 	firstDay := time.Monday
 
-	// Вычисляем метку времени начала следующей недели
-	startOfNextWeek := time.Date(now.Year(), now.Month(), now.Day()-int(now.Weekday()-firstDay)+7, 0, 0, 0, 0, now.Location())
+// 	// Вычисляем метку времени начала следующей недели
+// 	startOfNextWeek := time.Date(now.Year(), now.Month(), now.Day()-int(now.Weekday()-firstDay)+7, 0, 0, 0, 0, now.Location())
+	
+// 	// Вычисляем метку времени конца следующей недели
+// 	endOfNextWeek := startOfNextWeek.AddDate(0, 0, 7).Add(-time.Nanosecond)
 
-	// Вычисляем метку времени конца следующей недели
-	endOfNextWeek := startOfNextWeek.AddDate(0, 0, 7).Add(-time.Nanosecond)
-
-	return startOfNextWeek, endOfNextWeek
-}
+// 	return startOfNextWeek, endOfNextWeek
+// }
 
 // Возвращает метки времени, начало и конец предыдущего месяца.
 func GetTimeRangeLastMonth() (start, end time.Time) {
@@ -181,10 +182,7 @@ func GetTimeRangeLastMonth() (start, end time.Time) {
 	firstOfMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
 
 	// Получение метки времени первого дня предыдущего месяца.
-	firstOfLastMonth := firstOfMonth.AddDate(0, -1, 0)
-
-	// Получение метки времени начала предыдущего месяца.
-	startOfLastMonth := firstOfLastMonth.AddDate(0, 0, 0)
+	startOfLastMonth := firstOfMonth.AddDate(0, -1, 0)
 
 	// Получение метки времени конца предыдущего месяца.
 	endOfLastMonth := firstOfMonth.Add(-time.Nanosecond)
@@ -198,13 +196,10 @@ func GetTimeRangeThisMonth() (start, end time.Time) {
 	now := time.Now()
 
 	// Получение первого дня текущего месяца.
-	firstOfMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
-
-	// Получение метки времени начала текущего месяца.
-	startOfMonth := firstOfMonth.AddDate(0, 0, 0)
+	startOfMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
 
 	// Получение метки времени конца текущего месяца.
-	endOfMonth := firstOfMonth.AddDate(0, 1, 0).Add(-time.Nanosecond)
+	endOfMonth := startOfMonth.AddDate(0, 1, 0).Add(-time.Nanosecond)
 
 	return startOfMonth, endOfMonth
 }
@@ -218,13 +213,10 @@ func GetTimeRangeNextMonth() (start, end time.Time) {
 	firstOfMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
 
 	// Получение метки времени первого дня следующего месяца.
-	firstOfNextMonth := firstOfMonth.AddDate(0, 1, 0)
-
-	// Получение метки времени начала следующего месяца.
-	startOfNextMonth := firstOfNextMonth.AddDate(0, 0, 0)
+	startOfNextMonth := firstOfMonth.AddDate(0, 1, 0)
 
 	// Получение метки времени конца следующего месяца.
-	endOfNextMonth := firstOfNextMonth.AddDate(0, 1, 0).Add(-time.Nanosecond)
+	endOfNextMonth := startOfNextMonth.AddDate(0, 1, 0).Add(-time.Nanosecond)
 
 	return startOfNextMonth, endOfNextMonth
 }

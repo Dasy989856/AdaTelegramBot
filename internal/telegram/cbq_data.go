@@ -7,7 +7,6 @@ import (
 )
 
 func cbqParseDataGetAdEventId(data string) (adEventId int64, err error) {
-	// ad_event.control?1
 	dataSlice := strings.Split(data, ";")
 	if len(dataSlice) != 1 {
 		return 0, fmt.Errorf("dataSlice incorrect. dataSlice: %v", dataSlice)

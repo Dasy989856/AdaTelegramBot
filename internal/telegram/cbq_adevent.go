@@ -199,7 +199,7 @@ func cbqAdEventView(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	userId := cbq.Message.Chat.ID
 	messageId := cbq.Message.MessageID
 
-	text := "Выберите тип событий:"
+	text := "<b>✍️ Выберите тип событий:</b>"
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Проданная реклама", "ad_event.view.sale"),
@@ -220,8 +220,9 @@ func cbqAdEventView(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 			tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
 		),
 	)
-
-	if err := b.sendMessage(userId, tgbotapi.NewEditMessageTextAndMarkup(userId, messageId, text, keyboard)); err != nil {
+	botMsg := tgbotapi.NewEditMessageTextAndMarkup(userId, messageId, text, keyboard)
+	botMsg.ParseMode = tgbotapi.ModeHTML
+	if err := b.sendMessage(userId, botMsg); err != nil {
 		return fmt.Errorf("error edit msg in cbqAdEventView: %w", err)
 	}
 
@@ -454,7 +455,11 @@ func cbqAdEventViewSelect(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	}
 
 	// TODO Сохранение в кэш выборки ( удалить как появится сохранение в БД)
-	b.sessions[userId].Cache["cbqAdEventViewSelectData"] = cbqData
+	if b.sessions[userId] != nil {
+		b.sessions[userId].Cache["cbqAdEventViewSelectData"] = cbqData
+	} else {
+		return fmt.Errorf("sessions is nil")
+	}
 
 	// Парсинг данных.
 	data, err := parseDataAdEventView(cbqData)
