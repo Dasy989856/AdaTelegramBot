@@ -3,6 +3,7 @@ package telegram
 import (
 	"AdaTelegramBot/internal/models"
 	"AdaTelegramBot/internal/sdk"
+	"AdaTelegramBot/internal/subscriber_parser"
 	"fmt"
 	"log"
 	"math"
@@ -58,10 +59,10 @@ func aletrPosting(b *BotTelegram, aE *models.AdEvent) error {
 
 	// Сохранение подписчиков на момент выхода рекламы.
 	if int64(math.Abs(time.Since(timeDateStart).Minutes())) == 0 {
-		currentSub, err := getCurrentSubscriptionFromTelegramChannel(aE.Channel)
+		currentSub, err := subscriber_parser.Parse(aE.Channel)
 		if err != nil {
-			return fmt.Errorf("aletrPosting: error getCurrentSubscriptionFromTelegramChannel: %w", err)
-        }
+			return fmt.Errorf("aletrPosting: error subscriber_parser.Parse: %w", err)
+		}
 
 		if err := b.db.UpdatePartnerChannelSubscribersInStart(aE.Id, currentSub); err != nil {
 			return fmt.Errorf("aletrPosting: error UpdatePartnerChannelSubscribersInStart: %w", err)
@@ -103,10 +104,10 @@ func aletrDelete(b *BotTelegram, aE *models.AdEvent) error {
 
 	// Сохранение подписчиков на момент завершения рекламы.
 	if int64(math.Abs(time.Since(timeDateEnd).Minutes())) == 0 {
-		currentSub, err := getCurrentSubscriptionFromTelegramChannel(aE.Channel)
+		currentSub, err := subscriber_parser.Parse(aE.Channel)
 		if err != nil {
-			return fmt.Errorf("aletrDelete: error getCurrentSubscriptionFromTelegramChannel: %w", err)
-        }
+			return fmt.Errorf("aletrDelete: error subscriber_parser.Parse: %w", err)
+		}
 
 		if err := b.db.UpdatePartnerChannelSubscribersInEnd(aE.Id, currentSub); err != nil {
 			return fmt.Errorf("aletrDelete: error UpdatePartnerChannelSubscribersInEnd: %w", err)

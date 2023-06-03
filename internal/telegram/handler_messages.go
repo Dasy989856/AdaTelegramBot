@@ -3,6 +3,7 @@ package telegram
 import (
 	"AdaTelegramBot/internal/models"
 	"AdaTelegramBot/internal/sdk"
+	"AdaTelegramBot/internal/subscriber_parser"
 	"fmt"
 	"log"
 	"strconv"
@@ -175,14 +176,11 @@ func adEventChannel(b *BotTelegram, msg *tgbotapi.Message) error {
 		msg.Text = "https://t.me/" + msg.Text[1:]
 	}
 
-	// Если телеграм, получаем кол-во подписчиков канала.
-	if msg.Text[:13] == "https://t.me/" {
-		subChannel, err := getCurrentSubscriptionFromTelegramChannel(msg.Text)
-		if err != nil {
-			return err
-		}
-		adEvent.SubscribersOfChannel = subChannel
+	subChannel, err := subscriber_parser.Parse(msg.Text)
+	if err != nil {
+		return err
 	}
+	adEvent.SubscribersOfChannel = subChannel
 
 	adEvent.Channel = msg.Text
 	b.db.SetStepUser(userId, "ad_event.create.price")

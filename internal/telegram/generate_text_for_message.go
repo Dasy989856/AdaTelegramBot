@@ -3,6 +3,7 @@ package telegram
 import (
 	"AdaTelegramBot/internal/models"
 	"AdaTelegramBot/internal/sdk"
+	"AdaTelegramBot/internal/subscriber_parser"
 	"fmt"
 	"time"
 )
@@ -27,7 +28,7 @@ func createTextAdEventDescription(a *models.AdEvent) (descriptionAdEvent string)
 	}
 
 	if a.SubscribersOfChannel == 0 {
-		a.SubscribersOfChannel, _ =  getCurrentSubscriptionFromTelegramChannel(a.Channel)
+		a.SubscribersOfChannel, _ = subscriber_parser.Parse(a.Channel)
 	}
 
 	switch a.Type {
