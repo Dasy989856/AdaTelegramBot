@@ -23,7 +23,11 @@ func createStaticsBriefText(d *models.DataForStatistics) string {
 // Создание текст-описания ad события.
 func createTextAdEventDescription(a *models.AdEvent) (descriptionAdEvent string) {
 	if a.DateEnd == "02.01.06 15:04" {
-		a.DateEnd = "-"
+		a.DateEnd = ""
+	}
+
+	if a.SubscribersOfChannel == 0 {
+		a.SubscribersOfChannel, _ =  getCurrentSubscriptionFromTelegramChannel(a.Channel)
 	}
 
 	switch a.Type {

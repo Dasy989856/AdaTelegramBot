@@ -64,11 +64,13 @@ var (
 	TypeBarter TypeAdEvent = "barter"
 )
 
-// Ad событие.
 type AdEvent struct {
-	Id        int64  `json:"id" db:"id"`
-	CreatedAt string `json:"createdAt" db:"created_at"` // Дата создания события.
-	UserId    int64  `json:"userId" db:"user_id"`       // Id пользователя.
+	// Индификатор события.
+	Id int64 `json:"id" db:"id"`
+	// Дата создания события.
+	CreatedAt string `json:"createdAt" db:"created_at"`
+	// Id пользователя.
+	UserId int64 `json:"userId" db:"user_id"`
 	// Тип события.
 	Type TypeAdEvent `json:"type" db:"type"`
 	// Ссылка партнера.
@@ -107,15 +109,14 @@ type DataForStatistics struct {
 
 // Сессия пользователя.
 type Session struct {
-	DomainPath string // Наименование основной цепочки.
-	Step       int64  // Шаг в цепочке.
-	StateMsg   string // Состояние ожидающих данных в Msg.
-	Cache      map[string]interface{}
+	DomainPath string                 // Наименование основной цепочки.
+	Step       int64                  // Шаг в цепочке.
+	StateMsg   string                 // Состояние ожидающих данных в Msg.
+	Cache      map[string]interface{} // Кэш сессии.
 }
 
 // БД для телеграмм бота.
 type TelegramBotDB interface {
-	// Закрытие БД.
 	Close() error
 
 	// Получение данных пользователя.
@@ -126,6 +127,10 @@ type TelegramBotDB interface {
 	GetTimeLastAlert(userId int64) (timeLastAlert time.Time, err error)
 	// Обновление последней даты оповещения.
 	UpdateTimeLastAlert(userId int64, timeLastAlert time.Time) error
+	// Обновление кол-ва подписчиков канала на момент выхода рекламы.
+	UpdatePartnerChannelSubscribersInStart(adEventId, subscribers int64) error
+	// Обновление кол-ва подписчиков канала на момент завершения рекламы.
+	UpdatePartnerChannelSubscribersInEnd(adEventId, subscribers int64) error
 
 	// Получение ad события.
 	GetAdEvent(adEventId int64) (*AdEvent, error)
