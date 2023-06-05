@@ -14,41 +14,49 @@ import (
 )
 
 // Оповещение о предстоящих событиях.
-func (b *BotTelegram) handlerAlerts() (err error) {
-	var cashAdEvents []models.AdEvent
+func (b *BotTelegram) handlerAlerts() error {
 	timeAlert := viper.GetInt("ada_bot.time_alert")
 	if timeAlert == 0 {
 		timeAlert = 10
 	}
-	
+
 	for {
 		time.Sleep(time.Duration(timeAlert) * time.Second)
+		if err := handlerAlertsTick(b); err == nil {
+			log.Println(err)
+		}
+	}
+}
 
-		timeStart, _ := sdk.GetTimeRangeToday()
-		_, timeEnd := sdk.GetTimeRangeTomorrow()
-		cashAdEvents, err = b.db.GetRangeAdEvents(models.TypeAny, timeStart, timeEnd)
+func handlerAlertsTick(b *BotTelegram) error {
+	var cashAdEvents []models.AdEvent
+
+	timeStart, _ := sdk.GetTimeRangeToday()
+	_, timeEnd := sdk.GetTimeRangeTomorrow()
+	cashAdEvents, err := b.db.GetRangeAdEvents(models.TypeAny, timeStart, timeEnd)
+	if err != nil {
+		return fmt.Errorf("handlerAlertsTick: error GetRangeAdEvents: %w", err)
+	}
+
+	for _, aE := range cashAdEvents {
+		// Проврека последнего оповещения.
+		timeLastAlert, err := b.db.GetTimeLastAlert(aE.UserId)
 		if err != nil {
-			return fmt.Errorf("handlerAlerts: error GetRangeAdEvents: %w", err)
+			return fmt.Errorf("handlerAlertsTick: error GetTimeLastAlert: %w", err)
 		}
 
-		for _, aE := range cashAdEvents {
-			// Проврека последнего оповещения.
-			timeLastAlert, err := b.db.GetTimeLastAlert(aE.UserId)
-			if err != nil {
-				return err
+		// Оповещение не чаще чем раз в 1 минуту.
+		if int64(math.Abs(time.Since(timeLastAlert).Minutes())) > 1 {
+			if err := aletrPosting(b, &aE); err != nil {
+				return fmt.Errorf("handlerAlertsTick: error aletrPosting: %w", err)
 			}
-
-			// Оповещение не чаще чем раз в 1 минуту.
-			if int64(math.Abs(time.Since(timeLastAlert).Minutes())) > 1 {
-				if err := aletrPosting(b, &aE); err != nil {
-					return err
-				}
-				if err := aletrDelete(b, &aE); err != nil {
-					return err
-				}
+			if err := aletrDelete(b, &aE); err != nil {
+				return fmt.Errorf("handlerAlertsTick: error aletrDelete: %w", err)
 			}
 		}
 	}
+
+	return nil
 }
 
 // Оповещение о размещении рекламы.
