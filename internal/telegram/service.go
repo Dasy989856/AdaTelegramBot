@@ -260,3 +260,38 @@ func fullDataAdEvent(ae *models.AdEvent) bool {
 
 	return true
 }
+
+// Получение данных из кэша.
+func (b *BotTelegram) fromCache(userId int64, key string) (interface{}, bool) {
+	if b.sessions == nil {
+		return nil, false
+	}
+
+	session, ok := b.sessions[userId]
+	if !ok {
+		return nil, false
+	}
+
+	value, ok := session.Cache[key]
+	if !ok {
+		return nil, false
+	}
+
+	return value, true
+}
+
+// Запись в кэш.
+func (b *BotTelegram) toCache(userId int64, key string, value interface{}) bool {
+	if b.sessions == nil {
+		return false
+	}
+
+	session, ok := b.sessions[userId]
+	if !ok {
+		return false
+	}
+
+	session.Cache[key] = value
+	
+	return true
+}

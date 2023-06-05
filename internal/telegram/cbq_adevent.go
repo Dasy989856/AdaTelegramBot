@@ -455,10 +455,8 @@ func cbqAdEventViewSelect(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	}
 
 	// TODO Сохранение в кэш выборки ( удалить как появится сохранение в БД)
-	if b.sessions[userId] != nil {
-		b.sessions[userId].Cache["cbqAdEventViewSelectData"] = cbqData
-	} else {
-		return fmt.Errorf("sessions is nil")
+	if !b.toCache(userId, "cbqAdEventViewSelectData", cbqData) {
+		return fmt.Errorf("cbqAdEventViewSelect: error save cbqData in cache")
 	}
 
 	// Парсинг данных.
@@ -631,9 +629,13 @@ func cbqAdEventControl(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	dateEndButtonData := fmt.Sprintf("ad_event.update.date_end?%d", adEventId)
 	arrivalOfSubscribersButtonData := fmt.Sprintf("ad_event.update.arrival_of_subscribers?%d", adEventId)
 
-	cbqAdEventViewSelectData, ok := b.sessions[userId].Cache["cbqAdEventViewSelectData"].(string)
+	cbqAdEventViewSelectData, ok := b.fromCache(userId, "cbqAdEventViewSelectData")
 	if !ok {
-		return fmt.Errorf("error get cbqAdEventViewSelectData from cache")
+		return fmt.Errorf("cbqAdEventControl: error getCache")
+	}
+	cbqAdEventViewSelectDataString, ok := cbqAdEventViewSelectData.(string)
+	if !ok {
+		return fmt.Errorf("cbqAdEventControl: error parse cbqAdEventViewSelectData to string")
 	}
 
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
@@ -659,7 +661,7 @@ func cbqAdEventControl(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 			tgbotapi.NewInlineKeyboardButtonData("Внести приход подписчиков", arrivalOfSubscribersButtonData),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Назад", "ad_event.view.select?"+cbqAdEventViewSelectData),
+			tgbotapi.NewInlineKeyboardButtonData("Назад", "ad_event.view.select?"+cbqAdEventViewSelectDataString),
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
