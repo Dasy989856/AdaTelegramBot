@@ -10,13 +10,19 @@ import (
 	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/spf13/viper"
 )
 
 // Оповещение о предстоящих событиях.
 func (b *BotTelegram) handlerAlerts() (err error) {
 	var cashAdEvents []models.AdEvent
+	timeAlert := viper.GetInt("ada_bot.time_alert")
+	if timeAlert == 0 {
+		timeAlert = 10
+	}
+	
 	for {
-		time.Sleep(15 * time.Second)
+		time.Sleep(time.Duration(timeAlert) * time.Second)
 
 		timeStart, _ := sdk.GetTimeRangeToday()
 		_, timeEnd := sdk.GetTimeRangeTomorrow()

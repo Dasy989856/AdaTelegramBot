@@ -56,7 +56,7 @@ func scanSubscribersInTelegram(doc *goquery.Document) (int64, error) {
 
 	dataHtml, err := nameClass.Html()
 	if err != nil {
-		return 0, fmt.Errorf("inscanSubscribersInTelegram: error getting html: %w", err)
+		return 0, fmt.Errorf("scanSubscribersInTelegram: error getting html: %w", err)
 	}
 
 	var subscribersStrings []rune
@@ -68,7 +68,7 @@ func scanSubscribersInTelegram(doc *goquery.Document) (int64, error) {
 
 	subscribers, err := strconv.ParseInt(string(subscribersStrings), 0, 64)
 	if err != nil {
-		log.Println("inscanSubscribersInTelegram: error converting subscribersStrings to number: %w", err)
+		log.Println("scanSubscribersInTelegram: error converting subscribersStrings to number: %w", err)
 		// return 0, err
 	}
 
