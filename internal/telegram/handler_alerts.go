@@ -22,7 +22,7 @@ func (b *BotTelegram) alertTicker() error {
 
 	for {
 		time.Sleep(time.Duration(timeAlert) * time.Second)
-		if err := handlerAlertsTick(b); err == nil {
+		if err := handlerAlertsTick(b); err != nil {
 			log.Println(err)
 		}
 	}
