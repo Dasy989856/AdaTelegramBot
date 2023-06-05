@@ -96,7 +96,7 @@ func (b *BotTelegram) handlerUpdates(updates tgbotapi.UpdatesChannel) error {
 func (b *BotTelegram) StartBotUpdater() error {
 	log.Printf("Authorized on account %s", b.bot.Self.UserName)
 	updates := b.InitUpdatesChannel()
-	go b.handlerAlerts()
+	go b.alertTicker()
 	if err := b.handlerUpdates(updates); err != nil {
 		return err
 	}
