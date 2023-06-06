@@ -98,6 +98,7 @@ func aletrPosting(b *BotTelegram, aE *models.AdEvent) error {
 		if err := b.sendAlertMessage(aE.UserId, botMsg); err != nil {
 			return fmt.Errorf("aletrPosting: error sendAlertMessage: %w", err)
 		}
+		log.Println("successfully alert: ", aE)
 	}
 
 	return nil
