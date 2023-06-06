@@ -23,6 +23,7 @@ func createStaticsBriefText(d *models.DataForStatistics) string {
 
 // Создание текст-описания ad события.
 func createTextAdEventDescription(a *models.AdEvent) (descriptionAdEvent string) {
+	// TODO Требуется избавиться от данного решения к 2065 году.
 	if a.DateEnd == "02.01.06 15:04" {
 		a.DateEnd = ""
 	}
@@ -95,19 +96,19 @@ func createTextAlertForAdEventPosting(a *models.AdEvent, minutesLeftAlert int64)
 	switch a.Type {
 	case models.TypeSale:
 		descriptionAdEvent = fmt.Sprintf(`
-		Через %s Вы должны разместить рекламу. Подробнее:
+		❗️ Через %s Вы должны разместить рекламу. Подробнее:
 		`+createTextAdEventDescription(a), getTextTime(minutesLeftAlert))
 	case models.TypeBuy:
 		descriptionAdEvent = fmt.Sprintf(`
-		Через %s Ваша реклама будет размещена. Подробнее:
+		❗️ Через %s Ваша реклама будет размещена. Подробнее:
 		`+createTextAdEventDescription(a), getTextTime(minutesLeftAlert))
 	case models.TypeMutual:
 		descriptionAdEvent = fmt.Sprintf(`
-		Через %s у Вас начнется взаимный пиар. Подробнее:
+		❗️ Через %s у Вас начнется взаимный пиар. Подробнее:
 		`+createTextAdEventDescription(a), getTextTime(minutesLeftAlert))
 	case models.TypeMutual:
 		descriptionAdEvent = fmt.Sprintf(`
-		Через %s Вы должны разместить бартер. Подробнее:
+		❗️ Через %s Вы должны разместить бартер. Подробнее:
 		`+createTextAdEventDescription(a), getTextTime(minutesLeftAlert))
 	}
 
@@ -119,16 +120,16 @@ func createTextAlertForAdEventDelete(a *models.AdEvent, minutesLeftAlert int64) 
 	switch a.Type {
 	case models.TypeSale:
 		descriptionAdEvent = fmt.Sprintf(`
-		Через %s Вы должны удалить рекламу. Подробнее:`+createTextAdEventDescription(a), getTextTime(minutesLeftAlert))
+		❗️ Через %s Вы можете удалить рекламу. Подробнее:`+createTextAdEventDescription(a), getTextTime(minutesLeftAlert))
 	case models.TypeBuy:
 		descriptionAdEvent = fmt.Sprintf(`
-		Через %s Ваша реклама будет удалена. Подробнее:`+createTextAdEventDescription(a), getTextTime(minutesLeftAlert))
+		❗️ Через %s Ваша реклама будет удалена. Подробнее:`+createTextAdEventDescription(a), getTextTime(minutesLeftAlert))
 	case models.TypeMutual:
 		descriptionAdEvent = fmt.Sprintf(`
-		Через %s у Вас закончится взаимный пиар. Подробнее:`+createTextAdEventDescription(a), getTextTime(minutesLeftAlert))
+		❗️ Через %s у Вас закончится взаимный пиар. Подробнее:`+createTextAdEventDescription(a), getTextTime(minutesLeftAlert))
 	case models.TypeBarter:
 		descriptionAdEvent = fmt.Sprintf(`
-		Через %s у Вас закончится бартер. Подробнее:`+createTextAdEventDescription(a), getTextTime(minutesLeftAlert))
+		❗️ Через %s у Вас закончится бартер. Подробнее:`+createTextAdEventDescription(a), getTextTime(minutesLeftAlert))
 	}
 
 	return descriptionAdEvent

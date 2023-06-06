@@ -98,7 +98,7 @@ func aletrPosting(b *BotTelegram, aE *models.AdEvent) error {
 		if err := b.sendAlertMessage(aE.UserId, botMsg); err != nil {
 			return fmt.Errorf("aletrPosting: error sendAlertMessage: %w", err)
 		}
-		log.Println("successfully alert: ", aE)
+		log.Println("aletrPosting: successfully send posting alert: ", aE)
 	}
 
 	return nil
@@ -108,8 +108,7 @@ func aletrPosting(b *BotTelegram, aE *models.AdEvent) error {
 func aletrDelete(b *BotTelegram, aE *models.AdEvent) error {
 	timeDateEnd, err := sdk.ParseUserDateToTime(aE.DateEnd)
 	if err != nil {
-		log.Println(fmt.Errorf("aletrDelete: error ParseUserDateToTime: %w", err))
-		return err
+		return fmt.Errorf("aletrDelete: error ParseUserDateToTime: %w", err)
 	}
 
 	// Событие прошло.
@@ -149,6 +148,8 @@ func aletrDelete(b *BotTelegram, aE *models.AdEvent) error {
 		if err := b.sendAlertMessage(aE.UserId, botMsg); err != nil {
 			return fmt.Errorf("aletrDelete: error sendAlertMessage: %w", err)
 		}
+
+		log.Println("aletrDelete: successfully send delete alert: ", aE)
 	}
 
 	return nil

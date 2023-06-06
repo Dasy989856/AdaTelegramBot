@@ -2,7 +2,6 @@ package postgresql
 
 import (
 	"AdaTelegramBot/internal/models"
-	"AdaTelegramBot/internal/sdk"
 	"time"
 
 	"database/sql"
@@ -28,11 +27,17 @@ func (t *TelegramBotDB) GetAdEvent(adEventId int64) (adEvent *models.AdEvent, er
 	if err := tx.QueryRow(query, adEventId).Scan(&aE.Id, &aE.CreatedAt, &aE.UserId, &aE.Type, &aE.Partner, &aE.Channel, &aE.Price,
 		&dateStartFromDB, &dateEndFromDB, &aE.ArrivalOfSubscribers, &aE.PartnerChannelSubscribersInStart,
 		&aE.PartnerChannelSubscribersInEnd); err != nil {
-		return nil, fmt.Errorf("error scan AdEvent in GetAdEvent: %w", err)
+		return nil, fmt.Errorf("GetAdEvent: error scan AdEvent in GetAdEvent: %w", err)
 	}
-	aE.DateStart, aE.DateEnd, err = editDateFromDataBaseToUserDate(dateStartFromDB, dateEndFromDB)
+
+	aE.DateStart, err = dbDateToUserDate(aE.DateStart)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("GetAdEvent: error dbDateToUserDate: %w", err)
+	}
+
+	aE.DateEnd, err = dbDateToUserDate(aE.DateEnd)
+	if err != nil {
+		return nil, fmt.Errorf("GetAdEvent: error dbDateToUserDate: %w", err)
 	}
 
 	return &aE, nil
@@ -49,11 +54,11 @@ func (t *TelegramBotDB) GetRangeAdEvents(typeAdEvent models.TypeAdEvent, startTi
 	}()
 
 	listAdEvent = make([]models.AdEvent, 0, 50)
-	startDate, err := parseTimeToDateDataBase(startTime)
+	startDate, err := timeToDbDate(startTime)
 	if err != nil {
 		return nil, err
 	}
-	endDate, err := parseTimeToDateDataBase(endTime)
+	endDate, err := timeToDbDate(endTime)
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +72,7 @@ func (t *TelegramBotDB) GetRangeAdEvents(typeAdEvent models.TypeAdEvent, startTi
 
 		rows, err = tx.Query(query, startDate, endDate)
 		if err != nil {
-			return nil, fmt.Errorf("error select ad_events type `%s`: %w", typeAdEvent, err)
+			return nil, fmt.Errorf("GetRangeAdEvents: error select ad_events type `%s`: %w", typeAdEvent, err)
 		}
 	} else {
 		query := fmt.Sprintf(`SELECT id, created_at, user_id, "type", partner, channel, price, date_start, date_end,
@@ -77,7 +82,7 @@ func (t *TelegramBotDB) GetRangeAdEvents(typeAdEvent models.TypeAdEvent, startTi
 
 		rows, err = tx.Query(query, startDate, endDate, typeAdEvent)
 		if err != nil {
-			return nil, fmt.Errorf("error select ad_events type `%s`: %w", typeAdEvent, err)
+			return nil, fmt.Errorf("GetRangeAdEvents: error select ad_events type `%s`: %w", typeAdEvent, err)
 		}
 	}
 
@@ -90,7 +95,16 @@ func (t *TelegramBotDB) GetRangeAdEvents(typeAdEvent models.TypeAdEvent, startTi
 			return nil, fmt.Errorf("GetRangeAdEvents: error scan AdEvent: %w", err)
 		}
 
-		aE.DateStart, aE.DateEnd, err = editDateFromDataBaseToUserDate(dateStartFromDB, dateEndFromDB)
+		aE.DateStart, err = dbDateToUserDate(aE.DateStart)
+		if err != nil {
+			return nil, fmt.Errorf("GetRangeAdEvents: error dbDateToUserDate: %w", err)
+		}
+
+		aE.DateEnd, err = dbDateToUserDate(aE.DateEnd)
+		if err != nil {
+			return nil, fmt.Errorf("GetRangeAdEvents: error dbDateToUserDate: %w", err)
+		}
+
 		listAdEvent = append(listAdEvent, aE)
 	}
 
@@ -116,7 +130,7 @@ func (t *TelegramBotDB) GetAdEventsOfUser(userId int64, typeAdEvent models.TypeA
 
 		rows, err = tx.Query(query, userId)
 		if err != nil {
-			return nil, fmt.Errorf("error select ad_events TypeAny `%s`: %w", typeAdEvent, err)
+			return nil, fmt.Errorf("GetAdEventsOfUser: error select ad_events TypeAny `%s`: %w", typeAdEvent, err)
 		}
 	} else {
 		query := fmt.Sprintf(`SELECT id, created_at, user_id, "type", partner, channel, price, date_start, date_end,
@@ -125,7 +139,7 @@ func (t *TelegramBotDB) GetAdEventsOfUser(userId int64, typeAdEvent models.TypeA
 
 		rows, err = tx.Query(query, userId, typeAdEvent)
 		if err != nil {
-			return nil, fmt.Errorf("error select ad_events TypeAny `%s`: %w", typeAdEvent, err)
+			return nil, fmt.Errorf("GetAdEventsOfUser: error select ad_events TypeAny `%s`: %w", typeAdEvent, err)
 		}
 	}
 
@@ -138,10 +152,16 @@ func (t *TelegramBotDB) GetAdEventsOfUser(userId int64, typeAdEvent models.TypeA
 			return nil, fmt.Errorf("GetAdEventsOfUser: error scan AdEvent: %w", err)
 		}
 
-		aE.DateStart, aE.DateEnd, err = editDateFromDataBaseToUserDate(dateStartFromDB, dateEndFromDB)
+		aE.DateStart, err = dbDateToUserDate(aE.DateStart)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("GetAdEventsOfUser: error dbDateToUserDate: %w", err)
 		}
+
+		aE.DateEnd, err = dbDateToUserDate(aE.DateEnd)
+		if err != nil {
+			return nil, fmt.Errorf("GetAdEventsOfUser: error dbDateToUserDate: %w", err)
+		}
+
 		listAdEvent = append(listAdEvent, aE)
 	}
 
@@ -157,20 +177,19 @@ func (t *TelegramBotDB) GetRangeAdEventsOfUser(userId int64, typeAdEvent models.
 			tx.Commit()
 		}
 	}()
-	//  SELECT id, created_at, user_id, "type", partner, channel, price,
-	// 	date_start, date_end, arrival_of_subscribers
-	// 	FROM public.ad_events WHERE user_id=959606248 AND ((date_start BETWEEN '2021-01-01' AND '2023-12-31')
-	// 	OR (date_end BETWEEN '2021-01-01' AND '2023-12-31')) ORDER BY date_start ASC
 
 	listAdEvent = make([]models.AdEvent, 0, 50)
-	startDate, err := parseTimeToDateDataBase(startTime)
+
+	startDate, err := timeToDbDate(startTime)
 	if err != nil {
 		return nil, err
 	}
-	endDate, err := parseTimeToDateDataBase(endTime)
+
+	endDate, err := timeToDbDate(endTime)
 	if err != nil {
 		return nil, err
 	}
+
 	var rows *sql.Rows
 	if typeAdEvent == models.TypeAny {
 		query := fmt.Sprintf(`SELECT id, created_at, user_id, "type", partner, channel, price, date_start, date_end,
@@ -180,7 +199,7 @@ func (t *TelegramBotDB) GetRangeAdEventsOfUser(userId int64, typeAdEvent models.
 
 		rows, err = tx.Query(query, userId, startDate, endDate)
 		if err != nil {
-			return nil, fmt.Errorf("error select ad_events TypeAny `%s`: %w", typeAdEvent, err)
+			return nil, fmt.Errorf("GetRangeAdEventsOfUser: error select ad_events TypeAny `%s`: %w", typeAdEvent, err)
 		}
 	} else {
 		query := fmt.Sprintf(`SELECT id, created_at, user_id, "type", partner, channel, price, date_start, date_end,
@@ -190,7 +209,7 @@ func (t *TelegramBotDB) GetRangeAdEventsOfUser(userId int64, typeAdEvent models.
 
 		rows, err = tx.Query(query, userId, startDate, endDate, typeAdEvent)
 		if err != nil {
-			return nil, fmt.Errorf("error select ad_events TypeAny `%s`: %w", typeAdEvent, err)
+			return nil, fmt.Errorf("GetRangeAdEventsOfUser: error select ad_events TypeAny `%s`: %w", typeAdEvent, err)
 		}
 	}
 
@@ -203,7 +222,15 @@ func (t *TelegramBotDB) GetRangeAdEventsOfUser(userId int64, typeAdEvent models.
 			return nil, fmt.Errorf("GetRangeAdEventsOfUser: error scan AdEvent: %w", err)
 		}
 
-		aE.DateStart, aE.DateEnd, err = editDateFromDataBaseToUserDate(dateStartFromDB, dateEndFromDB)
+		aE.DateStart, err = dbDateToUserDate(aE.DateStart)
+		if err != nil {
+			return nil, fmt.Errorf("GetRangeAdEventsOfUser: error dbDateToUserDate: %w", err)
+		}
+
+		aE.DateEnd, err = dbDateToUserDate(aE.DateEnd)
+		if err != nil {
+			return nil, fmt.Errorf("GetRangeAdEventsOfUser: error dbDateToUserDate: %w", err)
+		}
 
 		listAdEvent = append(listAdEvent, aE)
 	}
@@ -211,7 +238,7 @@ func (t *TelegramBotDB) GetRangeAdEventsOfUser(userId int64, typeAdEvent models.
 	return listAdEvent, nil
 }
 
-func (t *TelegramBotDB) AdEventCreation(event *models.AdEvent) (eventId int64, err error) {
+func (t *TelegramBotDB) AdEventCreation(aE *models.AdEvent) (eventId int64, err error) {
 	tx := t.db.MustBegin()
 	defer func() {
 		if err != nil {
@@ -220,33 +247,25 @@ func (t *TelegramBotDB) AdEventCreation(event *models.AdEvent) (eventId int64, e
 			tx.Commit()
 		}
 	}()
-	if event.DateEnd == "" {
-		event.DateEnd = "02.01.06 15:04"
+
+	if aE.DateEnd == "" {
+		aE.DateEnd = "02.01.06 15:04"
 	}
 
-	// Изменение формата времени.
-	timeDateStart, err := sdk.ParseUserDateToTime(event.DateStart)
+	aE.DateStart, err = userDateToDbDate(aE.DateStart)
 	if err != nil {
-		return 0, err
-	}
-	event.DateStart, err = parseTimeToDateDataBase(timeDateStart)
-	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("AdEventCreation: error parse aE.DateStart in userDateToDbDate: %w", err)
 	}
 
-	timeDateEnd, err := sdk.ParseUserDateToTime(event.DateEnd)
+	aE.DateEnd, err = userDateToDbDate(aE.DateEnd)
 	if err != nil {
-		return 0, err
-	}
-	event.DateEnd, err = parseTimeToDateDataBase(timeDateEnd)
-	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("AdEventCreation: error parse aE.DateEnd in userDateToDbDate: %w", err)
 	}
 
 	sql := fmt.Sprintf(`INSERT INTO public.%s (user_id, "type", partner, channel, price, date_start, date_end)
 	values ($1, $2, $3, $4, $5, $6, $7) RETURNING id;`, adEventsTable)
-	if err := tx.QueryRow(sql, event.UserId, event.Type, event.Partner, event.Channel, event.Price,
-		event.DateStart, event.DateEnd).Scan(&eventId); err != nil {
+	if err := tx.QueryRow(sql, aE.UserId, aE.Type, aE.Partner, aE.Channel, aE.Price,
+		aE.DateStart, aE.DateEnd).Scan(&eventId); err != nil {
 		return 0, fmt.Errorf("error creation event: %w", err)
 	}
 
@@ -297,13 +316,9 @@ func (t *TelegramBotDB) AdEventUpdate(aE *models.AdEvent) (err error) {
 	}
 
 	if aE.DateStart != "" {
-		timeDateStart, err := sdk.ParseUserDateToTime(aE.DateStart)
+		aE.DateStart, err = userDateToDbDate(aE.DateStart)
 		if err != nil {
-			return err
-		}
-		aE.DateStart, err = parseTimeToDateDataBase(timeDateStart)
-		if err != nil {
-			return err
+			return fmt.Errorf("AdEventUpdate: error userDateToDbDate aE.DateStart: %w", err)
 		}
 
 		query := fmt.Sprintf(`UPDATE public.%s SET date_start=$1
@@ -314,13 +329,9 @@ func (t *TelegramBotDB) AdEventUpdate(aE *models.AdEvent) (err error) {
 	}
 
 	if aE.DateEnd != "" {
-		timeDateEnd, err := sdk.ParseUserDateToTime(aE.DateEnd)
+		aE.DateEnd, err = userDateToDbDate(aE.DateEnd)
 		if err != nil {
-			return err
-		}
-		aE.DateEnd, err = parseTimeToDateDataBase(timeDateEnd)
-		if err != nil {
-			return err
+			return fmt.Errorf("AdEventUpdate: error userDateToDbDate aE.DateEnd: %w", err)
 		}
 
 		query := fmt.Sprintf(`UPDATE public.%s SET date_end=$1
@@ -358,30 +369,6 @@ func (t *TelegramBotDB) AdEventDelete(eventId int64) (err error) {
 	}
 
 	return nil
-}
-
-func editDateFromDataBaseToUserDate(dateStartFromDB, dateEndFromDB string) (userDateStart, userDateEnd string, err error) {
-	// User Date Posting
-	timeDateStartFromDB, err := parseDateDataBaseToTime(dateStartFromDB)
-	if err != nil {
-		return "", "", err
-	}
-	userDateStart, err = sdk.ParseTimeToUserDate(timeDateStartFromDB)
-	if err != nil {
-		return "", "", err
-	}
-
-	// User Date Delete
-	timeDateEndFromDB, err := parseDateDataBaseToTime(dateEndFromDB)
-	if err != nil {
-		return "", "", err
-	}
-	userDateEnd, err = sdk.ParseTimeToUserDate(timeDateEndFromDB)
-	if err != nil {
-		return "", "", err
-	}
-
-	return userDateStart, userDateEnd, nil
 }
 
 func (t *TelegramBotDB) UpdatePartnerChannelSubscribersInStart(adEventId, subscribers int64) (err error) {

@@ -5,9 +5,12 @@ import (
 	"time"
 )
 
-
-// Парсинг даты в time.Time
+// Парсинг даты "02.01.06 15:04" в time.Time
 func ParseUserDateToTime(timeString string) (time.Time, error) {
+	if timeString == "" {
+		return time.Time{}, fmt.Errorf("ParseUserDateToTime: nil timeString")
+	}
+
 	var t time.Time
 	layout := "02.01.06 15:04"
 
@@ -20,7 +23,7 @@ func ParseUserDateToTime(timeString string) (time.Time, error) {
 
 	t, err = time.ParseInLocation(layout, timeString, defaultTimeZone)
 	if err != nil {
-		return t, fmt.Errorf("error parsing date: %w", err)
+		return t, fmt.Errorf("ParseUserDateToTime: error ParseInLocation: %w", err)
 	}
 
 	return t, nil
@@ -166,7 +169,7 @@ func GetTimeRangeThisWeek() (start, end time.Time) {
 
 // 	// Вычисляем метку времени начала следующей недели
 // 	startOfNextWeek := time.Date(now.Year(), now.Month(), now.Day()-int(now.Weekday()-firstDay)+7, 0, 0, 0, 0, now.Location())
-	
+
 // 	// Вычисляем метку времени конца следующей недели
 // 	endOfNextWeek := startOfNextWeek.AddDate(0, 0, 7).Add(-time.Nanosecond)
 

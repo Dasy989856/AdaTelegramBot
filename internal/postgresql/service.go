@@ -2,6 +2,7 @@ package postgresql
 
 import (
 	"AdaTelegramBot/internal/models"
+	"AdaTelegramBot/internal/sdk"
 	"database/sql"
 	"fmt"
 	"log"
@@ -232,12 +233,12 @@ func (t *TelegramBotDB) GetTimeLastAlert(userId int64) (timeLastAlert time.Time,
 		if err == sql.ErrNoRows {
 			return time.Time{}, models.ErrUserNotFound
 		}
-		return time.Time{}, fmt.Errorf("error scan user data. err: %w", err)
+		return time.Time{}, fmt.Errorf("GetTimeLastAlert: error scan user data. err: %w", err)
 	}
 
-	timeLastAlert, err = parseDateDataBaseToTime(dateLastAlert)
+	timeLastAlert, err = dbDateToTime(dateLastAlert)
 	if err != nil {
-		return time.Time{}, fmt.Errorf("error pase date to time: %w", err)
+		return time.Time{}, fmt.Errorf("GetTimeLastAlert: error dbDateToTime: %w", err)
 	}
 	return timeLastAlert, nil
 }
@@ -253,7 +254,7 @@ func (t *TelegramBotDB) UpdateTimeLastAlert(userId int64, timeLastAlert time.Tim
 		}
 	}()
 
-	dateLastAlert, err := parseTimeToDateDataBase(timeLastAlert)
+	dateLastAlert, err := timeToDbDate(timeLastAlert)
 	if err != nil {
 		return err
 	}
@@ -267,35 +268,6 @@ func (t *TelegramBotDB) UpdateTimeLastAlert(userId int64, timeLastAlert time.Tim
 	return nil
 }
 
-// Парсинг даты из БД в time.Time
-func parseDateDataBaseToTime(timeString string) (time.Time, error) {
-	layout := "2006-01-02T15:04:05Z"
-	var t time.Time
-
-	defaultTimeZoneInDataBase, err := time.LoadLocation("UTC")
-	if err != nil {
-		return time.Time{}, fmt.Errorf("error create defaultTimeZoneInDataBase: %w", err)
-	}
-
-	t, err = time.ParseInLocation(layout, timeString, defaultTimeZoneInDataBase)
-	if err != nil {
-		return t, fmt.Errorf("error parsing date: %w", err)
-	}
-
-	return t, nil
-}
-
-// Парсинг time.Time в дату из БД
-func parseTimeToDateDataBase(t time.Time) (string, error) {
-	defaultTimeZoneInDataBase, err := time.LoadLocation("UTC")
-	if err != nil {
-		return "", fmt.Errorf("error create defaultTimeZoneInDataBase: %w", err)
-	}
-	t = t.In(defaultTimeZoneInDataBase)
-
-	return t.Format("2006-01-02T15:04:05Z"), nil
-}
-
 func (t *TelegramBotDB) UpdateLastActive(userId int64) (err error) {
 	tx := t.db.MustBegin()
 	defer func() {
@@ -306,7 +278,7 @@ func (t *TelegramBotDB) UpdateLastActive(userId int64) (err error) {
 		}
 	}()
 
-	dateLastActive, err := parseTimeToDateDataBase(time.Now())
+	dateLastActive, err := timeToDbDate(time.Now())
 	if err != nil {
 		return err
 	}
@@ -318,4 +290,67 @@ func (t *TelegramBotDB) UpdateLastActive(userId int64) (err error) {
 	}
 
 	return nil
+}
+
+// Парсинг даты из БД в time.Time
+func dbDateToTime(timeString string) (time.Time, error) {
+	if timeString == "" {
+		return time.Time{}, fmt.Errorf("parseDateDataBaseToTime: nil timeString")
+	}
+
+	layout := "2006-01-02T15:04:05Z"
+	var t time.Time
+
+	defaultTimeZoneInDataBase, err := time.LoadLocation("UTC")
+	if err != nil {
+		return time.Time{}, fmt.Errorf("parseDateDataBaseToTime: error create defaultTimeZoneInDataBase: %w", err)
+	}
+
+	t, err = time.ParseInLocation(layout, timeString, defaultTimeZoneInDataBase)
+	if err != nil {
+		return t, fmt.Errorf("parseDateDataBaseToTime: error ParseInLocation: %w", err)
+	}
+
+	return t, nil
+}
+
+// Парсинг time.Time в дату из БД
+func timeToDbDate(t time.Time) (string, error) {
+	defaultTimeZoneInDataBase, err := time.LoadLocation("UTC")
+	if err != nil {
+		return "", fmt.Errorf("error create defaultTimeZoneInDataBase: %w", err)
+	}
+	t = t.In(defaultTimeZoneInDataBase)
+
+	return t.Format("2006-01-02T15:04:05Z"), nil
+}
+
+// Форматирование формата времени из БД в формат пользователя.
+func dbDateToUserDate(dbDate string) (userDate string, err error) {
+	timeDate, err := dbDateToTime(dbDate)
+	if err != nil {
+		return "", err
+	}
+
+	userDate, err = sdk.ParseTimeToUserDate(timeDate)
+	if err != nil {
+		return "", err
+	}
+
+	return userDate, nil
+}
+
+// Форматирование формата времени из формата пользователя в формат БД.
+func userDateToDbDate(dbDate string) (userDate string, err error) {
+	timeDate, err := dbDateToTime(dbDate)
+	if err != nil {
+		return "", err
+	}
+
+	userDate, err = sdk.ParseTimeToUserDate(timeDate)
+	if err != nil {
+		return "", err
+	}
+
+	return userDate, nil
 }
