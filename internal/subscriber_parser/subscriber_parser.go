@@ -66,11 +66,7 @@ func scanSubscribersInTelegram(doc *goquery.Document) (int64, error) {
 		}
 	}
 
-	subscribers, err := strconv.ParseInt(string(subscribersStrings), 0, 64)
-	if err != nil {
-		log.Println("scanSubscribersInTelegram: error converting subscribersStrings to number: %w", err)
-		// return 0, err
-	}
+	subscribers, _ := strconv.ParseInt(string(subscribersStrings), 0, 64)
 
 	return subscribers, nil
 }
