@@ -23,9 +23,8 @@ func (t *TelegramBotDB) GetAdEvent(adEventId int64) (adEvent *models.AdEvent, er
 	FROM public.%s WHERE id=$1;`, adEventsTable)
 
 	var aE models.AdEvent
-	var dateStartFromDB, dateEndFromDB string
 	if err := tx.QueryRow(query, adEventId).Scan(&aE.Id, &aE.CreatedAt, &aE.UserId, &aE.Type, &aE.Partner, &aE.Channel, &aE.Price,
-		&dateStartFromDB, &dateEndFromDB, &aE.ArrivalOfSubscribers, &aE.PartnerChannelSubscribersInStart,
+		&aE.DateStart, &aE.DateEnd, &aE.ArrivalOfSubscribers, &aE.PartnerChannelSubscribersInStart,
 		&aE.PartnerChannelSubscribersInEnd); err != nil {
 		return nil, fmt.Errorf("GetAdEvent: error scan AdEvent in GetAdEvent: %w", err)
 	}
@@ -88,9 +87,8 @@ func (t *TelegramBotDB) GetRangeAdEvents(typeAdEvent models.TypeAdEvent, startTi
 
 	for rows.Next() {
 		var aE models.AdEvent
-		var dateStartFromDB, dateEndFromDB string
 		if err := rows.Scan(&aE.Id, &aE.CreatedAt, &aE.UserId, &aE.Type, &aE.Partner, &aE.Channel, &aE.Price,
-			&dateStartFromDB, &dateEndFromDB, &aE.ArrivalOfSubscribers,
+			&aE.DateStart, &aE.DateEnd, &aE.ArrivalOfSubscribers,
 			&aE.PartnerChannelSubscribersInStart, &aE.PartnerChannelSubscribersInEnd); err != nil {
 			return nil, fmt.Errorf("GetRangeAdEvents: error scan AdEvent: %w", err)
 		}
@@ -145,9 +143,8 @@ func (t *TelegramBotDB) GetAdEventsOfUser(userId int64, typeAdEvent models.TypeA
 
 	for rows.Next() {
 		var aE models.AdEvent
-		var dateStartFromDB, dateEndFromDB string
 		if err := rows.Scan(&aE.Id, &aE.CreatedAt, &aE.UserId, &aE.Type, &aE.Partner, &aE.Channel, &aE.Price,
-			&dateStartFromDB, &dateEndFromDB, &aE.ArrivalOfSubscribers,
+			&aE.DateStart, &aE.DateEnd, &aE.ArrivalOfSubscribers,
 			&aE.PartnerChannelSubscribersInStart, &aE.PartnerChannelSubscribersInEnd); err != nil {
 			return nil, fmt.Errorf("GetAdEventsOfUser: error scan AdEvent: %w", err)
 		}
@@ -215,9 +212,8 @@ func (t *TelegramBotDB) GetRangeAdEventsOfUser(userId int64, typeAdEvent models.
 
 	for rows.Next() {
 		var aE models.AdEvent
-		var dateStartFromDB, dateEndFromDB string
 		if err := rows.Scan(&aE.Id, &aE.CreatedAt, &aE.UserId, &aE.Type, &aE.Partner, &aE.Channel, &aE.Price,
-			&dateStartFromDB, &dateEndFromDB, &aE.ArrivalOfSubscribers,
+			&aE.DateStart, &aE.DateStart, &aE.ArrivalOfSubscribers,
 			&aE.PartnerChannelSubscribersInStart, &aE.PartnerChannelSubscribersInEnd); err != nil {
 			return nil, fmt.Errorf("GetRangeAdEventsOfUser: error scan AdEvent: %w", err)
 		}

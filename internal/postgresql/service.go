@@ -293,22 +293,15 @@ func (t *TelegramBotDB) UpdateLastActive(userId int64) (err error) {
 }
 
 // Парсинг даты из БД в time.Time
-func dbDateToTime(timeString string) (time.Time, error) {
+func dbDateToTime(timeString string) (t time.Time, err error) {
 	if timeString == "" {
-		return time.Time{}, fmt.Errorf("parseDateDataBaseToTime: nil timeString")
+		return time.Time{}, fmt.Errorf("dbDateToTime: nil timeString")
 	}
 
 	layout := "2006-01-02T15:04:05Z"
-	var t time.Time
-
-	defaultTimeZoneInDataBase, err := time.LoadLocation("UTC")
+	t, err = time.Parse(layout, timeString)
 	if err != nil {
-		return time.Time{}, fmt.Errorf("parseDateDataBaseToTime: error create defaultTimeZoneInDataBase: %w", err)
-	}
-
-	t, err = time.ParseInLocation(layout, timeString, defaultTimeZoneInDataBase)
-	if err != nil {
-		return t, fmt.Errorf("parseDateDataBaseToTime: error ParseInLocation: %w", err)
+		return t, fmt.Errorf("dbDateToTime: error time.Parse: %w", err)
 	}
 
 	return t, nil
@@ -318,39 +311,39 @@ func dbDateToTime(timeString string) (time.Time, error) {
 func timeToDbDate(t time.Time) (string, error) {
 	defaultTimeZoneInDataBase, err := time.LoadLocation("UTC")
 	if err != nil {
-		return "", fmt.Errorf("error create defaultTimeZoneInDataBase: %w", err)
+		return "", fmt.Errorf("timeToDbDate: error time.LoadLocation: %w", err)
 	}
 	t = t.In(defaultTimeZoneInDataBase)
 
 	return t.Format("2006-01-02T15:04:05Z"), nil
 }
 
-// Форматирование формата времени из БД в формат пользователя.
+// Форматирование даты из БД в формат пользователя.
 func dbDateToUserDate(dbDate string) (userDate string, err error) {
-	timeDate, err := dbDateToTime(dbDate)
+	t, err := dbDateToTime(dbDate)
 	if err != nil {
-		return "", err
+		return userDate, fmt.Errorf("dbDateToUserDate: error dbDateToTime: %w", err)
 	}
 
-	userDate, err = sdk.ParseTimeToUserDate(timeDate)
+	userDate, err = sdk.ParseTimeToUserDate(t)
 	if err != nil {
-		return "", err
+		return userDate, fmt.Errorf("dbDateToUserDate: error sdk.ParseTimeToUserDate: %w", err)
 	}
 
 	return userDate, nil
 }
 
-// Форматирование формата времени из формата пользователя в формат БД.
-func userDateToDbDate(dbDate string) (userDate string, err error) {
-	timeDate, err := dbDateToTime(dbDate)
+// Форматирование даты пользователя в формат БД.
+func userDateToDbDate(userDate string) (dbDate string, err error) {
+	t, err := sdk.ParseUserDateToTime(userDate)
 	if err != nil {
-		return "", err
+		return dbDate, fmt.Errorf("userDateToDbDate: error sdk.ParseUserDateToTime: %w", err)
 	}
 
-	userDate, err = sdk.ParseTimeToUserDate(timeDate)
+	dbDate, err = timeToDbDate(t)
 	if err != nil {
-		return "", err
+		return dbDate, fmt.Errorf("userDateToDbDate: error timeToDbDate: %w", err)
 	}
 
-	return userDate, nil
+	return dbDate, nil
 }

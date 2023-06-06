@@ -106,7 +106,7 @@ func createTextAlertForAdEventPosting(a *models.AdEvent, minutesLeftAlert int64)
 		descriptionAdEvent = fmt.Sprintf(`
 		❗️ Через %s у Вас начнется взаимный пиар. Подробнее:
 		`+createTextAdEventDescription(a), getTextTime(minutesLeftAlert))
-	case models.TypeMutual:
+	case models.TypeBarter:
 		descriptionAdEvent = fmt.Sprintf(`
 		❗️ Через %s Вы должны разместить бартер. Подробнее:
 		`+createTextAdEventDescription(a), getTextTime(minutesLeftAlert))
