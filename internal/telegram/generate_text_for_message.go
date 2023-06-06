@@ -189,11 +189,11 @@ func textForGetPrice(t models.TypeAdEvent) (string, error) {
 		return "✍️ Теперь требуется отправить стоимость рекламы.\n<b>Пример:</b> <code>1000</code>", nil
 	case models.TypeMutual:
 		return `✍️ Теперь требуется отправить стоимость поста взаимного пиара.
-		<b>Пример:</b> <code>1000</code>
-		Можно указать <code>-1000</code> если была доплата с Вашей стороны или <code>1000</code> если доплатили Вам.`, nil
+<b>Пример:</b> <code>1000</code>
+Можно указать <code>-1000</code> если была доплата с Вашей стороны.`, nil
 	case models.TypeBarter:
 		return `✍️ Теперь требуется отправить прибыль с бартера.
-		<b>Пример:</b> <code>1000</code> Если считать прибыль не требуется <code>0</code>.`, nil
+<b>Пример:</b> <code>1000</code>. <code>0</code> - eсли считать прибыль не требуется.`, nil
 	default:
 		return "", fmt.Errorf("unknow type adEvent")
 	}
