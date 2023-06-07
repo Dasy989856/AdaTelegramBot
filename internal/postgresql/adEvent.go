@@ -213,19 +213,19 @@ func (t *TelegramBotDB) GetRangeAdEventsOfUser(userId int64, typeAdEvent models.
 	for rows.Next() {
 		var aE models.AdEvent
 		if err := rows.Scan(&aE.Id, &aE.CreatedAt, &aE.UserId, &aE.Type, &aE.Partner, &aE.Channel, &aE.Price,
-			&aE.DateStart, &aE.DateStart, &aE.ArrivalOfSubscribers,
+			&aE.DateStart, &aE.DateEnd, &aE.ArrivalOfSubscribers,
 			&aE.PartnerChannelSubscribersInStart, &aE.PartnerChannelSubscribersInEnd); err != nil {
 			return nil, fmt.Errorf("GetRangeAdEventsOfUser: error scan AdEvent: %w", err)
 		}
 
 		aE.DateStart, err = dbDateToUserDate(aE.DateStart)
 		if err != nil {
-			return nil, fmt.Errorf("GetRangeAdEventsOfUser: error dbDateToUserDate: %w", err)
+			return nil, fmt.Errorf("GetRangeAdEventsOfUser: error aE.DateStart to dbDateToUserDate: %w", err)
 		}
 
 		aE.DateEnd, err = dbDateToUserDate(aE.DateEnd)
 		if err != nil {
-			return nil, fmt.Errorf("GetRangeAdEventsOfUser: error dbDateToUserDate: %w", err)
+			return nil, fmt.Errorf("GetRangeAdEventsOfUser: error aE.DateEnd to dbDateToUserDate: %w", err)
 		}
 
 		listAdEvent = append(listAdEvent, aE)
