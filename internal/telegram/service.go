@@ -24,7 +24,7 @@ func NewBotTelegram(db models.TelegramBotDB) (*BotTelegram, error) {
 	token := viper.GetString("token.telegram")
 	bot, err := tgbotapi.NewBotAPI(token)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("NewBotTelegram: tgbotapi.NewBotAPI: %w", err)
 	}
 	bot.Debug = false
 
