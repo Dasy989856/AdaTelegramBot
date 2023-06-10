@@ -7,11 +7,11 @@ import (
 	"fmt"
 	"log"
 	"math"
+	"os"
 	"time"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
-	"github.com/spf13/viper"
 )
 
 const (
@@ -32,12 +32,12 @@ type Config struct {
 // Бесконечный цикл с попыткой подключиться к БД.
 func NewDB() (db *sqlx.DB) {
 	cfg := Config{
-		Host:     viper.GetString("postgre_sql.host"),
-		Port:     viper.GetString("postgre_sql.port"),
-		NameDB:   viper.GetString("postgre_sql.name_db"),
-		Username: viper.GetString("postgre_sql.user_name"),
-		Password: viper.GetString("postgre_sql.password"),
-		ModeSSL:  viper.GetString("postgre_sql.ssl_mode"),
+		Host:     os.Getenv("DB_HOST"),
+		Port:     os.Getenv("DB_PORT"),
+		NameDB:   os.Getenv("DB_NAME"),
+		Username: os.Getenv("DB_USER"),
+		Password: os.Getenv("DB_PASSWORD"),
+		ModeSSL:  os.Getenv("SSL_MODE"),
 	}
 
 	// urlExample := "postgres://username:password@localhost:5432/database_name"

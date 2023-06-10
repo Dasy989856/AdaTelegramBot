@@ -4,10 +4,10 @@ import (
 	"AdaTelegramBot/internal/models"
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/spf13/viper"
 )
 
 // Структура телеграмм бота.
@@ -21,8 +21,7 @@ type BotTelegram struct {
 
 // Создание телеграмм бота.
 func NewBotTelegram(db models.TelegramBotDB) (*BotTelegram, error) {
-	token := viper.GetString("token.telegram")
-	bot, err := tgbotapi.NewBotAPI(token)
+	bot, err := tgbotapi.NewBotAPI(os.Getenv("TG_TOKEN"))
 	if err != nil {
 		return nil, fmt.Errorf("NewBotTelegram: tgbotapi.NewBotAPI: %w", err)
 	}
@@ -292,6 +291,6 @@ func (b *BotTelegram) toCache(userId int64, key string, value interface{}) bool 
 	}
 
 	session.Cache[key] = value
-	
+
 	return true
 }
