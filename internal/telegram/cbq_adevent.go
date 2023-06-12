@@ -213,9 +213,9 @@ func cbqAdEventView(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Бартер", "ad_event.view.barter"),
 		),
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Все типы", "ad_event.view.any"),
-		),
+		// tgbotapi.NewInlineKeyboardRow(
+		// 	tgbotapi.NewInlineKeyboardButtonData("Все типы", "ad_event.view.any"),
+		// ),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("В главное меню", "start"),
 		),
@@ -242,7 +242,7 @@ func cbqAdEventViewAny(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 			tgbotapi.NewInlineKeyboardButtonData("Завтра", "ad_event.view.select?"+sdk.ParseTimesToRangeDate(sdk.GetTimeRangeTomorrow())+";any;1"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Текущая неделя", "ad_event.view.select?"+sdk.ParseTimesToRangeDate(sdk.GetTimeRangeThisWeek())+";any;1"),
+			tgbotapi.NewInlineKeyboardButtonData("Предыдущий месяц", "ad_event.view.select?"+sdk.ParseTimesToRangeDate(sdk.GetTimeRangeLastMonth())+";any;1"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Текущий месяц", "ad_event.view.select?"+sdk.ParseTimesToRangeDate(sdk.GetTimeRangeThisMonth())+";any;1"),
@@ -283,7 +283,7 @@ func cbqAdEventViewSale(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 			tgbotapi.NewInlineKeyboardButtonData("Завтра", "ad_event.view.select?"+sdk.ParseTimesToRangeDate(sdk.GetTimeRangeTomorrow())+";sale;1"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Текущая неделя", "ad_event.view.select?"+sdk.ParseTimesToRangeDate(sdk.GetTimeRangeThisWeek())+";sale;1"),
+			tgbotapi.NewInlineKeyboardButtonData("Предыдущий месяц", "ad_event.view.select?"+sdk.ParseTimesToRangeDate(sdk.GetTimeRangeLastMonth())+";sale;1"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Текущий месяц", "ad_event.view.select?"+sdk.ParseTimesToRangeDate(sdk.GetTimeRangeThisMonth())+";sale;1"),
@@ -325,7 +325,7 @@ func cbqAdEventViewBuy(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 			tgbotapi.NewInlineKeyboardButtonData("Завтра", "ad_event.view.select?"+sdk.ParseTimesToRangeDate(sdk.GetTimeRangeTomorrow())+";buy;1"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Текущая неделя", "ad_event.view.select?"+sdk.ParseTimesToRangeDate(sdk.GetTimeRangeThisWeek())+";buy;1"),
+			tgbotapi.NewInlineKeyboardButtonData("Предыдущий месяц", "ad_event.view.select?"+sdk.ParseTimesToRangeDate(sdk.GetTimeRangeLastMonth())+";mutual;1"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Текущий месяц", "ad_event.view.select?"+sdk.ParseTimesToRangeDate(sdk.GetTimeRangeThisMonth())+";buy;1"),
@@ -367,19 +367,13 @@ func cbqAdEventViewMutual(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 			tgbotapi.NewInlineKeyboardButtonData("Завтра", "ad_event.view.select?"+sdk.ParseTimesToRangeDate(sdk.GetTimeRangeTomorrow())+";mutual;1"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			// tgbotapi.NewInlineKeyboardButtonData("Предыдущая неделя", "ad_event.view.select?"+sdk.ParseTimeToRangeDate(sdk.GetTimeRangeLastWeek())+";any;1"),
-			tgbotapi.NewInlineKeyboardButtonData("Текущая неделя", "ad_event.view.select?"+sdk.ParseTimesToRangeDate(sdk.GetTimeRangeThisWeek())+";mutual;1"),
-			// tgbotapi.NewInlineKeyboardButtonData("Следующая неделя", "ad_event.view.select?"+sdk.ParseTimeToRangeDate(sdk.GetTimeRangeNextWeek())+";any;1"),
+			tgbotapi.NewInlineKeyboardButtonData("Предыдущий месяц", "ad_event.view.select?"+sdk.ParseTimesToRangeDate(sdk.GetTimeRangeLastMonth())+";mutual;1"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			// tgbotapi.NewInlineKeyboardButtonData("Предыдущий месяц", "ad_event.view.select?"+sdk.ParseTimeToRangeDate(sdk.GetTimeRangeLastMonth())+";any;1"),
 			tgbotapi.NewInlineKeyboardButtonData("Текущий месяц", "ad_event.view.select?"+sdk.ParseTimesToRangeDate(sdk.GetTimeRangeThisMonth())+";mutual;1"),
-			// tgbotapi.NewInlineKeyboardButtonData("Следующий месяц", "ad_event.view.select?"+sdk.ParseTimeToRangeDate(sdk.GetTimeRangeNextMonth())+";any;1"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			// tgbotapi.NewInlineKeyboardButtonData("Предыдущий год", "ad_event.view.select?"+sdk.ParseTimeToRangeDate(sdk.GetTimeRangeLastYear())+";any;1"),
 			tgbotapi.NewInlineKeyboardButtonData("Текущий год", "ad_event.view.select?"+sdk.ParseTimesToRangeDate(sdk.GetTimeRangeThisYear())+";mutual;1"),
-			// tgbotapi.NewInlineKeyboardButtonData("Следующий год", "ad_event.view.select?"+sdk.ParseTimeToRangeDate(sdk.GetTimeRangeNextYear())+";any;1"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("За все время", "ad_event.view.select?"+sdk.ParseTimesToRangeDate(models.MinTime, models.MaxTime)+";mutual;1"),
@@ -414,7 +408,7 @@ func cbqAdEventViewBarter(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 			tgbotapi.NewInlineKeyboardButtonData("Завтра", "ad_event.view.select?"+sdk.ParseTimesToRangeDate(sdk.GetTimeRangeTomorrow())+";barter;1"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Текущая неделя", "ad_event.view.select?"+sdk.ParseTimesToRangeDate(sdk.GetTimeRangeThisWeek())+";barter;1"),
+			tgbotapi.NewInlineKeyboardButtonData("Предыдущий месяц", "ad_event.view.select?"+sdk.ParseTimesToRangeDate(sdk.GetTimeRangeLastMonth())+";barter;1"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Текущий месяц", "ad_event.view.select?"+sdk.ParseTimesToRangeDate(sdk.GetTimeRangeThisMonth())+";barter;1"),

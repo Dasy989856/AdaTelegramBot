@@ -10,7 +10,7 @@ func cbqHelp(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 	userId := cbq.Message.Chat.ID
 	messageId := cbq.Message.MessageID
 
-	text := "📈 <b>Тех. поддержка:</b>"
+	text := "✉️ <b>Тех. поддержка:</b>"
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Предложить улучшения", "help.feature"),
