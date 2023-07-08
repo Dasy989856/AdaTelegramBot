@@ -113,7 +113,7 @@ func adEventPartner(b *BotTelegram, msg *tgbotapi.Message) error {
 
 	if !models.RegxUrlType1.MatchString(msg.Text) && !models.RegxUrlType2.MatchString(msg.Text) {
 		botMsg := tgbotapi.NewMessage(userId, `Вы отправили некорректную ссылку на пользователя, попробуйте снова.
-		<b>Пример:</b> @AdaTelegramBot или https://t.me/AdaTelegramBot`)
+		<b>Пример:</b> @DmitriySergeevich22 или https://t.me/DmitriySergeevich22`)
 		botMsg.ParseMode = tgbotapi.ModeHTML
 		if err := b.sendMessage(userId, botMsg); err != nil {
 			return err
@@ -163,7 +163,7 @@ func adEventChannel(b *BotTelegram, msg *tgbotapi.Message) error {
 
 	if !models.RegxUrlType1.MatchString(msg.Text) && !models.RegxUrlType2.MatchString(msg.Text) {
 		botMsg := tgbotapi.NewMessage(userId, `Вы отправили некорректную ссылку на канал, попробуйте снова.
-		<b>Пример:</b> @AdaTelegramBot или https://t.me/AdaTelegramBot`)
+		<b>Пример:</b> @DmitriySergeevich22 или https://t.me/DmitriySergeevich22`)
 		botMsg.ParseMode = tgbotapi.ModeHTML
 		if err := b.sendMessage(userId, botMsg); err != nil {
 			return err
@@ -401,7 +401,7 @@ func adEventUpdatePartner(b *BotTelegram, msg *tgbotapi.Message) error {
 
 	if !models.RegxUrlType1.MatchString(msg.Text) && !models.RegxUrlType2.MatchString(msg.Text) {
 		botMsg := tgbotapi.NewMessage(userId, `Вы отправили некорректную ссылку на партнера, попробуйте снова.
-		<b>Пример:</b> @AdaTelegramBot или https://t.me/AdaTelegramBot`)
+		<b>Пример:</b> @DmitriySergeevich22 или https://t.me/DmitriySergeevich22`)
 		botMsg.ParseMode = tgbotapi.ModeHTML
 		if err := b.sendMessage(userId, botMsg); err != nil {
 			return err
@@ -443,7 +443,7 @@ func adEventUpdateChannel(b *BotTelegram, msg *tgbotapi.Message) error {
 
 	if !models.RegxUrlType1.MatchString(msg.Text) && !models.RegxUrlType2.MatchString(msg.Text) {
 		botMsg := tgbotapi.NewMessage(userId, `Вы отправили некорректную ссылку на канал, попробуйте снова.
-		<b>Пример:</b> @AdaTelegramBot или https://t.me/AdaTelegramBot`)
+		<b>Пример:</b> @DmitriySergeevich22 или https://t.me/DmitriySergeevich22`)
 		botMsg.ParseMode = tgbotapi.ModeHTML
 		if err := b.sendMessage(userId, botMsg); err != nil {
 			return err

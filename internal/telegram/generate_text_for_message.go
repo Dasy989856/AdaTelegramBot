@@ -177,7 +177,7 @@ func getTextExampleDate() (string, error) {
 
 // Пример ссылки.
 func getExampleUrl() string {
-	return `<b>Пример:</b> <code>@AdaTelegramBot</code> или <code>https://t.me/AdaTelegramBot</code>`
+	return `<b>Пример:</b> <code>@DmitriySergeevich22</code> или <code>https://t.me/DmitriySergeevich22</code>`
 }
 
 // Текст получение стоимости события.

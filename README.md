@@ -1,5 +1,5 @@
 # Ada Telegram Bot
-**TelegramBot:** `https://t.me/AdaTelegramBot`
+**TelegramBot:** `https://t.me/DmitriySergeevich22`
 
 The Advertising Assistant is designed to help you run and manage your advertisements. It allows you to create ad buying events. Create ad sales events. We will notify you about previously created events. Allows you to see all your sales and purchases, create averages.
 In the future it is planned:
