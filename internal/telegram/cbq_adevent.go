@@ -58,7 +58,7 @@ func cbqAdEventCreateSale(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 
 	b.db.SetStepUser(userId, "ad_event.create.partner")
 
-	text := "✍️ Теперь требуется отправить ссылку на покупателя.\n" + getExampleUrl()
+	text := "✍️ Теперь требуется отправить ссылку на покупателя.\n" + getExamplePartnerUrl()
 	botMsg := tgbotapi.NewEditMessageText(userId, messageId, text)
 	botMsg.ParseMode = tgbotapi.ModeHTML
 	if err := b.sendMessage(userId, botMsg); err != nil {
@@ -82,7 +82,7 @@ func cbqAdEventCreateBuy(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 
 	b.db.SetStepUser(userId, "ad_event.create.partner")
 
-	text := "✍️ Теперь требуется отправить ссылку на продавца.\n" + getExampleUrl()
+	text := "✍️ Теперь требуется отправить ссылку на продавца.\n" + getExamplePartnerUrl()
 	botMsg := tgbotapi.NewEditMessageText(userId, messageId, text)
 	botMsg.ParseMode = tgbotapi.ModeHTML
 
@@ -107,7 +107,7 @@ func cbqAdEventCreateMutual(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 
 	b.db.SetStepUser(userId, "ad_event.create.partner")
 
-	text := "✍️ Теперь требуется отправить ссылку на пратнера по взаимному пиару.\n" + getExampleUrl()
+	text := "✍️ Теперь требуется отправить ссылку на пратнера по взаимному пиару.\n" + getExamplePartnerUrl()
 	botMsg := tgbotapi.NewEditMessageText(userId, messageId, text)
 	botMsg.ParseMode = tgbotapi.ModeHTML
 
@@ -132,7 +132,7 @@ func cbqAdEventCreateBarter(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error {
 
 	b.db.SetStepUser(userId, "ad_event.create.partner")
 
-	text := "✍️ Теперь требуется отправить ссылку на пратнера по бартеру.\n" + getExampleUrl()
+	text := "✍️ Теперь требуется отправить ссылку на пратнера по бартеру.\n" + getExamplePartnerUrl()
 	botMsg := tgbotapi.NewEditMessageText(userId, messageId, text)
 	botMsg.ParseMode = tgbotapi.ModeHTML
 
@@ -781,7 +781,7 @@ func cbqAdEventUpdatePartner(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error 
 		return err
 	}
 
-	text := "✍️ Требуется отправить новую ссылку на партнера./n" + getExampleUrl()
+	text := "✍️ Требуется отправить новую ссылку на партнера./n" + getExamplePartnerUrl()
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Назад", fmt.Sprintf("ad_event.control?%d", adEvent.Id)),
@@ -828,7 +828,7 @@ func cbqAdEventUpdateChannel(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error 
 		return err
 	}
 
-	text := "✍️ Требуется отправить новую ссылку на канал./n" + getExampleUrl()
+	text := "✍️ Требуется отправить новую ссылку на канал./n" + getExampleChannelUrl()
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Назад", fmt.Sprintf("ad_event.control?%d", adEvent.Id)),

@@ -175,9 +175,14 @@ func getTextExampleDate() (string, error) {
 	<b>Пример:</b> <code>%s</code> `, date), nil
 }
 
-// Пример ссылки.
-func getExampleUrl() string {
+// Пример ссылки канала.
+func getExampleChannelUrl() string {
 	return `<b>Пример:</b> <code>@DmitriySergeevich22</code> или <code>https://t.me/DmitriySergeevich22</code>`
+}
+
+// Пример ссылки партнера.
+func getExamplePartnerUrl() string {
+	return `<b>Пример:</b> <code>@DmitriiSergeevich22</code> или <code>https://t.me/DmitriiSergeevich22</code>`
 }
 
 // Текст получение стоимости события.
@@ -208,13 +213,13 @@ func textForUpdatePrice() string {
 func textForGetDateChannelUrl(t models.TypeAdEvent) (string, error) {
 	switch t {
 	case models.TypeSale:
-		return "✍️ Теперь требуется отправить ссылку на рекламируемый Вами канал.\n" + getExampleUrl(), nil
+		return "✍️ Теперь требуется отправить ссылку на рекламируемый Вами канал.\n" + getExampleChannelUrl(), nil
 	case models.TypeBuy:
-		return "✍️ Теперь требуется отправить ссылку на канал, в котором выйдет Ваша реклама.\n" + getExampleUrl(), nil
+		return "✍️ Теперь требуется отправить ссылку на канал, в котором выйдет Ваша реклама.\n" + getExampleChannelUrl(), nil
 	case models.TypeMutual:
-		return "✍️ Теперь требуется отправить ссылку на канал, с которым будет взаимный пиар.\n" + getExampleUrl(), nil
+		return "✍️ Теперь требуется отправить ссылку на канал, с которым будет взаимный пиар.\n" + getExampleChannelUrl(), nil
 	case models.TypeBarter:
-		return "✍️ Теперь требуется отправить ссылку на канал/магазин партнера по бартеру.\n" + getExampleUrl(), nil
+		return "✍️ Теперь требуется отправить ссылку на канал/магазин партнера по бартеру.\n" + getExampleChannelUrl(), nil
 	default:
 		return "", fmt.Errorf("unknow type adEvent. typeEvent: %s", t)
 	}
