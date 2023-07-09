@@ -781,7 +781,7 @@ func cbqAdEventUpdatePartner(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error 
 		return err
 	}
 
-	text := "✍️ Требуется отправить новую ссылку на партнера./n" + getExamplePartnerUrl()
+	text := "✍️ Требуется отправить новую ссылку на партнера.\n" + getExamplePartnerUrl()
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Назад", fmt.Sprintf("ad_event.control?%d", adEvent.Id)),
@@ -828,7 +828,7 @@ func cbqAdEventUpdateChannel(b *BotTelegram, cbq *tgbotapi.CallbackQuery) error 
 		return err
 	}
 
-	text := "✍️ Требуется отправить новую ссылку на канал./n" + getExampleChannelUrl()
+	text := "✍️ Требуется отправить новую ссылку на канал.\n" + getExampleChannelUrl()
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Назад", fmt.Sprintf("ad_event.control?%d", adEvent.Id)),
