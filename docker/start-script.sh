@@ -18,4 +18,4 @@ sudo docker rm ada_db
 sudo docker rmi ada_telegram_bot-app
 
 # Запускаем docker-compose в фоновом режиме и выводим логи в файл
-sudo nohup docker-compose -p ada_telegram_bot up > ada_telegram_bot_log.txt &
+sudo nohup docker-compose -p ada_telegram_bot up > logs_ada_telegram_bot.txt &
